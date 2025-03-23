@@ -52,7 +52,7 @@ exports.handler = async (event) => {
                   <tr>
                     <td align="center" style="padding: 20px">
                       <img
-                        src="https://iili.io/3zD8YMB.png"
+                        src="https://iili.io/3IAmUWF.png"
                         alt="Vocadecks Logo"
                         style="max-width: 330px; display: block" />
                     </td>
