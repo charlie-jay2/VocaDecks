@@ -26,7 +26,7 @@
   h4 {
     margin-bottom: 10px;
     font-size: 24px;
-    color: #222222;
+    color: black;
   }
   input {
     width: 100%;
@@ -54,12 +54,12 @@
   }
   .success-message {
     font-size: 20px;
-    color: #222222;
+    color: black;
     margin-top: 20px;
   }
   .additional-info {
     font-size: 16px;
-    color: #222222;
+    color: black;
     margin-top: 10px;
   }
 </style>
@@ -86,12 +86,27 @@
       "https://script.google.com/macros/s/AKfycbzmw5OarITK77Lr5Tr-peyohkpSrowjR8CTkT6Xb2opWeOh1CSlRguEQJ4XgCpJs4k/exec";
 
     const form = document.forms["contact-form"];
+    const submitButton = document.getElementById("submit");
     const successMessage = document.querySelector(".success-message");
     const additionalInfo = document.querySelector(".additional-info");
     const formContainer = document.querySelector(".container");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      // Disable the submit button and instantly show success message
+      submitButton.disabled = true;
+      submitButton.style.backgroundColor = "#cccccc"; // Change color to indicate it's disabled
+      submitButton.value = "Submitting..."; // Change the button text
+
+      // Hide the form
+      form.style.display = "none";
+
+      // Show submitting text and wait for 2 seconds
+      setTimeout(() => {
+        successMessage.style.display = "block";
+        additionalInfo.style.display = "block";
+      }, 2000); // Wait 2 seconds before showing success message
 
       const formData = new FormData(form);
       const jsonData = {
@@ -109,14 +124,13 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(jsonData),
         });
-
-        // Hide the form and show success message
-        form.style.display = "none";
-        successMessage.style.display = "block";
-        additionalInfo.style.display = "block";
       } catch (error) {
         console.error("Error!", error);
         alert("An error occurred. Please try again.");
+        submitButton.disabled = false;
+        submitButton.style.backgroundColor = "#50dbcb"; // Reset color
+        submitButton.value = "Submit"; // Reset button text
+        form.style.display = "block"; // Show the form again if there was an error
       }
     });
   </script>
