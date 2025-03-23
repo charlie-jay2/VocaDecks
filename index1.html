@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VocaDecks Interface</title>
+    <title>Random Card Generator</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -11,203 +11,374 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-image: url("https://iili.io/3Il9gd7.jpg");
-        background-size: 100% 100%;
-        background-position: center;
+        background-color: #f0f0f0;
         margin: 0;
-        overflow: hidden;
-        position: relative;
       }
 
-      /* VocaDecks Logo styles */
-      .vocadecks-logo {
-        position: absolute;
-        top: 2%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 380px;
-        cursor: pointer;
-        transition: transform 0.3s ease-in-out, filter 0.3s ease;
+      .container {
+        text-align: center;
       }
 
-      .vocadecks-logo:active {
-        transform: scale(0.95);
+      .text {
+        margin-top: -300px;
       }
 
-      .button-container {
-        position: absolute;
-        top: 15%;
-        left: 49%;
-        transform: translate(-50%, -50%);
-        width: 80%;
+      button {
+        display: inline-block;
+        background: linear-gradient(to right, #5bbaff, #ffcc00);
+        color: #ffffff;
+        text-decoration: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: 0.6s ease-in-out;
+      }
+
+      button:hover {
+        display: inline-block;
+        background: linear-gradient(to right, #ffcc00, #5bbaff);
+        color: #ffffff;
+        text-decoration: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: 0.6s ease-in-out;
+      }
+
+      .card-display {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
         align-items: center;
+        justify-content: center;
+        margin-top: 20px;
       }
 
-      .button {
-        width: 160px;
+      .card-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .card {
+        width: 100px;
+        height: 150px;
+        margin: 10px;
+        background-color: transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 16px;
+        border-radius: 8px;
         cursor: pointer;
-        transition: transform 0.2s ease;
+        transition: opacity 0.3s ease-in-out;
       }
 
-      .button:hover {
-        transform: scale(1.1);
-      }
-
-      .myvx-button {
-        position: absolute;
-        top: 2%;
-        right: 5%;
-        width: 130px;
-        transition: 0.3s ease-in-out;
-      }
-
-      .myvx-button:hover {
-        filter: invert(1);
-      }
-
-      .purchasebutt {
+      .main-card {
         width: 250px;
+        height: 350px;
+        margin-top: 20px; /* Adjust to move the main card down */
+        transition: opacity 0.3s ease-in-out;
+        background-color: transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        border-radius: 8px;
+        transition: opacity 0.3s ease-in-out;
       }
 
-      .creatorsbutt {
-        opacity: 30%;
-        pointer-events: none;
+      .card-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px; /* Ensure proper space between the main card and other cards */
       }
 
-      /* New Mikuthingy Image Styles */
-      .mikuthingy {
-        position: absolute;
-        top: 10%;
-        width: 150px;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease, transform 0.5s ease;
+      #imagesContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: 30px; /* Add top margin for proper spacing */
+        width: 100%; /* Ensure the container takes full width */
+        height: 100%; /* Make it take full height to avoid cutoff */
       }
 
-      /* Top-left corner with rotation */
-      .mikuthingy.left {
-        left: 5%;
-        transform: rotate(-45deg);
+      #wildCardButton,
+      #downloadButton {
+        position: fixed;
+        bottom: 10px;
+        display: inline-block;
+        margin-bottom: 10px;
+        display: visible;
       }
 
-      /* Top-right corner with rotation */
-      .mikuthingy.right {
-        right: 5%;
-        transform: rotate(45deg);
+      #downloadButton {
+        left: 35%;
+        transform: translateX(-50%);
       }
 
-      @keyframes moveAndScale {
-        0% {
-          transform: translateX(-50%) scale(1);
-          filter: none;
-        }
-        25% {
-          transform: translateX(-50%) translateY(-20px) scale(1.1);
-          filter: brightness(1.2);
-        }
-        50% {
-          transform: translateX(-50%) translateY(20px) scale(1.2);
-          filter: brightness(0.8) invert(1);
-        }
-        75% {
-          transform: translateX(-50%) translateY(-20px) scale(1.1);
-          filter: brightness(1.2);
-        }
-        100% {
-          transform: translateX(-50%) scale(1);
-          filter: none;
-        }
+      #wildCardButton {
+        left: 65%;
+        transform: translateX(-50%);
       }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   </head>
   <body>
-    <!-- VocaDecks Logo (Clickable for Audio) -->
-    <img
-      class="vocadecks-logo"
-      src="https://iili.io/3Il9SgS.png"
-      alt="VocaDecks Logo"
-      onclick="playRandomAudio(); animateLogo()" />
-
-    <!-- Mikuthingy Image (Top-left and Top-right) -->
-    <img
-      class="mikuthingy left"
-      src="./assets/mikuthingy.webp"
-      alt="Mikuthingy" />
-    <img
-      class="mikuthingy right"
-      src="./assets/mikuthingy.webp"
-      alt="Mikuthingy" />
-
-    <!-- Buttons -->
-    <div class="button-container">
-      <img
-        class="button creatorsbutt"
-        src="https://iili.io/3Il9X5X.png"
-        alt="CREATORS" />
-      <img
-        class="button purchasebutt"
-        src="https://iili.io/3Il9jbs.png"
-        alt="PURCHASE" />
-      <img class="button" src="https://iili.io/3Il9NzG.png" alt="SERIES 0" />
-      <img class="button" src="https://iili.io/3Il9hen.png" alt="COMMUNITY" />
-      <img class="button" src="https://iili.io/3Il9WJt.png" alt="DOWNLOADS" />
+    <div class="container">
+      <h1 class="text">Vocadecks My Random Cards</h1>
+      <button id="generateButton">Get your 4 Random cards</button>
+      <button
+        id="purchaseButton"
+        style="display: none"
+        onclick="redirectToStripe()">
+        Purchase All Cards
+      </button>
+      <div id="cardDisplay" class="card-display"></div>
+      <button id="wildCardButton" style="display: none">
+        Important! - Get Wild Cards
+      </button>
+      <button id="downloadButton" style="display: none">
+        Download Random 4 Cards
+      </button>
     </div>
 
-    <!-- My VX Button -->
-    <img
-      class="myvx-button"
-      src="https://iili.io/3IlK2Qn.png"
-      alt="My VX Button" />
-
     <script>
-      let isPlaying = false;
-      let audioFiles = ["MikuVocadecks.wav"];
+      const vocadecks = [
+        { name: "Hatsune Miku C.png", rarity: 1 },
+        { name: "Rin C.png", rarity: 1 },
+        { name: "Gumi E.png", rarity: 2 },
+        { name: "Hatsune Miku E.png", rarity: 2 },
+        { name: "Rin E.png", rarity: 2 },
+        { name: "Tohoku E.png", rarity: 2 },
+        { name: "Flower E.png", rarity: 2 },
+        { name: "Tohoku R.png", rarity: 3 },
+        { name: "Rana R.png", rarity: 3 },
+        { name: "Macne Nana R.png", rarity: 3 },
+        { name: "Hatsune Miku R.png", rarity: 3 },
+        { name: "Gumi R.png", rarity: 3 },
+        { name: "Galaco L.png", rarity: 4 },
+        { name: "Gumi L.png", rarity: 4 },
+        { name: "Macne Nana L.png", rarity: 4 },
+        { name: "Rana L.png", rarity: 4 },
+        { name: "Teto U.png", rarity: 5 },
+        { name: "Rana U.png", rarity: 5 },
+        { name: "Galaco U.png", rarity: 5 },
+        { name: "CaseO U.png", rarity: 5 },
+      ];
 
-      function playRandomAudio() {
-        if (isPlaying) return; // Prevent playing another audio until the first one finishes
+      document
+        .getElementById("generateButton")
+        .addEventListener("click", generateRandomCards);
+      document
+        .getElementById("downloadButton")
+        .addEventListener("click", downloadCards);
+      document
+        .getElementById("wildCardButton")
+        .addEventListener("click", downloadWildCards);
 
-        let randomFile =
-          audioFiles[Math.floor(Math.random() * audioFiles.length)];
-        let audio = new Audio(`./assets/audios/${randomFile}`);
+      let selectedCards = [];
 
-        isPlaying = true;
-        audio.play();
+      function checkRedeemed() {
+        const redeemed = localStorage.getItem("cardsRedeemed");
+        if (redeemed) {
+          const redeemedCards = JSON.parse(redeemed);
+          displayRedeemedCards(redeemedCards);
 
-        audio.onended = function () {
-          isPlaying = false; // Allow playing again after the audio ends
-        };
+          // Center the images on the page using element type styling
+          const imagesContainer = document.getElementById("imagesContainer");
+          if (imagesContainer) {
+            imagesContainer.style.display = "block"; // Make sure images are visible
+            imagesContainer.style.textAlign = "center"; // Center the images horizontally
+            imagesContainer.style.marginTop = "90px"; // Add top margin to prevent cut-off
+          }
+
+          // Ensure the Important and Download buttons are visible by setting visibility to visible
+          const importantButton = document.getElementById("wildCardButton");
+          const downloadButton = document.getElementById("downloadButton");
+
+          if (importantButton && downloadButton) {
+            importantButton.style.display = "inline-block"; // Make the buttons visible
+            downloadButton.style.display = "inline-block"; // Make the buttons visible
+          }
+        } else {
+          document.getElementById("generateButton").style.display =
+            "inline-block";
+          document.getElementById("purchaseButton").style.display = "none";
+        }
       }
 
-      // Function to animate the logo on click
-      function animateLogo() {
-        let logo = document.querySelector(".vocadecks-logo");
-        let mikuthingyLeft = document.querySelector(".mikuthingy.left");
-        let mikuthingyRight = document.querySelector(".mikuthingy.right");
+      function generateRandomCards() {
+        selectedCards = selectCardsByRarity(4);
+        selectedCards.sort((a, b) => b.rarity - a.rarity);
 
-        // Trigger the logo animation
-        logo.style.animation = "moveAndScale 1s ease-in-out";
+        const cardDisplay = document.getElementById("cardDisplay");
+        cardDisplay.innerHTML = "";
 
-        // Show Mikuthingy images and animate them
-        mikuthingyLeft.style.opacity = 1; // Show the left image
-        mikuthingyRight.style.opacity = 1; // Show the right image
-        mikuthingyLeft.style.transform = "scale(1.5) rotate(-45deg)"; // Animate left image
-        mikuthingyRight.style.transform = "scale(1.5) rotate(45deg)"; // Animate right image
+        const cardWrapper = document.createElement("div");
+        cardWrapper.classList.add("card-wrapper");
 
-        // Animation end for the logo
-        logo.addEventListener("animationend", function () {
-          logo.style.animation = ""; // Reset animation
+        const mainCard = document.createElement("div");
+        mainCard.classList.add("main-card");
+        mainCard.innerHTML = `<img src="Vocadecks/${selectedCards[0].name}" alt="${selectedCards[0].name}" width="230" height="340">`;
+        cardDisplay.appendChild(mainCard);
+
+        selectedCards.slice(1).forEach((card) => {
+          const cardElement = document.createElement("div");
+          cardElement.classList.add("card");
+          cardElement.innerHTML = `<img src="Vocadecks/${card.name}" alt="${card.name}" width="100" height="150">`;
+
+          cardElement.addEventListener("click", () => {
+            swapCards(mainCard, cardElement);
+          });
+
+          cardWrapper.appendChild(cardElement);
         });
 
-        // Hide Mikuthingy images after animation finishes
-        setTimeout(function () {
-          mikuthingyLeft.style.opacity = 0; // Hide the left image
-          mikuthingyRight.style.opacity = 0; // Hide the right image
-          mikuthingyLeft.style.transform = "scale(0) rotate(-45deg)"; // Reset size and rotation
-          mikuthingyRight.style.transform = "scale(0) rotate(45deg)"; // Reset size and rotation
-        }, 1500); // Time for animation duration + delay
+        cardDisplay.appendChild(cardWrapper);
+
+        document.getElementById("generateButton").style.display = "none";
+        document.getElementById("purchaseButton").style.display =
+          "inline-block";
+        document.getElementById("downloadButton").style.display =
+          "inline-block";
+        document.getElementById("wildCardButton").style.display =
+          "inline-block";
+
+        localStorage.setItem("cardsRedeemed", JSON.stringify(selectedCards));
       }
+
+      function displayRedeemedCards(redeemedCards) {
+        const cardDisplay = document.getElementById("cardDisplay");
+        cardDisplay.innerHTML = "";
+
+        const cardWrapper = document.createElement("div");
+        cardWrapper.classList.add("card-wrapper");
+
+        const mainCard = document.createElement("div");
+        mainCard.classList.add("main-card");
+        mainCard.innerHTML = `<img src="Vocadecks/${redeemedCards[0].name}" alt="${redeemedCards[0].name}" width="230" height="340">`;
+        cardDisplay.appendChild(mainCard);
+
+        redeemedCards.slice(1).forEach((card) => {
+          const cardElement = document.createElement("div");
+          cardElement.classList.add("card");
+          cardElement.innerHTML = `<img src="Vocadecks/${card.name}" alt="${card.name}" width="100" height="150">`;
+
+          cardWrapper.appendChild(cardElement);
+        });
+
+        cardDisplay.appendChild(cardWrapper);
+
+        document.getElementById("generateButton").style.display = "none";
+        document.getElementById("purchaseButton").style.display = "none";
+        document.getElementById("downloadButton").style.display = "none";
+        document.getElementById("wildCardButton").style.display = "none";
+      }
+
+      function selectCardsByRarity(numberOfCards) {
+        let selectedCards = [];
+
+        while (selectedCards.length < numberOfCards) {
+          const randomCard = weightedRandomCard();
+
+          if (!selectedCards.includes(randomCard)) {
+            selectedCards.push(randomCard);
+          }
+        }
+
+        return selectedCards;
+      }
+
+      function weightedRandomCard() {
+        const totalWeight = vocadecks.reduce(
+          (sum, card) => sum + (6 - card.rarity),
+          0
+        );
+
+        let random = Math.random() * totalWeight;
+
+        for (let card of vocadecks) {
+          random -= 6 - card.rarity;
+          if (random <= 0) {
+            return card;
+          }
+        }
+      }
+
+      function swapCards(mainCard, clickedCard) {
+        mainCard.style.opacity = 0;
+        clickedCard.style.opacity = 0;
+
+        setTimeout(() => {
+          const mainCardImage = mainCard.querySelector("img");
+          const clickedCardImage = clickedCard.querySelector("img");
+
+          const tempSrc = mainCardImage.src;
+          mainCardImage.src = clickedCardImage.src;
+          clickedCardImage.src = tempSrc;
+
+          mainCard.style.opacity = 1;
+          clickedCard.style.opacity = 1;
+        }, 300);
+      }
+
+      function downloadCards() {
+        const zip = new JSZip();
+        const folder = zip.folder("Vocadecks");
+
+        selectedCards.forEach((card) => {
+          folder.file(
+            card.name,
+            fetch(`Vocadecks/${card.name}`).then((res) => res.blob())
+          );
+        });
+
+        const pdfFiles = [
+          "CARD LIST SHEET.PDF",
+          "PLAYING SHEETS.PDF",
+          "VOCADECKS PLAYING GUIDE 25.1.PDF",
+        ];
+
+        pdfFiles.forEach((pdf) => {
+          folder.file(
+            pdf,
+            fetch(`Vocadecks/${pdf}`).then((res) => res.blob())
+          );
+        });
+
+        zip.generateAsync({ type: "blob" }).then(function (content) {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(content);
+          link.download = "Vocadecks.zip";
+          link.click();
+        });
+      }
+
+      function downloadWildCards() {
+        // Fetch the Wildcards.zip file from the specified location
+        fetch("./vocadecks/Wildcards.zip")
+          .then((response) => response.blob())
+          .then((blob) => {
+            // Create a link element to trigger the download
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Wildcards.zip"; // File name for the downloaded file
+            link.click(); // Simulate a click to start the download
+          })
+          .catch((error) => {
+            console.error("Error downloading the Wildcards.zip file:", error);
+          });
+      }
+
+      function redirectToStripe() {
+        window.location.href =
+          "https://payment-page-link-to-activate-purchase.com";
+      }
+
+      checkRedeemed();
     </script>
   </body>
 </html>
