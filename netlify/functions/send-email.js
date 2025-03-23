@@ -76,11 +76,8 @@ exports.handler = async (event) => {
                     <td align="center" style="padding: 20px">
                       <p style="color: #333333; font-size: 16px; margin: 0">
                         Hi <b>${name}</b>, <br>  
-                        You've successfully joined the <b>VocaDecks Newsletter</b>! 
-                        Expect exciting updates, exclusive content, and more.
-                      </p>
-                      <br>
-                      <p
+                        You've successfully joined the <b>VocaDecks Newsletter!<br>
+                        <p
                         style="
                           font-size: 16px;
                           font-weight: bold;
@@ -89,6 +86,9 @@ exports.handler = async (event) => {
                         ">
                         🔥 As a subscriber, you'll be the FIRST to know when new card drops happen! 🔥
                       </p>
+                        Expect exciting updates, exclusive content, and more.
+                      </p>
+                      <br>
                       <p style="color: #333333; font-size: 14px;">
                         If you didn’t sign up, you can ignore this email.
                       </p>

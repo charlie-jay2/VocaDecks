@@ -90,7 +90,9 @@
           body: JSON.stringify(jsonData),
         });
 
-        alert("Thank you! Form submitted, and confirmation email sent.");
+        alert(
+          "Thank you! Form submitted, and confirmation email sent. \n Make sure to check both your Inbox, and Spam folder."
+        );
         form.reset();
       } catch (error) {
         console.error("Error!", error);
