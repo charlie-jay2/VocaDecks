@@ -1,0 +1,91 @@
+<style>
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    font-family: "poppins", sans-serif;
+    font-size: 18px;
+  }
+  body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .container {
+    width: 500px;
+    padding: 30px;
+    border: 1px solid #eeeeee;
+    border-radius: 10px;
+    background-color: #222222;
+  }
+  h4 {
+    margin-bottom: 10px;
+    font-size: 24px;
+    color: white;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  #submit {
+    border: none;
+    background-color: #ffef3d;
+    color: black;
+    width: 200px;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  #submit:hover {
+    background-color: #333333;
+    color: white;
+  }
+</style>
+
+<body>
+  <div class="container">
+    <form method="post" action="" name="contact-form">
+      <h4>Join our Newsletter</h4>
+      <input type="text" name="your-name" placeholder="Name" required />
+      <input type="email" name="your-email" placeholder="Email" required />
+      <input type="submit" value="Submit" id="submit" />
+    </form>
+  </div>
+
+  <script>
+    const scriptURL =
+      "https://script.google.com/macros/s/AKfycbzmw5OarITK77Lr5Tr-peyohkpSrowjR8CTkT6Xb2opWeOh1CSlRguEQJ4XgCpJs4k/exec";
+
+    const form = document.forms["contact-form"];
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const jsonData = {
+        name: form["your-name"].value,
+        email: form["your-email"].value,
+      };
+
+      try {
+        // Send to Google Sheets
+        await fetch(scriptURL, { method: "POST", body: formData });
+
+        // Send confirmation email via Netlify Function
+        await fetch("/.netlify/functions/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(jsonData),
+        });
+
+        alert("Thank you! Form submitted, and confirmation email sent.");
+        form.reset();
+      } catch (error) {
+        console.error("Error!", error);
+        alert("An error occurred. Please try again.");
+      }
+    });
+  </script>
+</body>
