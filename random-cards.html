@@ -11,7 +11,7 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-image: url("https://iili.io/3Il9gd7.jpg");
+        background-image: url("https://iili.io/3I0Cvvj.png");
         background-size: 100% 100%;
         background-position: center;
         margin: 0;
@@ -98,6 +98,56 @@
         transform: rotate(45deg);
       }
 
+      /* Hexagonal Purchase Button Styles */
+      .hexagonalpurchase {
+        position: absolute;
+        top: 80%; /* Adjust this value for positioning */
+        left: 50%; /* Adjust this value for positioning */
+        transform: translate(-50%, -50%);
+        width: 300px;
+        transform: scale(2);
+        cursor: pointer;
+        transition: filter 0.6s ease-in-out;
+      }
+
+      .hexagonalpurchase:hover {
+        filter: invert(1);
+      }
+
+      /* Position randomcards in the center and scale down */
+      .randomcards {
+        position: absolute;
+        top: 57%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.1); /* Scale down by half */
+        cursor: pointer;
+        transition: filter 0.6s ease-in-out, transform 0.5s ease;
+      }
+
+      /* Add sway effect on hover */
+      .randomcards:hover {
+        animation: sway 3s ease-in-out infinite;
+      }
+
+      /* Sway animation */
+      @keyframes sway {
+        0% {
+          transform: translate(-50%, -50%) scale(0.1) rotate(0deg); /* Starting position */
+        }
+        25% {
+          transform: translate(-50%, -50%) scale(0.1) rotate(-2deg); /* Small left sway */
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(0.1) rotate(2deg); /* Small right sway */
+        }
+        75% {
+          transform: translate(-50%, -50%) scale(0.1) rotate(-2deg); /* Small left sway */
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(0.1) rotate(0deg); /* Back to original */
+        }
+      }
+
       @keyframes moveAndScale {
         0% {
           transform: translateX(-50%) scale(1);
@@ -167,6 +217,18 @@
         src="https://iili.io/3Il9WJt.png"
         alt="DOWNLOADS"
         onclick="navigateToPage('#')" />
+    </div>
+
+    <div class="randomcards">
+      <img src="https://iili.io/3zbFGEl.png" alt="Random Cards" />
+    </div>
+
+    <!-- Hexagonal Purchase Button -->
+    <div class="hexagonalpurchase">
+      <img
+        class="button"
+        src="https://iili.io/3I0Bus9.png"
+        alt="Hexagonal Purchase" />
     </div>
 
     <!-- My VX Button -->

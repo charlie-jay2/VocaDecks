@@ -11,7 +11,7 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-image: url("https://iili.io/3Il9gd7.jpg");
+        background-image: url("https://iili.io/3I0J022.png");
         background-size: 100% 100%;
         background-position: center;
         margin: 0;
@@ -98,6 +98,22 @@
         transform: rotate(45deg);
       }
 
+      /* Hexagonal Purchase Button Styles */
+      .hexagonalpurchase {
+        position: absolute;
+        top: 66.5%; /* Adjust this value for positioning */
+        left: 69%; /* Adjust this value for positioning */
+        transform: translate(-50%, -50%);
+        width: 300px;
+        transform: scale(2);
+        cursor: pointer;
+        transition: filter 0.6s ease-in-out;
+      }
+
+      .hexagonalpurchase:hover {
+        filter: invert(1);
+      }
+
       @keyframes moveAndScale {
         0% {
           transform: translateX(-50%) scale(1);
@@ -167,6 +183,14 @@
         src="https://iili.io/3Il9WJt.png"
         alt="DOWNLOADS"
         onclick="navigateToPage('#')" />
+    </div>
+
+    <!-- Hexagonal Purchase Button -->
+    <div class="hexagonalpurchase">
+      <img
+        class="button"
+        src="https://iili.io/3I0Ja14.png"
+        alt="Hexagonal Purchase" />
     </div>
 
     <!-- My VX Button -->
