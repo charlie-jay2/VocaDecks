@@ -3,297 +3,470 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VocaDecks Interface</title>
+    <title>VocaDecks</title>
     <style>
       body {
         font-family: Arial, sans-serif;
+        margin: 0;
+        overflow: hidden;
+        height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        background-image: url("https://iili.io/3I0Cvvj.png");
+        background-image: url("https://iili.io/3ISPfol.png");
         background-size: 100% 100%;
         background-position: center;
-        margin: 0;
-        overflow: hidden;
+      }
+      .container {
+        text-align: center;
         position: relative;
-      }
-
-      /* VocaDecks Logo styles */
-      .vocadecks-logo {
-        position: absolute;
-        top: 2%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 380px;
-        cursor: pointer;
-        transition: transform 0.3s ease-in-out, filter 0.3s ease;
-      }
-
-      .vocadecks-logo:active {
-        transform: scale(0.95);
-      }
-
-      .button-container {
-        position: absolute;
-        top: 15%;
-        left: 47%;
-        transform: translate(-50%, -50%);
-        width: 75%;
+        width: 100%;
+        height: 100%;
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        justify-content: center;
         align-items: center;
       }
-
-      .button {
-        width: 160px;
-        cursor: pointer;
-        transition: transform 0.2s ease;
-      }
-
-      .button:hover {
-        transform: scale(1.1);
-      }
-
-      .myvx-button {
-        position: absolute;
-        top: 2%;
-        right: 5%;
-        width: 130px;
+      .preview-image {
+        display: block;
+        margin: 0 auto;
+        transform: scale(2.5);
         transition: 0.3s ease-in-out;
       }
 
-      .myvx-button:hover {
-        filter: invert(1);
-      }
-
-      .purchasebutt {
-        width: 250px;
-      }
-
-      .creatorsbutt {
-        opacity: 30%;
-        pointer-events: none;
-      }
-
-      /* New Mikuthingy Image Styles */
-      .mikuthingy {
+      .text {
         position: absolute;
-        top: 10%;
-        width: 150px;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease, transform 0.5s ease;
-      }
-
-      /* Top-left corner with rotation */
-      .mikuthingy.left {
-        left: 5%;
-        transform: rotate(-45deg);
-      }
-
-      /* Top-right corner with rotation */
-      .mikuthingy.right {
-        right: 5%;
-        transform: rotate(45deg);
-      }
-
-      /* Hexagonal Purchase Button Styles */
-      .hexagonalpurchase {
-        position: absolute;
-        top: 80%; /* Adjust this value for positioning */
-        left: 50%; /* Adjust this value for positioning */
-        transform: translate(-50%, -50%);
-        width: 300px;
-        transform: scale(2);
-        cursor: pointer;
-        transition: filter 0.6s ease-in-out;
-      }
-
-      .hexagonalpurchase:hover {
-        filter: invert(1);
-      }
-
-      /* Position randomcards in the center and scale down */
-      .randomcards {
-        position: absolute;
-        top: 57%;
+        bottom: 20px;
         left: 50%;
-        transform: translate(-50%, -50%) scale(0.1); /* Scale down by half */
+        transform: translateX(-50%);
+      }
+      button {
+        background-color: transparent;
+        border: none;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: bold;
+        transition: 0.6s ease-in-out;
         cursor: pointer;
-        transition: filter 0.6s ease-in-out, transform 0.5s ease;
+        padding: 0;
       }
-
-      /* Add sway effect on hover */
-      .randomcards:hover {
-        animation: sway 3s ease-in-out infinite;
+      button img {
+        width: var(--button-width, 90px);
+        height: var(--button-height, 90px);
       }
-
-      /* Sway animation */
-      @keyframes sway {
-        0% {
-          transform: translate(-50%, -50%) scale(0.1) rotate(0deg); /* Starting position */
-        }
-        25% {
-          transform: translate(-50%, -50%) scale(0.1) rotate(-2deg); /* Small left sway */
-        }
-        50% {
-          transform: translate(-50%, -50%) scale(0.1) rotate(2deg); /* Small right sway */
-        }
-        75% {
-          transform: translate(-50%, -50%) scale(0.1) rotate(-2deg); /* Small left sway */
-        }
-        100% {
-          transform: translate(-50%, -50%) scale(0.1) rotate(0deg); /* Back to original */
-        }
+      button:hover {
+        transform: scale(1.05);
+        filter: invert(1);
       }
-
-      @keyframes moveAndScale {
-        0% {
-          transform: translateX(-50%) scale(1);
-          filter: none;
-        }
-        25% {
-          transform: translateX(-50%) translateY(-20px) scale(1.1);
-          filter: brightness(1.2);
-        }
-        50% {
-          transform: translateX(-50%) translateY(20px) scale(1.2);
-          filter: brightness(0.8) invert(1);
-        }
-        75% {
-          transform: translateX(-50%) translateY(-20px) scale(1.1);
-          filter: brightness(1.2);
-        }
-        100% {
-          transform: translateX(-50%) scale(1);
-          filter: none;
-        }
+      :root {
+        --button-width: 330px;
+        --button-height: 90px;
+      }
+      .card-controls {
+        display: none;
+        margin-top: 20px;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+      }
+      #slideshow {
+        width: 300px;
+        height: 450px;
+        position: relative;
+      }
+      .card-slide {
+        width: 100%;
+        height: 100%;
+        perspective: 1000px;
+        position: relative;
+        cursor: pointer;
+      }
+      .card-slide .card-inner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 1s;
+      }
+      .card-slide .card-front,
+      .card-slide .card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+      .card-slide .card-front img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .card-slide .card-back {
+        transform: rotateY(180deg);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .card-slide .card-back img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .card-slide.flipped .card-inner {
+        transform: rotateY(180deg);
+      }
+      .slideshow-controls {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      .slideshow-controls button {
+        pointer-events: auto;
+        width: 50px;
+        height: 40px;
+        background-color: #333;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 5px;
+        transition: 0.3s;
+        position: absolute;
+        top: 70%;
+        transform: translateY(-50%);
+      }
+      .slideshow-controls button:hover {
+        transform: translateY(-50%) scale(1.05);
+        background-color: #666;
+      }
+      #prevCardBtn {
+        left: -60px;
+      }
+      #nextCardBtn {
+        right: -60px;
+      }
+      #popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+        background-color: transparent;
+        padding: 20px;
+        border-radius: 10px;
+        z-index: 1000;
+        pointer-events: none;
+        transition: transform 0.3s ease;
+      }
+      .popup-card {
+        width: 300px;
+        height: 450px;
+        transform-style: preserve-3d;
+        transition: transform 0.1s ease-out;
+        transition: width 0.3s, height 0.3s;
+      }
+      #popup .card-back {
+        display: none;
+      }
+      #popup .card-front img {
+        width: 300px;
+        height: 450px;
+        object-fit: contain;
       }
     </style>
   </head>
   <body>
-    <!-- VocaDecks Logo (Clickable for Audio) -->
-    <img
-      class="vocadecks-logo"
-      src="https://iili.io/3Il9SgS.png"
-      alt="VocaDecks Logo"
-      onclick="playRandomAudio(); animateLogo()" />
-
-    <!-- Mikuthingy Image (Top-left and Top-right) -->
-    <img
-      class="mikuthingy left"
-      src="./assets/mikuthingy.webp"
-      alt="Mikuthingy" />
-    <img
-      class="mikuthingy right"
-      src="./assets/mikuthingy.webp"
-      alt="Mikuthingy" />
-
-    <!-- Buttons -->
-    <div class="button-container">
+    <audio
+      id="flipAudio"
+      src="./assets/audios/CARD FLIP.wav"
+      preload="auto"></audio>
+    <div class="container">
       <img
-        class="button creatorsbutt"
-        src="https://iili.io/3Il9X5X.png"
-        alt="CREATORS"
-        onclick="navigateToPage('#')" />
-      <img
-        class="button purchasebutt"
-        src="https://iili.io/3Il9jbs.png"
-        alt="PURCHASE"
-        onclick="navigateToPage('purchase-cards.html')" />
-      <img
-        class="button"
-        src="https://iili.io/3Il9NzG.png"
-        alt="SERIES 0"
-        onclick="navigateToPage('random-cards.html')" />
-      <img
-        class="button"
-        src="https://iili.io/3Il9hen.png"
-        alt="COMMUNITY"
-        onclick="navigateToPage('#')" />
-      <img
-        class="button"
-        src="https://iili.io/3Il9WJt.png"
-        alt="DOWNLOADS"
-        onclick="navigateToPage('#')" />
+        class="preview-image"
+        id="previewImage"
+        src="https://iili.io/3IrkxmQ.png"
+        alt="Preview of Cards"
+        width="200"
+        height="200" />
+      <div class="text">
+        <button id="generateButton">
+          <img
+            src="https://iili.io/3IgnFwu.png"
+            alt="Generate Cards"
+            width="150"
+            height="50" />
+        </button>
+      </div>
+      <div class="card-controls" id="card-controls">
+        <button id="downloadButton">
+          <img
+            src="https://iili.io/3ISPnK7.png"
+            alt="Download Cards"
+            width="150"
+            height="50" />
+        </button>
+        <div id="slideshow">
+          <div id="cardSlide" class="card-slide">
+            <div class="card-inner">
+              <div class="card-front">
+                <img
+                  id="cardFrontImage"
+                  src="https://iili.io/3I4YJQp.png"
+                  alt="Card Reveal" />
+              </div>
+              <div class="card-back">
+                <img id="cardBackImage" src="" alt="Card Face" />
+              </div>
+            </div>
+          </div>
+          <div class="slideshow-controls">
+            <button id="prevCardBtn" style="display: none" disabled>
+              Prev
+            </button>
+            <button id="nextCardBtn" style="display: none" disabled>
+              Next
+            </button>
+          </div>
+        </div>
+        <button id="wildCardButton">
+          <img
+            src="https://iili.io/3ISPol9.png"
+            alt="Download Wild Cards"
+            width="150"
+            height="50" />
+        </button>
+      </div>
     </div>
-
-    <div class="randomcards">
-      <img src="https://iili.io/3zbFGEl.png" alt="Random Cards" />
+    <div id="popup" class="popup">
+      <div id="popupCard" class="popup-card">
+        <div class="card-inner">
+          <div class="card-front">
+            <img id="popupCardImage" src="" alt="Card" />
+          </div>
+          <div class="card-back">
+            <img src="https://iili.io/3I4YJQp.png" alt="Card Reveal" />
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- Hexagonal Purchase Button -->
-    <div class="hexagonalpurchase">
-      <img
-        class="button"
-        src="https://iili.io/3I0Bus9.png"
-        alt="Hexagonal Purchase" />
-    </div>
-
-    <!-- My VX Button -->
-    <img
-      class="myvx-button"
-      src="https://iili.io/3IlK2Qn.png"
-      alt="My VX Button" />
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
-      let isPlaying = false;
-      let audioFiles = ["MikuVocadecks.wav"];
+      // Original vocadecks array with image names restored and audio added.
+      const vocadecks = [
+        { name: "Hatsune Miku C.png", audio: "MIKU REVEAL.wav", rarity: 1 },
+        { name: "Rin C.png", audio: "RIN AND LEN REVEAL.wav", rarity: 1 },
+        { name: "Gumi E.png", audio: "GUMI REVEAL.wav", rarity: 2 },
+        { name: "Hatsune Miku E.png", audio: "MIKU REVEAL.wav", rarity: 2 },
+        { name: "Rin E.png", audio: "RIN AND LEN REVEAL.wav", rarity: 2 },
+        { name: "Tohoku E.png", audio: "Tohoku E.wav", rarity: 2 },
+        { name: "Flower E.png", audio: "FLOWER REVEAL.wav", rarity: 2 },
+        { name: "Tohoku R.png", audio: "Tohoku R.wav", rarity: 3 },
+        { name: "Rana R.png", audio: "RANA REVEAL.wav", rarity: 3 },
+        { name: "Macne Nana R.png", audio: "MACNE NANA REVEAL.wav", rarity: 3 },
+        { name: "Hatsune Miku R.png", audio: "MIKU REVEAL.wav", rarity: 3 },
+        { name: "Gumi R.png", audio: "GUMI REVEAL.wav", rarity: 3 },
+        { name: "Galaco L.png", audio: "GALACO REVEAL.wav", rarity: 4 },
+        { name: "Gumi L.png", audio: "GUMI REVEAL.wav", rarity: 4 },
+        { name: "Macne Nana L.png", audio: "MACNE NANA REVEAL.wav", rarity: 4 },
+        { name: "Rana L.png", audio: "RANA REVEAL.wav", rarity: 4 },
+        { name: "Teto U.png", audio: "TETO REVEAL.wav", rarity: 5 },
+        { name: "Rana U.png", audio: "RANA REVEAL.wav", rarity: 5 },
+        { name: "Galaco U.png", audio: "GALACO REVEAL.wav", rarity: 5 },
+        { name: "CaseO U.png", audio: "CASEOH REVEAL.wav", rarity: 5 },
+      ];
 
-      function playRandomAudio() {
-        if (isPlaying) return; // Prevent playing another audio until the first one finishes
+      let selectedCards = [];
+      let currentIndex = 0;
 
-        let randomFile =
-          audioFiles[Math.floor(Math.random() * audioFiles.length)];
-        let audio = new Audio(`./assets/audios/${randomFile}`);
+      const flipAudio = document.getElementById("flipAudio");
+      flipAudio.volume = 0.7;
 
-        isPlaying = true;
-        audio.play();
-
-        audio.onended = function () {
-          isPlaying = false; // Allow playing again after the audio ends
-        };
+      function playFlipSound() {
+        flipAudio.currentTime = 0;
+        flipAudio.play();
       }
 
-      // Function to animate the logo on click
-      function animateLogo() {
-        let logo = document.querySelector(".vocadecks-logo");
-        let mikuthingyLeft = document.querySelector(".mikuthingy.left");
-        let mikuthingyRight = document.querySelector(".mikuthingy.right");
-
-        // Trigger the logo animation
-        logo.style.animation = "moveAndScale 1s ease-in-out";
-
-        // Show Mikuthingy images and animate them
-        mikuthingyLeft.style.opacity = 1; // Show the left image
-        mikuthingyRight.style.opacity = 1; // Show the right image
-        mikuthingyLeft.style.transform = "scale(1.5) rotate(-45deg)"; // Animate left image
-        mikuthingyRight.style.transform = "scale(1.5) rotate(45deg)"; // Animate right image
-
-        // Animation end for the logo
-        logo.addEventListener("animationend", function () {
-          logo.style.animation = ""; // Reset animation
-        });
-
-        // Hide Mikuthingy images after animation finishes
-        setTimeout(function () {
-          mikuthingyLeft.style.opacity = 0; // Hide the left image
-          mikuthingyRight.style.opacity = 0; // Hide the right image
-          mikuthingyLeft.style.transform = "scale(0) rotate(-45deg)"; // Reset size and rotation
-          mikuthingyRight.style.transform = "scale(0) rotate(45deg)"; // Reset size and rotation
-        }, 1500); // Time for animation duration + delay
+      // Function to play the card-specific audio at 70% volume
+      function playCardAudio(audioFile) {
+        const cardAudio = new Audio("./assets/audios/" + audioFile);
+        cardAudio.volume = 0.7;
+        cardAudio.play();
       }
 
-      function navigateToPage(page) {
-        if (page === "#") {
-          // For '#' just scroll to the top or stay on the same page
-          window.scrollTo(0, 0);
-        } else {
-          // Navigate to the specific page
-          window.location.href = page;
+      const generateBtn = document.getElementById("generateButton");
+      const downloadBtn = document.getElementById("downloadButton");
+      const wildCardBtn = document.getElementById("wildCardButton");
+      const slideshow = document.getElementById("slideshow");
+      const cardSlide = document.getElementById("cardSlide");
+      const cardFrontImage = document.getElementById("cardFrontImage");
+      const cardBackImage = document.getElementById("cardBackImage");
+      const prevCardBtn = document.getElementById("prevCardBtn");
+      const nextCardBtn = document.getElementById("nextCardBtn");
+      const popup = document.getElementById("popup");
+      const popupCard = document.getElementById("popupCard");
+      const popupCardImage = document.getElementById("popupCardImage");
+      const cardControls = document.getElementById("card-controls");
+
+      generateBtn.addEventListener("click", generateRandomCards);
+      downloadBtn.addEventListener("click", downloadCards);
+      wildCardBtn.addEventListener("click", downloadWildCards);
+      prevCardBtn.addEventListener("click", showPreviousCard);
+      nextCardBtn.addEventListener("click", showNextCard);
+      cardSlide.addEventListener("click", openPopupForCurrentCard);
+      document.addEventListener("click", closePopup);
+      popup.addEventListener("mousemove", movePopupWithMouse);
+
+      function getImagePath(fileName) {
+        // Replace spaces with %20 so that the image loads correctly.
+        return "Vocadecks/" + fileName.split(" ").join("%20");
+      }
+
+      function generateRandomCards() {
+        selectedCards = [];
+        // Randomly select 4 unique cards from the vocadecks array.
+        while (selectedCards.length < 4) {
+          const randomCard =
+            vocadecks[Math.floor(Math.random() * vocadecks.length)];
+          if (!selectedCards.includes(randomCard)) {
+            selectedCards.push(randomCard);
+          }
+        }
+        revealCardsOneByOne(0);
+        generateBtn.style.display = "none";
+        document.getElementById("previewImage").style.display = "none";
+        cardControls.style.display = "flex";
+        downloadBtn.style.display = "inline-block";
+        wildCardBtn.style.display = "inline-block";
+      }
+
+      function revealCardsOneByOne(index) {
+        if (index >= selectedCards.length) {
+          // Enable card navigation buttons after all cards have been revealed.
+          prevCardBtn.disabled = false;
+          nextCardBtn.disabled = false;
+          prevCardBtn.style.display = "inline-block";
+          nextCardBtn.style.display = "inline-block";
+          return;
+        }
+
+        currentIndex = index;
+        // Set the front image to the card flip reveal image.
+        cardFrontImage.src = "https://iili.io/3I4YJQp.png"; // Card reveal image
+        // Set the back image to the actual card image.
+        cardBackImage.src = getImagePath(selectedCards[index].name);
+        cardSlide.classList.remove("flipped");
+
+        // After 3000ms, flip the card, play the flip sound and then the card's specific audio.
+        setTimeout(() => {
+          cardSlide.classList.add("flipped");
+          playFlipSound();
+          playCardAudio(selectedCards[index].audio);
+        }, 3000);
+
+        // After 9000ms, move on to the next card.
+        setTimeout(() => {
+          revealCardsOneByOne(index + 1);
+        }, 9000);
+      }
+
+      function showPreviousCard() {
+        currentIndex =
+          (currentIndex - 1 + selectedCards.length) % selectedCards.length;
+        updateCardDisplay(false);
+      }
+
+      function showNextCard() {
+        currentIndex = (currentIndex + 1) % selectedCards.length;
+        updateCardDisplay(false);
+      }
+
+      function updateCardDisplay(isRevealed = true) {
+        cardFrontImage.src = "https://iili.io/3I4YJQp.png"; // Card reveal image
+        cardBackImage.src = getImagePath(selectedCards[currentIndex].name);
+        if (isRevealed) {
+          cardSlide.classList.add("flipped");
         }
       }
+
+      function openPopupForCurrentCard() {
+        cardSlide.style.display = "none";
+        popup.style.display = "block";
+        popupCardImage.src = getImagePath(selectedCards[currentIndex].name);
+      }
+
+      function closePopup(e) {
+        if (e.target !== popup && !popup.contains(e.target)) {
+          popup.style.display = "none";
+          cardSlide.style.display = "block";
+        }
+      }
+
+      function movePopupWithMouse(e) {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        const popupWidth = popup.offsetWidth;
+        const popupHeight = popup.offsetHeight;
+
+        const offsetX = mouseX - popupWidth / 2;
+        const offsetY = mouseY - popupHeight / 2;
+
+        popup.style.left = offsetX + "px";
+        popup.style.top = offsetY + "px";
+      }
+
+      function downloadCards() {
+        const zip = new JSZip();
+        const folder = zip.folder("Vocadecks");
+
+        selectedCards.forEach((card) => {
+          folder.file(
+            card.name,
+            fetch(`Vocadecks/${card.name}`).then((res) => res.blob())
+          );
+        });
+
+        const pdfFiles = [
+          "CARD LIST SHEET.PDF",
+          "PLAYING SHEETS.PDF",
+          "VOCADECKS PLAYING GUIDE 25.1.PDF",
+        ];
+
+        pdfFiles.forEach((pdf) => {
+          folder.file(
+            pdf,
+            fetch(`Vocadecks/${pdf}`).then((res) => res.blob())
+          );
+        });
+
+        zip.generateAsync({ type: "blob" }).then(function (content) {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(content);
+          link.download = "Vocadecks.zip";
+          link.click();
+        });
+      }
+
+      function downloadWildCards() {
+        // Fetch the Wildcards.zip file from the specified location
+        fetch("./vocadecks/Wildcards.zip")
+          .then((response) => response.blob())
+          .then((blob) => {
+            // Create a link element to trigger the download
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Wildcards.zip"; // File name for the downloaded file
+            link.click(); // Simulate a click to start the download
+          })
+          .catch((error) => {
+            console.error("Error downloading the Wildcards.zip file:", error);
+          });
+      }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   </body>
 </html>
