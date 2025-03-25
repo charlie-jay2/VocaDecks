@@ -96,9 +96,10 @@
       </div>
     </div>
     <script src="floatinghomebutton.js"></script>
+
     <script>
       const scriptURL =
-        "https://script.google.com/macros/s/AKfycbzmw5OarITK77Lr5Tr-peyohkpSrowjR8CTkT6Xb2opWeOh1CSlRguEQJ4XgCpJs4k/exec";
+        "https://script.google.com/macros/s/AKfycbxrYMkAU11tPC6EZ5FGLqZORq0RHJ3kGONXnjPMc52QoXIuv4Kz6t9yPobKbHrzueql/exec";
 
       const form = document.forms["contact-form"];
       const submitButton = document.getElementById("submit");
@@ -138,6 +139,10 @@
           const response = await fetch(scriptURL, {
             method: "POST",
             body: formData,
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            mode: "cors", // Add this line if not already set
           });
           const data = await response.json();
 
