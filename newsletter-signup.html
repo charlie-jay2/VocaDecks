@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Join Newsletter</title>
+    <title>VocaDecks Newsletter</title>
     <style>
       * {
         box-sizing: border-box;
@@ -18,7 +18,7 @@
         align-items: center;
         justify-content: center;
         background-color: #222222;
-        flex-direction: column; /* Stack the elements vertically */
+        flex-direction: column;
       }
       .container {
         width: 500px;
@@ -26,7 +26,6 @@
         border: 1px solid #eeeeee;
         border-radius: 10px;
         background: linear-gradient(180deg, #50dbcb, #ffef3d);
-        margin-top: 20px; /* Space between logo and form */
         text-align: center;
       }
       h4 {
@@ -39,29 +38,40 @@
         padding: 10px;
         margin-bottom: 10px;
       }
-      #submit {
+      .button-container {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      button,
+      input[type="submit"] {
         border: none;
         background-color: #50dbcb;
         color: black;
         width: 200px;
+        padding: 10px; /* Ensure same height */
         margin-top: 10px;
         border-radius: 5px;
         cursor: pointer;
         transition: 0.6s ease-in-out;
       }
-      #submit:hover {
-        background-color: #ffef3d;
-        color: black;
+      button:hover,
+      input[type="submit"]:hover {
+        background-color: #053e46;
+        color: rgb(197, 197, 197);
       }
       img {
         max-width: 390px;
         display: block;
-        margin-bottom: 0px; /* Space between the logo and the form */
+        margin-bottom: 20px;
+      }
+      .message {
+        font-size: 20px;
+        margin-top: 20px;
       }
       .success-message {
-        font-size: 20px;
         color: black;
-        margin-top: 20px;
       }
       .additional-info {
         font-size: 16px;
@@ -74,99 +84,216 @@
         margin-top: 20px;
         display: none;
       }
+      /* Hide unsubscribe container initially */
+      .unsubscribe-container {
+        display: none;
+      }
     </style>
   </head>
   <body>
     <img src="https://iili.io/3IAmUWF.png" alt="Vocadecks Logo" />
-    <div class="container">
-      <form method="post" action="" name="contact-form">
+    <!-- Subscribe Container -->
+    <div class="container subscribe-container">
+      <form id="subscribe-form" name="subscribe-form">
         <h4>Join our Newsletter</h4>
         <input type="text" name="your-name" placeholder="Name" required />
         <input type="email" name="your-email" placeholder="Email" required />
-        <input type="submit" value="Submit" id="submit" />
+        <div class="button-container">
+          <input type="submit" value="Subscribe" id="subscribe-submit" />
+          <button type="button" id="switch-to-unsub">
+            Switch to Unsubscribe
+          </button>
+        </div>
       </form>
-      <div class="success-message" style="display: none">
+      <div
+        class="message success-message"
+        id="subscribe-success"
+        style="display: none">
         Successfully joined the VocaDecks newsletter!
       </div>
-      <div class="additional-info" style="display: none">
+      <div
+        class="message additional-info"
+        id="subscribe-info"
+        style="display: none">
         Ensure you check your Inbox and Spam folder.
       </div>
-      <div class="error-message">
+      <div class="message error-message" id="subscribe-error">
         This email is already registered. Please use a different one.
       </div>
     </div>
-    <script src="floatinghomebutton.js"></script>
+
+    <!-- Unsubscribe Container -->
+    <div class="container unsubscribe-container">
+      <form id="unsubscribe-form" name="unsubscribe-form">
+        <h4>Unsubscribe from the Newsletter</h4>
+        <input type="text" name="your-name" placeholder="Name" required />
+        <input type="email" name="your-email" placeholder="Email" required />
+        <div class="button-container">
+          <input
+            type="submit"
+            value="Confirm Unsubscribe"
+            id="unsubscribe-submit" />
+          <button type="button" id="go-back">Go Back</button>
+        </div>
+      </form>
+      <div
+        class="message success-message"
+        id="unsubscribe-success"
+        style="display: none">
+        You have successfully unsubscribed from the VocaDecks newsletter, we
+        hope to see you again soon.
+      </div>
+      <div class="message error-message" id="unsubscribe-error">
+        This email does not exist.
+      </div>
+    </div>
+    <script src="fscreen.js" defer></script>
 
     <script>
-      const scriptURL =
-        "https://script.google.com/macros/s/AKfycbzWQV2nxCYEnBvJItompsbOiRCtOdwNlxdGaQmWOcMO4-ao7lYwcuVgFMFaSuYHvXmg/exec";
+      // Endpoints
+      const subscribeURL = "/.netlify/functions/newsletter-add"; // subscription & DB insertion
+      const emailURL = "/.netlify/functions/send-email"; // sends confirmation email on subscribe
+      const unsubscribeURL = "/.netlify/functions/newsletter-unsub"; // handles unsubscribe
 
-      const form = document.forms["contact-form"];
-      const submitButton = document.getElementById("submit");
-      const successMessage = document.querySelector(".success-message");
-      const additionalInfo = document.querySelector(".additional-info");
-      const errorMessage = document.querySelector(".error-message");
+      // Form elements
+      const subscribeForm = document.getElementById("subscribe-form");
+      const unsubscribeForm = document.getElementById("unsubscribe-form");
+      const switchToUnsubBtn = document.getElementById("switch-to-unsub");
+      const goBackBtn = document.getElementById("go-back");
 
-      form.addEventListener("submit", async (e) => {
+      // Buttons for subscribe & unsubscribe
+      const subscribeSubmit = document.getElementById("subscribe-submit");
+      const unsubscribeSubmit = document.getElementById("unsubscribe-submit");
+
+      // Message elements
+      const subscribeSuccess = document.getElementById("subscribe-success");
+      const subscribeInfo = document.getElementById("subscribe-info");
+      const subscribeError = document.getElementById("subscribe-error");
+      const unsubscribeSuccess = document.getElementById("unsubscribe-success");
+      const unsubscribeError = document.getElementById("unsubscribe-error");
+
+      // Container elements
+      const subscribeContainer = document.querySelector(".subscribe-container");
+      const unsubscribeContainer = document.querySelector(
+        ".unsubscribe-container"
+      );
+
+      // Subscribe Form Submission
+      subscribeForm.addEventListener("submit", async (e) => {
         e.preventDefault();
+        // Disable button and change text
+        subscribeSubmit.disabled = true;
+        subscribeSubmit.style.backgroundColor = "#cccccc";
+        subscribeSubmit.value = "Submitting...";
 
-        // Disable the submit button and instantly show success message
-        submitButton.disabled = true;
-        submitButton.style.backgroundColor = "#cccccc"; // Change color to indicate it's disabled
-        submitButton.value = "Submitting..."; // Change the button text
+        // Hide previous messages
+        subscribeSuccess.style.display = "none";
+        subscribeInfo.style.display = "none";
+        subscribeError.style.display = "none";
 
-        // Hide the form and clear previous messages
-        form.style.display = "none";
-        successMessage.style.display = "none";
-        additionalInfo.style.display = "none";
-        errorMessage.style.display = "none";
-
-        // Show submitting text and wait for 2 seconds
-        setTimeout(() => {
-          successMessage.style.display = "none";
-          additionalInfo.style.display = "none";
-          errorMessage.style.display = "none"; // Hide error message initially
-        }, 2000); // Wait 2 seconds before showing success message
-
-        const formData = new FormData(form);
+        // Gather data from subscribe form
+        const formData = new FormData(subscribeForm);
         const jsonData = {
-          name: form["your-name"].value,
-          email: form["your-email"].value,
+          name: formData.get("your-name"),
+          email: formData.get("your-email"),
         };
 
         try {
-          // Send to Google Sheets
-          const response = await fetch(scriptURL, {
+          // Send data to subscription endpoint
+          const response = await fetch(subscribeURL, {
             method: "POST",
-            body: formData,
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            mode: "cors", // Add this line if not already set
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(jsonData),
           });
           const data = await response.json();
 
-          if (data.result === "error") {
-            // Show error message if email is already registered
-            errorMessage.textContent = data.message;
-            errorMessage.style.display = "block";
-            submitButton.disabled = false;
-            submitButton.style.backgroundColor = "#50dbcb"; // Reset color
-            submitButton.value = "Submit"; // Reset button text
-            form.style.display = "block"; // Show the form again
+          if (data.success) {
+            // Trigger email sending
+            const emailResponse = await fetch(emailURL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(jsonData),
+            });
+            const emailData = await emailResponse.json();
+            if (emailData.success) {
+              subscribeSuccess.style.display = "block";
+              subscribeInfo.style.display = "block";
+              subscribeForm.style.display = "none";
+            } else {
+              subscribeError.textContent =
+                emailData.message || "Failed to send confirmation email.";
+              subscribeError.style.display = "block";
+            }
           } else {
-            // Show success message
-            successMessage.style.display = "block";
-            additionalInfo.style.display = "block";
+            subscribeError.textContent =
+              data.message || "Failed to register email.";
+            subscribeError.style.display = "block";
           }
         } catch (error) {
           console.error("Error!", error);
           alert("An error occurred. Please try again.");
-          submitButton.disabled = false;
-          submitButton.style.backgroundColor = "#50dbcb"; // Reset color
-          submitButton.value = "Submit"; // Reset button text
-          form.style.display = "block"; // Show the form again if there was an error
+        } finally {
+          subscribeSubmit.disabled = false;
+          subscribeSubmit.style.backgroundColor = "#50dbcb";
+          subscribeSubmit.value = "Subscribe";
         }
+      });
+
+      // Unsubscribe Form Submission
+      unsubscribeForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        // Disable button and change text
+        unsubscribeSubmit.disabled = true;
+        unsubscribeSubmit.style.backgroundColor = "#cccccc";
+        unsubscribeSubmit.value = "Unsubscribing...";
+
+        // Hide previous messages
+        unsubscribeSuccess.style.display = "none";
+        unsubscribeError.style.display = "none";
+
+        // Gather data from unsubscribe form
+        const formData = new FormData(unsubscribeForm);
+        const jsonData = {
+          name: formData.get("your-name"),
+          email: formData.get("your-email"),
+        };
+
+        try {
+          const response = await fetch(unsubscribeURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(jsonData),
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            unsubscribeSuccess.style.display = "block";
+            unsubscribeForm.style.display = "none";
+          } else {
+            unsubscribeError.textContent =
+              data.message || "Failed to unsubscribe.";
+            unsubscribeError.style.display = "block";
+          }
+        } catch (error) {
+          console.error("Error!", error);
+          alert("An error occurred. Please try again.");
+        } finally {
+          unsubscribeSubmit.disabled = false;
+          unsubscribeSubmit.style.backgroundColor = "#50dbcb";
+          unsubscribeSubmit.value = "Confirm Unsubscribe";
+        }
+      });
+
+      // Switch to Unsubscribe Form
+      switchToUnsubBtn.addEventListener("click", () => {
+        subscribeContainer.style.display = "none";
+        unsubscribeContainer.style.display = "block";
+      });
+
+      // Go Back from Unsubscribe to Subscribe
+      goBackBtn.addEventListener("click", () => {
+        unsubscribeContainer.style.display = "none";
+        subscribeContainer.style.display = "block";
       });
     </script>
   </body>
