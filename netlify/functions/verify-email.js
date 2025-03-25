@@ -54,12 +54,12 @@ exports.handler = async (event) => {
         // Optionally, delete the verification token record after success
         await EmailVerify.deleteOne({ email });
 
+        // Redirect to the homepage after successful verification
         return {
-            statusCode: 200,
-            body: JSON.stringify({
-                success: true,
-                message: "Email verified successfully! You can now log in.",
-            }),
+            statusCode: 302,
+            headers: {
+                Location: 'https://www.vocadecks.com', // Redirect to the homepage
+            },
         };
     } catch (error) {
         console.error("Error in verification process:", error);
