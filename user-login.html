@@ -47,28 +47,6 @@
       button:hover {
         background-color: #45a049;
       }
-      /* Popup styles */
-      #verificationPopup {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 300px;
-        text-align: center;
-      }
-      #verificationPopup input {
-        margin: 10px 0;
-        width: 80%;
-      }
-      #verificationPopup button {
-        background-color: #f39c12;
-        width: 80%;
-      }
     </style>
   </head>
   <body>
@@ -103,18 +81,6 @@
       </div>
     </div>
 
-    <!-- Verification Popup -->
-    <div id="verificationPopup">
-      <h3>Enter Verification Code</h3>
-      <input
-        type="text"
-        id="verificationCode"
-        placeholder="Enter Code"
-        required />
-      <button id="verifyButton">Verify</button>
-      <p id="verifyMessage"></p>
-    </div>
-
     <script>
       document
         .getElementById("registerForm")
@@ -145,12 +111,8 @@
           const data = await response.json();
           if (data.success) {
             alert(
-              "Registration successful! Please check your email for verification."
+              "Registration successful! Please check your email for verification. You will be able to log in once verified."
             );
-
-            // Show the verification popup after successful registration
-            document.getElementById("verificationPopup").style.display =
-              "block";
           } else {
             alert("Error: " + data.message);
           }
@@ -178,41 +140,6 @@
             window.location.href = "/dashboard"; // redirect to dashboard or main page
           } else {
             alert("Error: " + data.message);
-          }
-        });
-
-      // Verification code submission
-      document
-        .getElementById("verifyButton")
-        .addEventListener("click", async function () {
-          const verificationCode =
-            document.getElementById("verificationCode").value;
-          const email = document.getElementById("registerEmail").value; // Use the email from the form
-
-          if (!verificationCode) {
-            alert("Please enter the verification code.");
-            return;
-          }
-
-          const response = await fetch("/.netlify/functions/verify-email", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, verificationCode }),
-          });
-
-          const data = await response.json();
-          if (data.success) {
-            document.getElementById("verifyMessage").innerText =
-              "Email verified successfully!";
-            setTimeout(function () {
-              document.getElementById("verificationPopup").style.display =
-                "none";
-            }, 2000);
-          } else {
-            document.getElementById("verifyMessage").innerText =
-              "Invalid code, please try again.";
           }
         });
     </script>

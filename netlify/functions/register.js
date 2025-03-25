@@ -2,6 +2,7 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
+const crypto = require("crypto");
 
 const { Schema } = mongoose;
 
@@ -10,20 +11,20 @@ const registrationSchema = new Schema({
     username: String,
     email: { type: String, unique: true },
     password: String,
-    verificationCode: Number,
+    verificationToken: String,
     verified: { type: Boolean, default: false },
 }, { collection: 'usersignupdata' }); // Specify the collection name here
 
-// MongoDB schema for email verification codes
-const verificationCodeSchema = new Schema({
+// MongoDB schema for email verification tokens
+const verificationTokenSchema = new Schema({
     email: { type: String, unique: true },
-    verificationCode: Number,
+    verificationToken: String,
     createdAt: { type: Date, default: Date.now }
-}, { collection: 'emailverify' }); // Specify the collection name for email verification codes
+}, { collection: 'emailverify' }); // Specify the collection name for email verification tokens
 
 // Avoid model redefinition by checking if it's already defined
 const Registration = mongoose.models.Registration || mongoose.model("Registration", registrationSchema);
-const EmailVerify = mongoose.models.EmailVerify || mongoose.model("EmailVerify", verificationCodeSchema);
+const EmailVerify = mongoose.models.EmailVerify || mongoose.model("EmailVerify", verificationTokenSchema);
 
 exports.handler = async (event) => {
     if (event.httpMethod !== "POST") {
@@ -42,11 +43,6 @@ exports.handler = async (event) => {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             dbName: 'VocaDecksDB', // Specify the database name here
-        }).then(() => {
-            console.log("MongoDB connected successfully.");
-        }).catch((error) => {
-            console.error("MongoDB connection error: ", error);
-            throw new Error("Database connection failed");
         });
 
         // Check if the email is already registered
@@ -58,43 +54,29 @@ exports.handler = async (event) => {
             };
         }
 
-        // Generate a 6-digit verification code
-        const verificationCode = Math.floor(100000 + Math.random() * 900000);
+        // Generate a unique verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
 
         // Save user registration data in the 'usersignupdata' collection
         const newUser = new Registration({
             username,
             email,
             password,
-            verificationCode,
+            verificationToken,
         });
 
         // Save user and handle errors if any
-        await newUser.save()
-            .then(() => {
-                console.log("User successfully saved.");
-            })
-            .catch((error) => {
-                console.error("Error saving user: ", error);
-                throw new Error("Failed to save user data.");
-            });
+        await newUser.save();
 
-        // Save verification code to 'emailverify' collection
+        // Save verification token to 'emailverify' collection
         const newVerification = new EmailVerify({
             email,
-            verificationCode,
+            verificationToken,
         });
 
-        await newVerification.save()
-            .then(() => {
-                console.log("Verification code saved to emailverify collection.");
-            })
-            .catch((error) => {
-                console.error("Error saving verification code: ", error);
-                throw new Error("Failed to save verification code.");
-            });
+        await newVerification.save();
 
-        // Send verification email
+        // Send verification email with the verification link
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -108,94 +90,15 @@ exports.handler = async (event) => {
             to: email,
             subject: "VocaDecks - Email Verification",
             html: `
-                <!DOCTYPE html>
-                <html>
-                  <head>
-                    <style>
-                      @import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap");
-                    </style>
-                  </head>
-                  <body
-                    style="
-                      margin: 0;
-                      padding: 0;
-                      background-color: #f5f5f5;
-                      font-family: 'Raleway', Arial, sans-serif;
-                    ">
-                    <table
-                      width="100%"
-                      cellspacing="0"
-                      cellpadding="0"
-                      style="
-                        max-width: 600px;
-                        margin: auto;
-                        background-color: #ffffff;
-                        border-radius: 8px;
-                      ">
-                      <tr>
-                        <td align="center" style="padding: 20px">
-                          <img
-                            src="https://iili.io/3zD8YMB.png"
-                            alt="Vocadecks Logo"
-                            style="max-width: 330px; display: block" />
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td align="center" style="padding: 10px">
-                          <p
-                            style="
-                              font-size: 18px;
-                              font-weight: bold;
-                              color: #333333;
-                              margin: 0;
-                            ">
-                            🚀 Email Verification for VocaDecks 🚀
-                          </p>
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td align="center" style="padding: 20px">
-                          <table
-                            width="100%"
-                            cellspacing="10"
-                            cellpadding="0"
-                            style="text-align: center">
-                            <tr>
-                              <td
-                                style="
-                                  background-color: #f9f9f9;
-                                  border: 2px solid transparent;
-                                  border-radius: 8px;
-                                  padding: 10px;
-                                  width: 100%;
-                                  text-align: center;
-                                ">
-                                <p
-                                  style="color: #333333; font-size: 16px; margin: 0;">
-                                  Hi there <strong>${username}</strong>,<br/>
-                                  We have received an email verification request for this email: <strong>${email}</strong>.<br/>
-                                  The verification code for this email is: <strong>${verificationCode}</strong><br/><br/>
-                                  If you did not make this request, please contact us at <a href="mailto:management@vocadecks.com">management@vocadecks.com</a>.<br/><br/>
-                                  <strong>Note:</strong> The code expires in 30 minutes.
-                                </p>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td
-                          align="center"
-                          style="padding: 20px; font-size: 12px; color: #666666">
-                          © 2025 Vocadecks. All Rights Reserved.
-                        </td>
-                      </tr>
-                    </table>
-                  </body>
-                </html>
+                <p>Hi ${username},</p>
+                <p>Thank you for signing up with VocaDecks! Please click the link below to verify your email address:</p>
+                <p>
+                    <a href="https://www.vocadeck.com/verify-email?token=${verificationToken}" target="_blank">
+                        Verify your email
+                    </a>
+                </p>
+                <p>If you did not request this verification, please ignore this message.</p>
+                <p>Note: The link will expire in 30 minutes.</p>
             `,
         };
 
