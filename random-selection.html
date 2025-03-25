@@ -12,6 +12,7 @@
         height: 100vh;
         display: flex;
         justify-content: center;
+        background-color: black;
         align-items: center;
         background-image: url("https://iili.io/3ISPfol.png");
         background-size: 100% 100%;
@@ -33,7 +34,6 @@
         transform: scale(2.5);
         transition: 0.3s ease-in-out;
       }
-
       .text {
         position: absolute;
         bottom: 20px;
@@ -260,20 +260,34 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
-      // Original vocadecks array with image names restored and audio added.
+      // Rarity system mapping:
+      // ONE: Common, TWO: Extra, THREE: Rare, FOUR: Legendary, FIVE: Untouched
+      // Using rarity values (1 to 5) where lower numbers are more common.
+      // The weight is calculated as: weight = 6 - rarity.
       const vocadecks = [
+        { name: "Akoi Lapis C.png", audio: "AOKI LAPIS REVEAL.wav", rarity: 1 },
+        {
+          name: "Anon & Kanon C.png",
+          audio: "ANON AND KANON REVEAL.wav",
+          rarity: 1,
+        },
         { name: "Hatsune Miku C.png", audio: "MIKU REVEAL.wav", rarity: 1 },
         { name: "Rin C.png", audio: "RIN AND LEN REVEAL.wav", rarity: 1 },
+        { name: "Kokone C.png", audio: "KOKONE REVEAL.wav", rarity: 1 },
+        { name: "KAITO C.png", audio: "MEIKO AND KAITO REVEAL.wav", rarity: 1 },
+        { name: "Luka C.png", audio: "LUKA REVEAL.wav", rarity: 1 },
         { name: "Gumi E.png", audio: "GUMI REVEAL.wav", rarity: 2 },
         { name: "Hatsune Miku E.png", audio: "MIKU REVEAL.wav", rarity: 2 },
         { name: "Rin E.png", audio: "RIN AND LEN REVEAL.wav", rarity: 2 },
-        { name: "Tohoku E.png", audio: "Tohoku E.wav", rarity: 2 },
+        { name: "Tohoku E.png", audio: "MIKUVocaDecks.wav", rarity: 2 },
         { name: "Flower E.png", audio: "FLOWER REVEAL.wav", rarity: 2 },
+        { name: "MEIKO E.png", audio: "MEIKO AND KAITO REVEAL.wav", rarity: 2 },
         { name: "Tohoku R.png", audio: "Tohoku R.wav", rarity: 3 },
         { name: "Rana R.png", audio: "RANA REVEAL.wav", rarity: 3 },
         { name: "Macne Nana R.png", audio: "MACNE NANA REVEAL.wav", rarity: 3 },
         { name: "Hatsune Miku R.png", audio: "MIKU REVEAL.wav", rarity: 3 },
         { name: "Gumi R.png", audio: "GUMI REVEAL.wav", rarity: 3 },
+        { name: "Luka R.png", audio: "LUKA REVEAL.wav", rarity: 3 },
         { name: "Galaco L.png", audio: "GALACO REVEAL.wav", rarity: 4 },
         { name: "Gumi L.png", audio: "GUMI REVEAL.wav", rarity: 4 },
         { name: "Macne Nana L.png", audio: "MACNE NANA REVEAL.wav", rarity: 4 },
@@ -330,14 +344,27 @@
         return "Vocadecks/" + fileName.split(" ").join("%20");
       }
 
+      // Helper function: returns a weighted random card based on rarity
+      // Weight is calculated as (6 - rarity)
+      function weightedRandomCard() {
+        const totalWeight = vocadecks.reduce(
+          (sum, card) => sum + (6 - card.rarity),
+          0
+        );
+        let randomNum = Math.random() * totalWeight;
+        for (let card of vocadecks) {
+          randomNum -= 6 - card.rarity;
+          if (randomNum <= 0) return card;
+        }
+      }
+
       function generateRandomCards() {
         selectedCards = [];
-        // Randomly select 4 unique cards from the vocadecks array.
+        // Randomly select 4 unique cards using weighted probabilities.
         while (selectedCards.length < 4) {
-          const randomCard =
-            vocadecks[Math.floor(Math.random() * vocadecks.length)];
-          if (!selectedCards.includes(randomCard)) {
-            selectedCards.push(randomCard);
+          const candidate = weightedRandomCard();
+          if (!selectedCards.includes(candidate)) {
+            selectedCards.push(candidate);
           }
         }
         revealCardsOneByOne(0);
@@ -357,7 +384,6 @@
           nextCardBtn.style.display = "inline-block";
           return;
         }
-
         currentIndex = index;
         // Set the front image to the card flip reveal image.
         cardFrontImage.src = "https://iili.io/3I4YJQp.png"; // Card reveal image
