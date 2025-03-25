@@ -3,36 +3,17 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const registrationSchema = new Schema({
-    username: String,
-    email: { type: String, unique: true },
-    password: String,
-    verificationToken: String,
-    verified: { type: Boolean, default: false },
-}, { collection: 'usersignupdata' });
-
-const EmailVerify = mongoose.models.EmailVerify || mongoose.model("EmailVerify", new Schema({
+// MongoDB schema for email verification tokens
+const verificationTokenSchema = new Schema({
     email: { type: String, unique: true },
     verificationToken: String,
     createdAt: { type: Date, default: Date.now }
-}, { collection: 'emailverify' }));
+}, { collection: 'emailverify' });
+
+const EmailVerify = mongoose.models.EmailVerify || mongoose.model("EmailVerify", verificationTokenSchema);
 
 exports.handler = async (event) => {
-    if (event.httpMethod !== "GET") {
-        return {
-            statusCode: 405,
-            body: JSON.stringify({ message: "Method Not Allowed" }),
-        };
-    }
-
-    const { token } = event.queryStringParameters;
-
-    if (!token) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: "No token provided." }),
-        };
-    }
+    const { token, email } = event.queryStringParameters;
 
     try {
         // Connect to the VocaDecksDB database
@@ -40,20 +21,28 @@ exports.handler = async (event) => {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             dbName: 'VocaDecksDB',
+        }).then(() => {
+            console.log("MongoDB connected successfully.");
+        }).catch((error) => {
+            console.error("MongoDB connection error: ", error);
+            throw new Error("Database connection failed");
         });
 
-        // Find the email and token match
-        const emailVerification = await EmailVerify.findOne({ verificationToken: token });
-
-        if (!emailVerification) {
+        // Check if the token and email are valid
+        const verificationRecord = await EmailVerify.findOne({ email, verificationToken: token });
+        if (!verificationRecord) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "Invalid or expired verification token." }),
+                body: JSON.stringify({ message: "Invalid or expired verification link." }),
             };
         }
 
-        // Mark the user as verified
-        const user = await mongoose.model('Registration').findOne({ email: emailVerification.email });
+        // Mark the user's email as verified
+        const user = await mongoose.model("Registration").findOneAndUpdate(
+            { email },
+            { verified: true },
+            { new: true }
+        );
 
         if (!user) {
             return {
@@ -62,18 +51,18 @@ exports.handler = async (event) => {
             };
         }
 
-        user.verified = true;
-        await user.save();
-
-        // Optionally delete the verification token after use
-        await EmailVerify.deleteOne({ verificationToken: token });
+        // Optionally, delete the verification token record after success
+        await EmailVerify.deleteOne({ email });
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: "Email verified successfully!" }),
+            body: JSON.stringify({
+                success: true,
+                message: "Email verified successfully! You can now log in.",
+            }),
         };
     } catch (error) {
-        console.error("Error verifying email:", error);
+        console.error("Error in verification process:", error);
         return {
             statusCode: 500,
             body: JSON.stringify({ message: "Server error", error: error.message }),

@@ -2,8 +2,6 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
-const crypto = require("crypto");
-
 const { Schema } = mongoose;
 
 // MongoDB schema for user registration with explicit collection name
@@ -13,14 +11,14 @@ const registrationSchema = new Schema({
     password: String,
     verificationToken: String,
     verified: { type: Boolean, default: false },
-}, { collection: 'usersignupdata' }); // Specify the collection name here
+}, { collection: 'usersignupdata' });
 
 // MongoDB schema for email verification tokens
 const verificationTokenSchema = new Schema({
     email: { type: String, unique: true },
     verificationToken: String,
     createdAt: { type: Date, default: Date.now }
-}, { collection: 'emailverify' }); // Specify the collection name for email verification tokens
+}, { collection: 'emailverify' });
 
 // Avoid model redefinition by checking if it's already defined
 const Registration = mongoose.models.Registration || mongoose.model("Registration", registrationSchema);
@@ -35,14 +33,17 @@ exports.handler = async (event) => {
     }
 
     try {
-        // Parse the input
         const { username, email, password } = JSON.parse(event.body);
 
-        // Connect to the VocaDecksDB database
         await mongoose.connect(process.env.MONGO_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            dbName: 'VocaDecksDB', // Specify the database name here
+            dbName: 'VocaDecksDB',
+        }).then(() => {
+            console.log("MongoDB connected successfully.");
+        }).catch((error) => {
+            console.error("MongoDB connection error: ", error);
+            throw new Error("Database connection failed");
         });
 
         // Check if the email is already registered
@@ -54,10 +55,10 @@ exports.handler = async (event) => {
             };
         }
 
-        // Generate a unique verification token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
+        // Generate a verification token (a unique URL parameter)
+        const verificationToken = Math.random().toString(36).substring(2);
 
-        // Save user registration data in the 'usersignupdata' collection
+        // Save user registration data
         const newUser = new Registration({
             username,
             email,
@@ -65,7 +66,6 @@ exports.handler = async (event) => {
             verificationToken,
         });
 
-        // Save user and handle errors if any
         await newUser.save();
 
         // Save verification token to 'emailverify' collection
@@ -76,7 +76,7 @@ exports.handler = async (event) => {
 
         await newVerification.save();
 
-        // Send verification email with the verification link
+        // Send verification email with the link
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -91,14 +91,9 @@ exports.handler = async (event) => {
             subject: "VocaDecks - Email Verification",
             html: `
                 <p>Hi ${username},</p>
-                <p>Thank you for signing up with VocaDecks! Please click the link below to verify your email address:</p>
-                <p>
-                    <a href="https://www.vocadeck.com/verify-email?token=${verificationToken}" target="_blank">
-                        Verify your email
-                    </a>
-                </p>
-                <p>If you did not request this verification, please ignore this message.</p>
-                <p>Note: The link will expire in 30 minutes.</p>
+                <p>Thank you for signing up. Please verify your email by clicking the link below:</p>
+                <p><a href="https://www.vocadecks.com/verify-email?token=${verificationToken}&email=${email}">Verify your email</a></p>
+                <p>If you did not request this, please ignore this email.</p>
             `,
         };
 
