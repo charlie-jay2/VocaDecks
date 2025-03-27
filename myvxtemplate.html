@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My VX</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap");
+
+      /* Add the custom Panton font */
+      @font-face {
+        font-family: "Panton";
+        src: url("./assets/fonts/Panton.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: url("https://iili.io/3TZ8cRn.png") no-repeat center center
+          fixed;
+        background-size: 100% 100%;
+        font-family: "Quicksand", sans-serif;
+        color: white;
+      }
+
+      .container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 90vw;
+        height: 90vh;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .profile-box {
+        position: absolute;
+        top: 20%;
+        left: 12%;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .avatar img {
+        width: 100px;
+        height: 100px;
+        border-radius: 10px;
+        object-fit: cover;
+      }
+
+      .stats {
+        display: flex;
+        font-family: "Panton";
+        gap: 140px;
+        position: absolute; /* Add this line */
+        top: 200%; /* Use percentage or px to adjust position */
+        left: 2%; /* Use percentage or px to adjust position */
+        font-size: 160px;
+        font-weight: bold;
+      }
+
+      #avatar-upload {
+        position: absolute;
+        opacity: 0;
+        width: 100px;
+        height: 100px;
+        cursor: pointer;
+      }
+
+      .site-settings {
+        position: absolute;
+        top: 55%;
+        left: 15%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+      }
+
+      input[type="checkbox"] {
+        width: 40px;
+        height: 20px;
+        cursor: pointer;
+      }
+
+      .delete-account {
+        position: absolute;
+        bottom: 5%;
+        left: 15%;
+        background: red;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="profile-box">
+        <div class="avatar">
+          <input type="file" id="avatar-upload" accept="image/*" />
+          <img id="avatar-preview" src="" alt="Avatar" />
+        </div>
+        <div class="stats">
+          <span id="user-level">0</span>
+          <span id="cards-won">0</span>
+        </div>
+      </div>
+
+      <button class="delete-account" id="delete-account">DELETE ACCOUNT</button>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const userEmail = "user@example.com"; // Replace this with the actual session email.
+
+        // Fetch user data
+        const response = await fetch(
+          `/.netlify/functions/getuserdata?email=${userEmail}`
+        );
+        const userData = await response.json();
+
+        document.getElementById("avatar-preview").src =
+          userData.avatar || "default-avatar.png";
+        document.getElementById("user-level").textContent = userData.level || 0;
+        document.getElementById("cards-won").textContent =
+          userData.cardsWon || 0;
+        document.getElementById("toggle-inventory").checked =
+          userData.inventoryPublic;
+        document.getElementById("toggle-requests").checked =
+          userData.allowRequests;
+
+        // Update avatar
+        document
+          .getElementById("avatar-upload")
+          .addEventListener("change", async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+              const formData = new FormData();
+              formData.append("avatar", file);
+              formData.append("email", userEmail);
+
+              await fetch("/.netlify/functions/updateprofile", {
+                method: "POST",
+                body: formData,
+              });
+
+              location.reload();
+            }
+          });
+
+        // Toggle settings instantly
+        document
+          .getElementById("toggle-inventory")
+          .addEventListener("change", (event) => {
+            updateSetting("inventoryPublic", event.target.checked);
+          });
+
+        document
+          .getElementById("toggle-requests")
+          .addEventListener("change", (event) => {
+            updateSetting("allowRequests", event.target.checked);
+          });
+
+        async function updateSetting(key, value) {
+          await fetch("/.netlify/functions/updateprofile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: userEmail, [key]: value }),
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forum Post</title>
+    <style>
+      /* Import the local Panton font */
+      @font-face {
+        font-family: "Panton";
+        src: url("./assets/fonts/panton.ttf") format("truetype");
+      }
+
+      body {
+        font-family: "Panton", sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+        color: #333;
+      }
+
+      .container {
+        width: 80%;
+        margin: 20px auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        font-size: 36px;
+        color: #007bff;
+        margin-bottom: 10px;
+      }
+
+      h2 {
+        font-size: 24px;
+        color: #555;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 20px;
+        margin-top: 30px;
+        color: #333;
+      }
+
+      p {
+        font-size: 16px;
+        color: #444;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      ul li {
+        background-color: #f9f9f9;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      ul li strong {
+        color: #007bff;
+      }
+
+      /* Style for the "back" button or other buttons if needed */
+      .back-button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-top: 20px;
+        display: inline-block;
+      }
+
+      .back-button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="postDetails">
+      <!-- The post details will be dynamically inserted here -->
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const postId = urlParams.get("postId");
+
+      async function fetchPostDetails() {
+        const response = await fetch(
+          `/.netlify/functions/getPostDetails?postId=${postId}`
+        );
+        const post = await response.json();
+
+        if (post) {
+          document.getElementById("postDetails").innerHTML = `
+            <h1>${post.title}</h1>
+            <h2>By ${post.createdBy}</h2>
+            <p>${post.content}</p>
+            <h3>Comments</h3>
+            <ul>
+              ${post.comments
+                .map(
+                  (comment) => `
+                <li><strong>${comment.commenterName}:</strong> ${comment.comment}</li>
+              `
+                )
+                .join("")}
+            </ul>
+            <a href="forum.html" class="back-button">Back to Forum</a>
+          `;
+        }
+      }
+
+      fetchPostDetails();
+    </script>
+  </body>
+</html>
