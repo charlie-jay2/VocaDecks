@@ -12,9 +12,10 @@
         align-items: center;
         height: 100vh;
         background-image: url("https://iili.io/3R54QHJ.png");
-        background-size: 100% 100%;
+        background-size: contain; /* Ensures the full image fits without cropping */
         background-color: black;
         background-position: center;
+        background-repeat: no-repeat; /* Prevents tiling */
         margin: 0;
         overflow: hidden;
         position: relative;
