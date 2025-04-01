@@ -4,7 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VocaDecks Interface</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap"
+      rel="stylesheet" />
     <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./assets/fonts/panton.ttf") format("truetype");
+      }
+
       body {
         font-family: Arial, sans-serif;
         display: flex;
@@ -20,6 +30,27 @@
         overflow: hidden;
         position: relative;
       }
+
+      .bottom-link {
+        font-family: "Quicksand", sans-serif;
+        position: absolute;
+        bottom: 23%; /* Adjust this value to move the text up or down */
+        left: 50%;
+        font-weight: 700;
+        transform: translateX(-50%);
+        color: rgb(133, 193, 216);
+        text-decoration: underline; /* Always underlined */
+        font-size: 28px;
+      }
+
+      .bottom-link:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
+  <body>
+    <a href="https://status.vocadecks.com" target="_blank" class="bottom-link"
+      >STATUS.VOCADECKS.COM</a
+    >
+  </body>
 </html>
