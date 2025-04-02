@@ -3,307 +3,443 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard</title>
+    <title>VocaDecks</title>
+
+    <!-- Meta Embed Tags -->
+    <meta property="og:title" content="VocaDecks" />
+    <meta property="og:description" content="This site is under maintenance." />
+    <meta property="og:image" content="https://iili.io/3R7cv7j.png" />
+    <meta property="og:url" content="https://www.vocadecks.com" />
+    <meta name="twitter:card" content="summary" />
+    <!-- Small preview image -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap"
+      rel="stylesheet" />
     <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./assets/fonts/panton.ttf") format("truetype");
+      }
+
       body {
-        font-family: "Poppins", sans-serif;
-        background-color: #f4f4f9;
-        color: #333;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-image: url("https://iili.io/3RlSZg9.png");
+        background-size: contain;
+        background-color: black;
+        background-position: center;
+        background-repeat: no-repeat;
         margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        overflow: hidden;
+        position: relative;
       }
 
-      header {
-        padding: 20px;
-        background-color: #50dbcb;
-        width: 100%;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      header img {
-        max-width: 180px;
-      }
-
-      h1 {
-        margin-top: 15px;
-        font-size: 28px;
-        font-weight: bold;
-        color: #333;
-      }
-
-      .login-container {
-        background-color: #fff;
-        color: #333;
-        padding: 40px;
-        border-radius: 10px;
-        margin-top: 50px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        max-width: 400px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .login-container h3 {
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 20px;
-      }
-
-      .login-container input {
-        width: 100%;
-        padding: 10px;
-        margin: 10px 0;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 16px;
-      }
-
-      .login-container button {
-        padding: 12px;
-        background-color: #50dbcb;
-        border: none;
-        color: #fff;
-        cursor: pointer;
-        width: 100%;
-        font-size: 16px;
-        border-radius: 5px;
-        transition: background-color 0.3s ease;
-      }
-
-      .login-container button:hover {
-        background-color: #ffef3d;
-      }
-
-      .container {
-        margin-top: 20px;
-        width: 80%;
-        max-width: 1000px;
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        display: none;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
-
-      table th,
-      table td {
-        padding: 12px;
-        text-align: left;
-        border: 1px solid #ddd;
-        font-size: 16px;
-      }
-
-      table th {
-        background-color: #50dbcb;
-        color: #fff;
-      }
-
-      .delete-btn {
-        color: red;
-        cursor: pointer;
-        padding: 5px;
-        border: none;
-        background-color: transparent;
-        font-size: 14px;
-      }
-
-      .delete-btn:hover {
-        text-decoration: underline;
-        color: #ff3d3d;
-      }
-
-      /* Download Button */
-      #downloadButton {
+      .bottom-link {
+        font-family: "Panton", sans-serif;
         position: absolute;
-        top: 20px;
-        right: 20px;
-        padding: 10px 20px;
-        background-color: #50dbcb;
-        border: none;
+        bottom: 23%;
+        left: 50%;
+        font-weight: 700;
+        transform: translateX(-50%);
+        color: rgb(133, 193, 216);
+        text-decoration: underline;
+        font-size: 28px;
+      }
+
+      .bottom-link:hover {
+        text-decoration: underline;
+      }
+
+      .logo {
+        width: 10%;
+        height: auto;
+        position: absolute;
+        top: 2%;
+      }
+
+      .searchdatabox {
+        width: 33%;
+        height: auto;
+        position: absolute;
+        left: 63%;
+        top: 15%;
+      }
+
+      .searchdatatext {
+        width: 20%;
+        height: auto;
+        position: absolute;
+        left: 64%;
+        top: 17%;
+      }
+
+      .notes {
+        width: 33%;
+        height: auto;
+        position: absolute;
+        left: 3%;
+        top: 22%;
+      }
+
+      .notestext {
+        width: 65%;
+        height: auto;
+        position: absolute;
+        left: 3%;
+        top: 3%;
+      }
+
+      .notestitle {
+        width: 20%;
+        height: auto;
+        position: absolute;
+        left: 5%;
+        top: 29%;
+        z-index: 5;
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border-radius: 8px;
+        border: 1px solid #ccc;
         color: white;
-        cursor: pointer;
-        border-radius: 5px;
+        background-color: transparent;
         font-size: 16px;
+        font-family: "Panton";
+        font-weight: 700;
       }
 
-      #downloadButton:hover {
-        background-color: #ffef3d;
+      .notesdata {
+        font-family: "Panton";
+        font-weight: 700;
+        width: 40%;
+        height: 150px; /* Large text area */
+        position: absolute;
+        left: 5%;
+        top: 35%;
+        z-index: 5;
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        color: white;
+        background-color: transparent;
+        font-size: 16px;
+        resize: vertical; /* Allows resizing the textarea */
+        overflow-y: auto; /* Enables scrolling when the text overflows */
+        text-align: left; /* Text starts from the left */
+        vertical-align: top; /* Ensures text starts from the top-left */
       }
 
-      /* Responsive Design */
-      @media (max-width: 768px) {
-        .login-container {
-          width: 90%;
-        }
+      .publishbtn {
+        width: 35%;
+        height: auto;
+        position: absolute;
+        left: 98%;
+        top: 84%;
+      }
 
-        .container {
-          width: 90%;
-        }
+      .title {
+        width: 35%;
+        height: auto;
+        position: absolute;
+        left: 3%;
+        top: 15.5%;
+      }
 
-        table th,
-        table td {
-          font-size: 14px;
-          padding: 8px;
-        }
+      .shutsite {
+        width: 20%;
+        height: auto;
+        position: absolute;
+        left: 3%;
+        top: 75%;
+      }
+
+      .deletedata {
+        width: 25%;
+        height: auto;
+        position: absolute;
+        left: 3%;
+        top: 85%;
+      }
+
+      .siteassets {
+        width: 25%;
+        height: auto;
+        position: absolute;
+        left: 3%;
+        top: 95%;
+      }
+
+      .toggle-switch {
+        position: absolute;
+        left: 30%; /* Adjust based on design */
+        top: 74.5%;
+        width: 60px;
+        height: 30px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        background-color: red;
+        border-radius: 30px;
+        transition: 0.4s;
+        top: -10%;
+        left: -130%;
+      }
+
+      .slider::before {
+        content: "";
+        position: absolute;
+        height: 26px;
+        width: 26px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        border-radius: 50%;
+        transition: 0.4s;
+      }
+
+      input:checked + .slider {
+        background-color: green;
+      }
+
+      input:checked + .slider::before {
+        transform: translateX(30px);
+      }
+
+      .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        z-index: 10;
+      }
+
+      .popup button {
+        margin: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .popup-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 5;
       }
     </style>
   </head>
   <body>
-    <header>
-      <img src="https://iili.io/3Il9SgS.png" alt="Vocadecks Logo" />
-      <h1>Admin Dashboard</h1>
-    </header>
+    <img src="https://iili.io/3RlUb4I.png" class="logo" draggable="false" />
+    <img src="https://iili.io/3Rli77S.png" class="title" draggable="false" />
 
-    <div id="loginContainer" class="login-container">
-      <h3>Login</h3>
-      <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required />
-        <input type="password" id="password" placeholder="Password" required />
-        <button type="submit">Login</button>
-      </form>
+    <div class="searchdata">
+      <img
+        src="https://iili.io/3RliBet.png"
+        class="searchdatabox"
+        draggable="false" />
+      <img
+        src="https://iili.io/3RliFgp.png"
+        class="searchdatatext"
+        draggable="false" />
+      <input
+        id="notestitle"
+        class="notestitle"
+        placeholder="Error with Game Data" />
+      <textarea
+        id="notescontent"
+        class="notesdata"
+        placeholder="Users have notified an error that Data is not being saved from their won matches to their account. We are actively looking into this."></textarea>
     </div>
-
-    <div id="adminContainer" class="container">
-      <h3>Newsletter Signups</h3>
-      <table id="newsletterTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Rows will be populated by JavaScript -->
-        </tbody>
-      </table>
+    <div class="notes">
+      <img
+        src="https://iili.io/3Rli31R.png"
+        class="notesbox"
+        draggable="false" />
+      <img
+        src="https://iili.io/3RliTBf.png"
+        class="notestext"
+        draggable="false" />
+      <img
+        src="https://iili.io/3Rli522.png"
+        class="publishbtn"
+        draggable="false" />
     </div>
-
-    <button id="downloadButton" style="display: none">Download Emails</button>
+    <div class="reds">
+      <img src="https://iili.io/3Rliq7I.png" class="shutsite" />
+      <img src="https://iili.io/3RliCmX.png" class="deletedata" />
+      <img src="https://iili.io/3RlioIn.png" class="siteassets" />
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="siteToggle" />
+      <span class="slider"></span>
+    </label>
+    <div class="popup-overlay" id="popupOverlay"></div>
+    <div class="popup" id="popup">
+      <p id="popupText">Do you want to do this?</p>
+      <button id="confirmBtn">Confirm</button>
+      <button id="cancelBtn">Cancel</button>
+    </div>
 
     <script>
-      const loginContainer = document.getElementById("loginContainer");
-      const adminContainer = document.getElementById("adminContainer");
-      const loginForm = document.getElementById("loginForm");
-      const adminTable = document
-        .getElementById("newsletterTable")
-        .getElementsByTagName("tbody")[0];
-      const downloadButton = document.getElementById("downloadButton");
-
-      loginForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-
-        const response = await fetch("/.netlify/functions/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password }),
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          loginContainer.style.display = "none";
-          adminContainer.style.display = "block";
-          downloadButton.style.display = "inline-block"; // Show download button
-          fetchSignups(); // Initial fetch
-          setInterval(fetchSignups, 20000); // Poll every 20 seconds
-        } else {
-          alert("Invalid username or password");
+      // Limit for the title (27 characters)
+      const titleInput = document.getElementById("notestitle");
+      titleInput.addEventListener("input", function () {
+        if (titleInput.value.length > 27) {
+          titleInput.value = titleInput.value.substring(0, 27);
         }
       });
 
-      const fetchSignups = async () => {
-        const response = await fetch(
-          "/.netlify/functions/get-newsletter-signups"
-        );
-        const data = await response.json();
+      // Limit for the content (90 characters)
+      const contentTextarea = document.getElementById("notescontent");
+      contentTextarea.addEventListener("input", function () {
+        if (contentTextarea.value.length > 90) {
+          contentTextarea.value = contentTextarea.value.substring(0, 90);
+        }
+      });
+    </script>
+    <script>
+      // Save Notes button functionality remains unchanged
+      document
+        .querySelector(".publishbtn")
+        .addEventListener("click", async () => {
+          const notestitle = document.querySelector(".notestitle").value;
+          const notesdata = document.querySelector(".notesdata").value;
 
-        if (data.success) {
-          adminTable.innerHTML = ""; // Clear existing table rows
-          data.signups.forEach((signup) => {
-            const row = adminTable.insertRow();
-            const nameCell = row.insertCell(0);
-            const emailCell = row.insertCell(1);
-            const actionCell = row.insertCell(2);
+          if (!notestitle || !notesdata) {
+            alert("Please fill both fields.");
+            return;
+          }
 
-            nameCell.textContent = signup.name;
-            emailCell.textContent = signup.email;
-
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Delete";
-            deleteButton.className = "delete-btn";
-            deleteButton.onclick = () =>
-              handleDeleteClick(deleteButton, signup._id);
-
-            actionCell.appendChild(deleteButton);
+          const response = await fetch("/.netlify/functions/saveNotes", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              notestitle,
+              notesdata,
+            }),
           });
-        } else {
-          alert("Failed to fetch signups.");
-        }
-      };
 
-      const handleDeleteClick = (button, id) => {
-        if (button.textContent === "Delete") {
-          button.textContent = "Are you sure?";
-        } else {
-          deleteSignup(id);
-        }
-      };
+          const data = await response.json();
+          if (data.message === "Notes saved successfully!") {
+            alert("Notes saved successfully!");
+          } else {
+            alert("Error saving notes.");
+          }
+        });
+    </script>
+    <script>
+      // On page load, fetch the current site status from the database
+      document.addEventListener("DOMContentLoaded", async function () {
+        const toggle = document.getElementById("siteToggle");
 
-      const deleteSignup = async (id) => {
-        const response = await fetch("/.netlify/functions/delete-signup", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id }),
+        async function fetchSiteStatus() {
+          const response = await fetch("/.netlify/functions/getSiteStatus");
+          const data = await response.json();
+          toggle.checked = data.site_off ? true : false;
+        }
+
+        // Run fetch on page load
+        fetchSiteStatus();
+      });
+    </script>
+    <script>
+      // When the toggle is changed, show confirmation before updating the database
+      document
+        .getElementById("siteToggle")
+        .addEventListener("change", function (e) {
+          // Capture the intended state
+          const toggle = document.getElementById("siteToggle");
+          const intendedState = toggle.checked; // true means site_off
+
+          // Prevent immediate change: show confirmation popup
+          e.preventDefault();
+          // Temporarily revert the toggle for now (until confirmation)
+          toggle.checked = !intendedState;
+
+          showPopup(
+            "Do you want to do this?",
+            function () {
+              showPopup(
+                "Are you sure?",
+                async function () {
+                  // User confirmed: update toggle and send update to database
+                  toggle.checked = intendedState;
+                  const response = await fetch(
+                    "/.netlify/functions/updateSiteStatus",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ site_off: intendedState }),
+                    }
+                  );
+                  const data = await response.json();
+                  if (data.message === "Updated successfully!") {
+                    alert("Site status updated.");
+                  } else {
+                    alert("Error updating site status.");
+                  }
+                },
+                function () {
+                  // User cancelled second prompt: revert toggle to previous state
+                  toggle.checked = !intendedState;
+                }
+              );
+            },
+            function () {
+              // User cancelled first prompt: revert toggle to previous state
+              toggle.checked = !intendedState;
+            }
+          );
         });
 
-        const data = await response.json();
-        if (data.success) {
-          alert("Signup deleted successfully.");
-          fetchSignups(); // Refresh the table after deletion
-        } else {
-          alert("Error deleting signup.");
-        }
-      };
+      function showPopup(message, confirmCallback, cancelCallback) {
+        document.getElementById("popupText").innerText = message;
+        document.getElementById("popupOverlay").style.display = "block";
+        document.getElementById("popup").style.display = "block";
 
-      // Download emails as .txt file
-      downloadButton.addEventListener("click", async () => {
-        const response = await fetch(
-          "/.netlify/functions/get-newsletter-signups"
-        );
-        const data = await response.json();
+        document.getElementById("confirmBtn").onclick = function () {
+          document.getElementById("popupOverlay").style.display = "none";
+          document.getElementById("popup").style.display = "none";
+          confirmCallback();
+        };
 
-        if (data.success) {
-          const emails = data.signups.map((signup) => signup.email).join("\n");
-          const blob = new Blob([emails], { type: "text/plain" });
-          const link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = "emails.txt";
-          link.click();
-        } else {
-          alert("Failed to fetch signups.");
-        }
-      });
+        document.getElementById("cancelBtn").onclick = function () {
+          document.getElementById("popupOverlay").style.display = "none";
+          document.getElementById("popup").style.display = "none";
+          cancelCallback();
+        };
+      }
     </script>
   </body>
 </html>

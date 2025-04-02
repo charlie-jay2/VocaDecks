@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VocaDecks</title>
+
+    <!-- Meta Embed Tags -->
+    <meta property="og:title" content="VocaDecks" />
+    <meta property="og:description" content="This site is under maintenance." />
+    <meta property="og:image" content="https://iili.io/3R7cv7j.png" />
+    <meta property="og:url" content="https://www.vocadecks.com" />
+    <meta name="twitter:card" content="summary" />
+    <!-- Small preview image -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap"
+      rel="stylesheet" />
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./assets/fonts/panton.ttf") format("truetype");
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-image: url("https://iili.io/3RGWM7f.png");
+        background-size: 100% 100%;
+        background-color: black;
+        background-position: center;
+        background-repeat: no-repeat;
+        margin: 0;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .logo {
+        width: 10%;
+        height: auto;
+        position: absolute;
+        top: 2%;
+      }
+
+      .side-bar {
+        width: 6%;
+        height: auto;
+        position: absolute;
+        top: 0%;
+        left: 0%;
+        -webkit-user-drag: none;
+      }
+
+      .shop {
+        width: 3.5%;
+        height: auto;
+        position: absolute;
+        top: 40%;
+        left: 1%;
+        -webkit-user-drag: none;
+      }
+
+      .stats {
+        width: 3.5%;
+        height: auto;
+        position: absolute;
+        top: 51%;
+        left: 1%;
+        -webkit-user-drag: none;
+      }
+
+      .cards {
+        width: 3.5%;
+        height: auto;
+        position: absolute;
+        top: 26%;
+        left: 1%;
+        -webkit-user-drag: none;
+      }
+
+      .play {
+        width: 3.5%;
+        height: auto;
+        position: absolute;
+        top: 15%;
+        left: 1%;
+        -webkit-user-drag: none;
+      }
+
+      .profilepic {
+        width: 3.5%;
+        height: auto;
+        position: absolute;
+        top: 2%;
+        left: 1%;
+      }
+
+      .avatar {
+        width: 20%;
+        position: absolute;
+        top: 10%;
+        left: 20%;
+        transform: translate(-50%, -50%);
+      }
+
+      .levels {
+        width: 16%;
+        position: absolute;
+        top: 10%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .cardswon {
+        width: 30%;
+        position: absolute;
+        top: 10%;
+        left: 80%;
+        transform: translate(-50%, -50%);
+      }
+
+      .username {
+        width: 29%;
+        position: absolute;
+        top: 50%;
+        left: 24.5%;
+        transform: translate(-50%, -50%);
+      }
+
+      .pfp {
+        width: 15%;
+        position: absolute;
+        top: 30%;
+        left: 20%;
+        transform: translate(-50%, -50%);
+        border-radius: 10px;
+        transition: 0.3s ease-in-out;
+      }
+
+      .pfp:hover {
+        cursor: pointer; /* Changes cursor to hand icon */
+        filter: invert(0.7);
+      }
+
+      .reqchange {
+        width: 25%;
+        position: absolute;
+        top: 90%;
+        left: 86%;
+        transform: translate(-50%, -50%);
+      }
+
+      .level {
+        font-family: "Panton";
+        color: white;
+        font-size: 1500%;
+        position: absolute;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .cwon {
+        font-family: "Panton";
+        color: white;
+        font-size: 1500%;
+        position: absolute;
+        top: 30%;
+        left: 80%;
+        transform: translate(-50%, -50%);
+      }
+
+      .uname {
+        font-family: "Panton";
+        color: white;
+        font-size: 400%;
+        position: absolute;
+        top: 60%;
+        left: 24%;
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </head>
+  <body>
+    <img src="https://iili.io/3RlUb4I.png" class="logo" draggable="false" />
+
+    <div class="sidebar">
+      <img
+        src="https://iili.io/3R11HIn.png"
+        draggable="false"
+        class="side-bar" />
+      <img src="https://iili.io/3R10ymX.png" draggable="false" class="shop" />
+      <img src="https://iili.io/3R10pet.png" draggable="false" class="stats" />
+      <img src="https://iili.io/3R10m7I.png" draggable="false" class="cards" />
+      <img src="https://iili.io/3R10Qqv.png" draggable="false" class="play" />
+      <img
+        src="https://iili.io/3R10tgp.png"
+        draggable="false"
+        class="profilepic" />
+    </div>
+    <div class="titles">
+      <img src="https://iili.io/3RGWlqX.png" draggable="false" class="avatar" />
+      <img src="https://iili.io/3RGWGdG.png" draggable="false" class="levels" />
+      <img
+        src="https://iili.io/3RGW01n.png"
+        draggable="false"
+        class="cardswon" />
+      <img
+        src="https://iili.io/3RGW1gs.png"
+        draggable="false"
+        class="username" />
+    </div>
+    <div class="profile">
+      <img
+        src="https://iili.io/3RGrEOP.png"
+        draggable="false"
+        class="pfp"
+        id="pfp" />
+    </div>
+    <div class="button">
+      <img
+        src="https://iili.io/3RGWWml.png"
+        draggable="false"
+        class="reqchange" />
+    </div>
+    <div class="fields">
+      <p1 class="level">0</p1>
+      <p1 class="cwon">0</p1>
+      <p1 class="uname">N.A</p1>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*" style="display: none" />
+
+    <script>
+      const pfp = document.getElementById("pfp");
+      const fileInput = document.getElementById("fileInput");
+      const profilepic = document.querySelector(".profilepic"); // Sidebar profile picture
+
+      // Click on profile picture to open file explorer
+      pfp.addEventListener("click", function () {
+        fileInput.click();
+      });
+
+      // Handle file input change (image selection)
+      fileInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            // Set the image as profile picture in both main and sidebar
+            pfp.src = e.target.result;
+            profilepic.src = e.target.result; // Update sidebar profile pic
+            pfp.style.objectFit = "cover"; // Ensures image crops to fit the box
+            pfp.style.width = "15%";
+            pfp.style.height = "auto";
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    </script>
+  </body>
+</html>
