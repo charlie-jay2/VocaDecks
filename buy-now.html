@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Buy Product</title>
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <h1>Buy Product for £0.20</h1>
+
+    <!-- User Info Fields -->
+    <input type="email" id="email" placeholder="Your email" required />
+    <input
+      type="text"
+      id="username"
+      placeholder="Your VocaDecks Username"
+      required />
+
+    <button id="checkout-button">Buy Now</button>
+
+    <script type="text/javascript">
+      const stripe = Stripe(
+        "pk_live_51R9Vo7Kgeyf7DXflsEzIBkMeLWA3sMrYbrAOBNtrMIXEL7hYoFMH3UDPtNwhXI5IZBE5p2Gy7O68DeWPwoeglUD900qM7ZZ8JF"
+      );
+
+      const checkoutButton = document.getElementById("checkout-button");
+
+      checkoutButton.addEventListener("click", function () {
+        const email = document.getElementById("email").value;
+        const username = document.getElementById("username").value;
+
+        // Validate inputs
+        if (!email || !username) {
+          alert("Please enter both email and username.");
+          return;
+        }
+
+        fetch("/.netlify/functions/create-checkout-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: email, username: username }),
+        })
+          .then((response) => response.json())
+          .then((sessionId) => {
+            return stripe.redirectToCheckout({ sessionId: sessionId.id });
+          })
+          .then((result) => {
+            if (result.error) {
+              alert(result.error.message);
+            }
+          })
+          .catch((error) => console.error("Error:", error));
+      });
+    </script>
+  </body>
+</html>

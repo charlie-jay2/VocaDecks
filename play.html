@@ -198,6 +198,10 @@
       <p1 class="notescontent" contenteditable="true"> N/A Content</p1>
     </div>
   </body>
+  <audio
+    id="notificationSound"
+    src="./assets/notification.mp3"
+    preload="auto"></audio>
   <script>
     async function loadNotes() {
       const response = await fetch("/.netlify/functions/getNotes");
