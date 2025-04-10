@@ -44,16 +44,19 @@
         font-family: "Panton", sans-serif;
         position: absolute;
         bottom: 23%;
-        left: 50%;
+        left: 38.5%;
         font-weight: 700;
-        transform: translateX(-50%);
         color: rgb(133, 193, 216);
         text-decoration: underline;
         font-size: 28px;
+        transition: 0.6s ease-in-out;
       }
 
       .bottom-link:hover {
         text-decoration: underline;
+        filter: invert(1);
+        rotate: 3deg;
+        transform: scale(1.1);
       }
 
       /* Media Query for devices 768px and below */
@@ -79,11 +82,56 @@
           bottom: 30%; /* Adjust position for better visibility */
         }
       }
+
+      .ks {
+        display: none;
+        height: auto;
+        width: 5%;
+      }
+
+      .ig {
+        height: auto;
+        width: 5%;
+        position: absolute;
+        top: 88%;
+        left: 50%;
+        transition: 0.6s ease-in-out;
+      }
+
+      .dc {
+        position: absolute;
+        width: 5%;
+        height: auto;
+        top: 89%;
+        left: 44%;
+        transition: 0.6s ease-in-out;
+      }
+
+      .dc:hover {
+        transform: scale(1.1);
+        filter: invert(1);
+        rotate: -10deg;
+      }
+
+      .ig:hover {
+        transform: scale(1.1);
+        filter: invert(1);
+        rotate: 10deg;
+      }
     </style>
   </head>
   <body>
     <a href="https://status.vocadecks.com" target="_blank" class="bottom-link"
       >STATUS.VOCADECKS.COM</a
     >
+    <div class="icons">
+      <a href="https://discord.gg/SMkKKrHaeD" target="_blank"
+        ><img src="https://iili.io/3797NKQ.png" class="dc"
+      /></a>
+      <a href="https://www.instagram.com/vocadecks/" target="_blank"
+        ><img src="https://iili.io/3797hVj.png" class="ig"
+      /></a>
+      <img src="https://iili.io/3797OlV.png" class="ks" />
+    </div>
   </body>
 </html>

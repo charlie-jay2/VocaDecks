@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - VocaDecks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      }
+    </style>
+  </head>
+  <body class="flex items-center justify-center min-h-screen text-white">
+    <div
+      id="mainContainer"
+      class="w-full max-w-md bg-white/10 p-6 rounded-xl shadow-lg backdrop-blur-md opacity-0 translate-y-5 transition-all duration-700 ease-out">
+      <h2
+        id="formTitle"
+        class="text-2xl font-bold text-center text-green-400 mb-6">
+        Sign Up
+      </h2>
+
+      <form id="mainForm" class="space-y-4">
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          required
+          class="w-full px-4 py-2 rounded-md bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400" />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          required
+          class="w-full px-4 py-2 rounded-md bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400" />
+        <input
+          type="text"
+          name="password"
+          placeholder="Password"
+          required
+          class="w-full px-4 py-2 rounded-md bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400" />
+        <button
+          type="submit"
+          class="w-full py-2 bg-green-400 text-black font-semibold rounded-md hover:bg-green-500 transition">
+          Create Account
+        </button>
+      </form>
+
+      <button
+        class="w-full mt-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition"
+        id="toggleBtn"
+        onclick="toggleForm()">
+        Delete Account
+      </button>
+
+      <div id="formMessage" class="text-center mt-4 text-sm text-white"></div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div
+      id="confirmModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+      <div class="bg-white text-black p-6 rounded-lg shadow-xl max-w-sm w-full">
+        <h3 class="text-lg font-bold mb-2">Are you sure?</h3>
+        <p class="mb-4">This will permanently delete your account.</p>
+        <div class="flex justify-end gap-2">
+          <button
+            class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            onclick="hideConfirm()">
+            Cancel
+          </button>
+          <button
+            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            onclick="submitDelete()">
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("mainForm");
+      const formTitle = document.getElementById("formTitle");
+      const formMessage = document.getElementById("formMessage");
+      const toggleBtn = document.getElementById("toggleBtn");
+      const confirmModal = document.getElementById("confirmModal");
+
+      let currentFormType = "signup";
+      let formDataCache = null;
+
+      // Fade in animation
+      window.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById("mainContainer");
+        setTimeout(() => {
+          container.classList.remove("opacity-0", "translate-y-5");
+        }, 50);
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        if (currentFormType === "delete") {
+          formDataCache = data;
+          showConfirm(); // Show modal
+        } else {
+          sendRequest(data);
+        }
+      });
+
+      async function submitDelete() {
+        hideConfirm();
+        if (formDataCache) sendRequest(formDataCache);
+      }
+
+      async function sendRequest(data) {
+        const endpoint =
+          currentFormType === "signup"
+            ? "/.netlify/functions/signup"
+            : "/.netlify/functions/deleteaccount";
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+        formMessage.textContent = result.message;
+      }
+
+      function toggleForm() {
+        if (currentFormType === "signup") {
+          formTitle.textContent = "Delete Account";
+          form.innerHTML = `
+      <input type="text" name="username" placeholder="Username" required
+        class="w-full px-4 py-2 rounded-md bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-red-400" />
+      <input type="email" name="email" placeholder="Email" required
+        class="w-full px-4 py-2 rounded-md bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-red-400" />
+      <input type="text" name="password" placeholder="Password" required
+        class="w-full px-4 py-2 rounded-md bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-red-400" />
+      <button type="submit"
+        class="w-full py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition">
+        Delete My Account
+      </button>
+    `;
+          toggleBtn.classList.remove("bg-green-400", "hover:bg-green-500");
+          toggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
+          toggleBtn.textContent = "Back to Sign Up";
+          currentFormType = "delete";
+        } else {
+          formTitle.textContent = "Sign Up";
+          form.innerHTML = `
+      <input type="text" name="username" placeholder="Username" required
+        class="w-full px-4 py-2 rounded-md bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400" />
+      <input type="email" name="email" placeholder="Email" required
+        class="w-full px-4 py-2 rounded-md bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400" />
+      <input type="text" name="password" placeholder="Password" required
+        class="w-full px-4 py-2 rounded-md bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400" />
+      <button type="submit"
+        class="w-full py-2 bg-green-400 text-black font-semibold rounded-md hover:bg-green-500 transition">
+        Create Account
+      </button>
+    `;
+          toggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
+          toggleBtn.classList.add("bg-green-400", "hover:bg-green-500");
+          toggleBtn.textContent = "Delete Account";
+          currentFormType = "signup";
+        }
+      }
+
+      function showConfirm() {
+        confirmModal.classList.remove("hidden");
+        confirmModal.classList.add("flex");
+      }
+
+      function hideConfirm() {
+        confirmModal.classList.remove("flex");
+        confirmModal.classList.add("hidden");
+      }
+    </script>
+  </body>
+</html>
