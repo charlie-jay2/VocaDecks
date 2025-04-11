@@ -1,43 +1,35 @@
 const mongoose = require("mongoose");
 const nodemailer = require("nodemailer");
 
-// Updated UserSchema with soft delete (using 'deleted' flag)
 const UserSchema = new mongoose.Schema({
     username: String,
     email: String,
     password: String,
-    deleted: { type: Boolean, default: false },  // Flag for soft deletion
 });
 
 const handler = async (event) => {
     try {
         const { username, email, password } = JSON.parse(event.body);
 
-        // Connect to MongoDB
         await mongoose.connect(process.env.MONGO_URL, {
-            dbName: "test",
+            dbName: "test", // Updated to your actual DB name
         });
 
-        // Prevent model overwrite error by checking if the model already exists
         const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
-        // Check if a user already exists with the same email or username (excluding deleted ones)
-        const existingUser = await User.findOne({ 
+        const existingUser = await User.findOne({
             $or: [{ email }, { username }],
-            deleted: { $ne: true }  // Ensure that we're not finding soft-deleted users
         });
 
         if (existingUser) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "Email or username already exists" }),
+                body: JSON.stringify({ message: "Email or username already exists." }),
             };
         }
 
-        // Save new user (plain password as requested)
         const newUser = await User.create({ username, email, password });
 
-        // Send email confirmation
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -71,11 +63,12 @@ const handler = async (event) => {
             statusCode: 200,
             body: JSON.stringify({ message: "Signup successful! Confirmation email sent." }),
         };
+
     } catch (err) {
-        console.error("Error during signup:", err); // Log the error for easier debugging
+        console.error("Error during signup:", err);
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: "Server error", error: err.message }),
+            body: JSON.stringify({ message: "An error occurred during signup. Please try again later." }),
         };
     }
 };
