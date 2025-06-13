@@ -2,136 +2,667 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VocaDecks</title>
-
-    <!-- Meta Embed Tags -->
-    <meta property="og:title" content="VocaDecks" />
-    <meta property="og:description" content="This site is under maintenance." />
-    <meta property="og:image" content="https://iili.io/3R7cv7j.png" />
-    <meta property="og:url" content="https://www.vocadecks.com" />
-    <meta name="twitter:card" content="summary" />
-    <!-- Small preview image -->
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Slide Show with Gradient Background</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap"
-      rel="stylesheet" />
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
       @font-face {
         font-family: "Panton";
-        src: url("./assets/fonts/panton.ttf") format("truetype");
+        src: url("Fonts/Panton.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
       }
 
-      body {
-        font-family: Arial, sans-serif;
+      body,
+      html {
+        margin: 0;
+        height: 100%;
+        font-family: "Panton", sans-serif;
+        overflow: hidden;
+        background: radial-gradient(circle, #0f1645 0%, #222222 50%);
+      }
+
+      .logo-container {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 0;
+        padding: 10px 0;
+        background: transparent;
+      }
+
+      .logo {
+        height: 70px;
+        width: auto;
+        z-index: 2;
+      }
+
+      .slide {
+        height: 100vh;
+        padding-top: 90px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding-left: 40px;
+      }
+
+      .coral {
+        position: fixed;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+        height: 600px;
+        width: auto;
+        user-select: none;
+        pointer-events: none;
+      }
+
+      .rectangle {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1.5px solid rgba(255, 255, 255, 0.6);
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        width: 100%;
+        max-width: 900px;
+        max-height: calc(100vh - 130px);
+        padding: 20px;
+        box-sizing: border-box;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        z-index: 1;
+        position: relative;
+        transition: transform 0.8s ease;
+        left: 0;
+      }
+
+      .startt1 {
+        font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+        color: white;
+        margin-bottom: 2rem;
+      }
+
+      .light-bar {
+        width: 100%;
+        height: 1px;
+        background-color: white;
+        border-radius: 0px;
+        box-shadow: 0 0 6px white;
+      }
+
+      .text-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+      }
+
+      .gobutton {
+        position: relative;
+        width: 100%;
+        max-width: 950px;
+        height: 380px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        background-image: url("https://iili.io/3R54QHJ.png");
-        background-size: contain;
-        background-color: black;
-        background-position: center;
-        background-repeat: no-repeat;
-        margin: 0;
         overflow: hidden;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4),
+          0 0 30px rgba(0, 255, 255, 0.2);
+        padding: 0;
+        z-index: 4;
+        background-size: 200% 200%;
+        animation: scrollGradient 8s linear infinite;
+      }
+
+      @keyframes scrollGradient {
+        0% {
+          background-position: 0% 0%;
+        }
+        100% {
+          background-position: 200% 0%;
+        }
+      }
+
+      .gobutton:hover {
+        transform: scale(0.98);
+      }
+
+      #gradientBar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .gobutton-text {
+        color: #0f1645;
+        font-weight: bold;
+        font-size: clamp(15.5rem, 5vw, 5rem);
+        text-shadow: 1px 1px 0 #ffffffaa;
+        z-index: 1;
         position: relative;
       }
 
-      .bottom-link {
-        font-family: "Panton", sans-serif;
-        position: absolute;
-        bottom: 23%;
-        left: 38.5%;
-        font-weight: 700;
-        color: rgb(133, 193, 216);
-        text-decoration: underline;
-        font-size: 28px;
-        transition: 0.6s ease-in-out;
+      .cards {
+        position: fixed;
+        top: -70px;
+        right: -63px;
+        width: 130px;
+        height: auto;
+        z-index: 2;
+        pointer-events: none;
+        user-select: none;
       }
 
-      .bottom-link:hover {
-        text-decoration: underline;
-        filter: invert(1);
-        rotate: 3deg;
-        transform: scale(1.1);
+      .leveling-img,
+      .shop-img,
+      .trading-img,
+      .gifting-img {
+        position: fixed;
+        top: 54%;
+        right: 13%;
+        opacity: 0;
+        width: 100%;
+        height: 600px;
+        object-fit: contain;
+        border-radius: 20px;
+        pointer-events: none;
+        z-index: 3;
       }
 
-      /* Media Query for devices 768px and below */
-      @media (max-width: 769px) {
-        body {
-          font-family: Arial, sans-serif;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          background-image: url("https://iili.io/3R54QHJ.png");
-          background-size: contain;
-          background-color: black;
-          background-position: center;
-          background-repeat: no-repeat;
-          margin: 0;
-          overflow: hidden;
-          position: relative;
+      #endImg {
+        top: 52% !important; /* Moved up by 2% */
+      }
+
+      @keyframes flyInRight {
+        0% {
+          right: -150%;
+          opacity: 0;
+          transform: translateY(-50%);
         }
-
-        .bottom-link {
-          font-size: 20px; /* Reduce font size for smaller screens */
-          bottom: 30%; /* Adjust position for better visibility */
+        100% {
+          right: 13%;
+          opacity: 1;
+          transform: translateY(-50%);
         }
       }
 
-      .ks {
+      @keyframes flyOutRight {
+        0% {
+          right: 13%;
+          opacity: 1;
+          transform: translateY(-50%);
+        }
+        100% {
+          right: -150%;
+          opacity: 0;
+          transform: translateY(-50%);
+        }
+      }
+
+      @keyframes flyInLeft {
+        0% {
+          right: 150%;
+          opacity: 0;
+          transform: translateY(-50%);
+        }
+        100% {
+          right: 13%;
+          opacity: 1;
+          transform: translateY(-50%);
+        }
+      }
+
+      @keyframes flyOutLeft {
+        0% {
+          right: 13%;
+          opacity: 1;
+          transform: translateY(-50%);
+        }
+        100% {
+          right: 150%;
+          opacity: 0;
+          transform: translateY(-50%);
+        }
+      }
+
+      .visible {
+        right: 13% !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: translateY(-50%) !important;
+        animation-fill-mode: forwards;
+      }
+
+      .fly-in-right {
+        animation: flyInRight 0.8s forwards;
+        pointer-events: auto !important;
+      }
+
+      .fly-out-right {
+        animation: flyOutRight 0.8s forwards;
+        pointer-events: none !important;
+      }
+
+      .fly-in-left {
+        animation: flyInLeft 0.8s forwards;
+        pointer-events: auto !important;
+      }
+
+      .fly-out-left {
+        animation: flyOutLeft 0.8s forwards;
+        pointer-events: none !important;
+      }
+
+      .nav-buttons {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        gap: 15px;
+        z-index: 10;
+      }
+
+      .nav-button {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s ease;
+      }
+
+      .nav-button:hover:not(.disabled) {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .nav-button.disabled {
+        cursor: default;
+        opacity: 0.3;
+      }
+
+      .chevron {
+        width: 20px;
+        height: 20px;
+        fill: white;
+      }
+
+      #checkOutButton {
         display: none;
-        height: auto;
-        width: 5%;
-      }
-
-      .ig {
-        height: auto;
-        width: 5%;
-        position: absolute;
-        top: 88%;
+        margin-top: 20px;
+        font-size: 2rem;
+        padding: 15px 30px;
+        border-radius: 15px;
+        border: none;
+        color: #0f1645;
+        cursor: pointer;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+        opacity: 0;
+        transition: opacity 0.8s ease;
+        text-decoration: none;
+        position: fixed;
+        top: 85%;
         left: 50%;
-        transition: 0.6s ease-in-out;
+        transform: translateX(-50%);
+        z-index: 5;
+        font-weight: bold;
+        text-shadow: 1px 1px 0 #ffffffaa;
+        background-size: 200% 200%;
+        animation: scrollGradient 8s linear infinite;
+        transition: 0.6s ease-in-out
       }
 
-      .dc {
-        position: absolute;
-        width: 5%;
-        height: auto;
-        top: 89%;
-        left: 44%;
-        transition: 0.6s ease-in-out;
+      .checkOutButton {
+        text-decoration: none;
       }
 
-      .dc:hover {
-        transform: scale(1.1);
-        filter: invert(1);
-        rotate: -10deg;
-      }
-
-      .ig:hover {
-        transform: scale(1.1);
-        filter: invert(1);
-        rotate: 10deg;
+      @keyframes scrollGradient {
+        0% {
+          background-position: 0% 0%;
+        }
+        100% {
+          background-position: 200% 0%;
+        }
       }
     </style>
   </head>
   <body>
-    <a href="https://status.vocadecks.com" target="_blank" class="bottom-link"
-      >STATUS.VOCADECKS.COM</a
-    >
-    <div class="icons">
-      <a href="https://discord.gg/SMkKKrHaeD" target="_blank"
-        ><img src="https://iili.io/3797NKQ.png" class="dc"
-      /></a>
-      <a href="https://www.instagram.com/vocadecks/" target="_blank"
-        ><img src="https://iili.io/3797hVj.png" class="ig"
-      /></a>
-      <img src="https://iili.io/3797OlV.png" class="ks" />
+    <div class="logo-container">
+      <img
+        src="./Assets/START/VOCADECKS LOGO NO GLINT 315.png"
+        alt="Logo"
+        class="logo"
+      />
     </div>
+
+    <div class="slide container-fluid">
+      <div class="rectangle" id="rectangle">
+        <img
+          src="./Assets/START/series 0 showcase 6.png"
+          class="cards"
+          alt="Cards Showcase"
+        />
+        <div class="text-container">
+          <h1 class="startt1">
+            VocaDecks is a fun way to keep users engaged in servers. When you
+            add our bot to your server, it will track users’ messages and
+            activity, rewarding them with levels. Each level unlocks points or a
+            new card featuring a unique Vocaloid character! Personas such as
+            Hatsune Miku, Kasane Teto, and CaseO can be found on the cards,
+            along with many more. Users can also purchase cards using their
+            points. Show off your cards and even battle with their stats against
+            fellow server members! Trading, gifting, and seasonal tournaments
+            are also available. All of our cards are uniquely designed,
+            featuring a mix of fan art and official artwork. Add VocaDecks to
+            your server to bring a touch of whimsy and competition to your chat!
+          </h1>
+          <div class="light-bar"></div>
+        </div>
+        <button class="gobutton" id="goButton">
+          <canvas id="gradientBar" width="1000" height="380"></canvas>
+          <span class="gobutton-text">GO!</span>
+        </button>
+      </div>
+    </div>
+
+    <img
+      src="./Assets/LEVELING.png"
+      alt="Leveling"
+      class="leveling-img"
+      id="levelingImg"
+    />
+    <img
+      src="./Assets/SHOP_SYSTEM.png"
+      alt="Shop"
+      class="shop-img"
+      id="shopImg"
+    />
+    <img
+      src="./Assets/TRADING.png"
+      alt="Trading"
+      class="trading-img"
+      id="tradingImg"
+    />
+    <img
+      src="./Assets/GIFTING.png"
+      alt="Gifting"
+      class="gifting-img"
+      id="giftingImg"
+    />
+    <img
+      src="./Assets/END/Post.png"
+      alt="End Slide"
+      class="gifting-img"
+      id="endImg"
+      style="
+        opacity: 0;
+        pointer-events: none;
+        position: fixed;
+        top: 52%;
+        right: 13%;
+        height: 600px;
+        border-radius: 20px;
+        object-fit: contain;
+        z-index: 3;
+      "
+    />
+    <button id="checkOutButton">
+      <canvas
+        id="checkoutGradient"
+        width="600"
+        height="100"
+        style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border-radius: 15px;
+          z-index: 0;
+          pointer-events: none;
+        "
+      ></canvas>
+      <a href="https://discord.com/oauth2/authorize?client_id=1381732660115804232" target="_blank"><span style="position: relative; z-index: 1" class="checkOutButton">Check it out now!</span></a>
+    </button>
+    <img src="./Assets/START/Coral With Shadow.png" alt="Coral" class="coral" />
+
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons" id="navButtons" style="display: none">
+      <div class="nav-button disabled" id="backButton" title="Back">
+        <svg class="chevron" viewBox="0 0 24 24">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+        </svg>
+      </div>
+      <div class="nav-button" id="nextButton" title="Next">
+        <svg class="chevron" viewBox="0 0 24 24">
+          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+        </svg>
+      </div>
+    </div>
+
+    <script>
+      const images = [
+        document.getElementById("levelingImg"),
+        document.getElementById("shopImg"),
+        document.getElementById("tradingImg"),
+        document.getElementById("giftingImg"),
+        document.getElementById("endImg"),
+      ];
+
+      const checkOutButton = document.getElementById("checkOutButton");
+      let currentIndex = 0;
+      const nextButton = document.getElementById("nextButton");
+      const backButton = document.getElementById("backButton");
+      const navButtons = document.getElementById("navButtons");
+      const goButton = document.getElementById("goButton");
+      const rectangle = document.getElementById("rectangle");
+
+      function flyOutRight(el) {
+        el.classList.remove(
+          "fly-in-left",
+          "fly-in-right",
+          "fly-out-left",
+          "fly-out-right",
+          "visible"
+        );
+        el.classList.add("fly-out-right");
+      }
+
+      function flyInLeft(el) {
+        el.classList.remove(
+          "fly-in-left",
+          "fly-in-right",
+          "fly-out-left",
+          "fly-out-right",
+          "visible"
+        );
+        el.classList.add("fly-in-left");
+      }
+
+      function flyOutLeft(el) {
+        el.classList.remove(
+          "fly-in-left",
+          "fly-in-right",
+          "fly-out-left",
+          "fly-out-right",
+          "visible"
+        );
+        el.classList.add("fly-out-left");
+      }
+
+      function flyInRight(el) {
+        el.classList.remove(
+          "fly-in-left",
+          "fly-in-right",
+          "fly-out-left",
+          "fly-out-right",
+          "visible"
+        );
+        el.classList.add("fly-in-right");
+      }
+
+      function showImage(index, direction) {
+        images.forEach((img, i) => {
+          if (i === index) {
+            if (direction === "left") {
+              flyInLeft(img);
+            } else {
+              flyInRight(img);
+            }
+
+            // If it's the end image, trigger button fade-in after 0.5s
+            if (i === images.length - 1) {
+              setTimeout(() => {
+                checkOutButton.style.display = "block";
+                requestAnimationFrame(() => {
+                  checkOutButton.style.opacity = "1";
+                });
+              }, 500);
+            } else {
+              checkOutButton.style.opacity = "0";
+              setTimeout(() => (checkOutButton.style.display = "none"), 500);
+            }
+          } else if (i === currentIndex) {
+            if (direction === "left") {
+              flyOutLeft(img);
+            } else {
+              flyOutRight(img);
+            }
+
+            img.addEventListener("animationend", function handler() {
+              img.style.opacity = 0;
+              img.style.pointerEvents = "none";
+              img.classList.remove("fly-out-left", "fly-out-right", "visible");
+              img.removeEventListener("animationend", handler);
+            });
+          } else {
+            img.classList.remove(
+              "fly-in-left",
+              "fly-in-right",
+              "fly-out-left",
+              "fly-out-right",
+              "visible"
+            );
+            img.style.opacity = 0;
+            img.style.pointerEvents = "none";
+          }
+        });
+        updateNavButtons();
+        currentIndex = index;
+      }
+
+      function updateNavButtons() {
+        backButton.classList.toggle("disabled", currentIndex === 0);
+        nextButton.classList.toggle(
+          "disabled",
+          currentIndex === images.length - 1
+        );
+      }
+
+      goButton.addEventListener("click", () => {
+        goButton.style.display = "none";
+        rectangle.style.display = "none";
+        navButtons.style.display = "flex";
+
+        currentIndex = 0;
+        showImage(currentIndex, "left");
+      });
+
+      nextButton.addEventListener("click", () => {
+        if (currentIndex < images.length - 1) {
+          const oldIndex = currentIndex;
+          currentIndex++;
+          showImage(currentIndex, "left");
+        }
+      });
+
+      backButton.addEventListener("click", () => {
+        if (currentIndex > 0) {
+          const oldIndex = currentIndex;
+          currentIndex--;
+          showImage(currentIndex, "right");
+        }
+      });
+
+      images.forEach((img) => {
+        img.style.opacity = 0;
+        img.style.pointerEvents = "none";
+      });
+    </script>
+
+    <script>
+      const canvas1 = document.getElementById("gradientBar");
+      const canvas2 = document.getElementById("checkoutGradient");
+      const ctx1 = canvas1.getContext("2d");
+      const ctx2 = canvas2.getContext("2d");
+
+      const color1 = [0, 232, 240];
+      const color2 = [245, 231, 70];
+
+      let offset = 0;
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function drawGradientTo(ctx, width, height) {
+        const imageData = ctx.createImageData(width, height);
+        const data = imageData.data;
+        const diagonalLength = Math.sqrt(width * width + height * height);
+
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            let pos = (x + y + offset) % diagonalLength;
+            let t = pos / diagonalLength;
+            t = t - Math.floor(t);
+            let gradientT = t < 0.5 ? t * 2 : 1 - (t - 0.5) * 2;
+
+            const r = Math.round(lerp(color1[0], color2[0], gradientT));
+            const g = Math.round(lerp(color1[1], color2[1], gradientT));
+            const b = Math.round(lerp(color1[2], color2[2], gradientT));
+
+            const index = (y * width + x) * 4;
+            data[index] = r;
+            data[index + 1] = g;
+            data[index + 2] = b;
+            data[index + 3] = 255;
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      function animateGradients() {
+        const w1 = canvas1.width,
+          h1 = canvas1.height;
+        const w2 = canvas2.width,
+          h2 = canvas2.height;
+
+        drawGradientTo(ctx1, w1, h1);
+        drawGradientTo(ctx2, w2, h2);
+
+        offset += 1.5;
+        requestAnimationFrame(animateGradients);
+      }
+
+      animateGradients();
+    </script>
   </body>
 </html>
