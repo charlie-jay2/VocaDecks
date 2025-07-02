@@ -1,668 +1,462 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>VocaDecks</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
-    />
-    <style>
-      @font-face {
-        font-family: "Panton";
-        src: url("Fonts/Panton.ttf") format("truetype");
-        font-weight: normal;
-        font-style: normal;
-      }
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-      body,
-      html {
-        margin: 0;
-        height: 100%;
-        font-family: "Panton", sans-serif;
-        overflow: hidden;
-        background: radial-gradient(circle, #0f1645 0%, #222222 50%);
-      }
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-      .logo-container {
-        position: fixed;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 0;
-        padding: 10px 0;
-        background: transparent;
-      }
-
-      .logo {
-        height: 70px;
-        width: auto;
-        z-index: 2;
-      }
-
-      .slide {
-        height: 100vh;
-        padding-top: 90px;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        padding-left: 40px;
-      }
-
-      .coral {
-        position: fixed;
-        top: 50%;
-        right: 0;
-        transform: translateY(-50%);
-        height: 600px;
-        width: auto;
-        user-select: none;
-        pointer-events: none;
-      }
-
-      .rectangle {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1.5px solid rgba(255, 255, 255, 0.6);
-        border-radius: 20px;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        width: 100%;
-        max-width: 900px;
-        max-height: calc(100vh - 130px);
-        padding: 20px;
-        box-sizing: border-box;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: flex-start;
-        z-index: 1;
-        position: relative;
-        transition: transform 0.8s ease;
-        left: 0;
-      }
-
-      .startt1 {
-        font-size: clamp(0.9rem, 1.5vw, 1.2rem);
-        color: white;
-        margin-bottom: 2rem;
-      }
-
-      .light-bar {
-        width: 100%;
-        height: 1px;
-        background-color: white;
-        border-radius: 0px;
-        box-shadow: 0 0 6px white;
-      }
-
-      .text-container {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-      }
-
-      .gobutton {
-        position: relative;
-        width: 100%;
-        max-width: 950px;
-        height: 380px;
-        border: none;
-        border-radius: 20px;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4),
-          0 0 30px rgba(0, 255, 255, 0.2);
-        padding: 0;
-        z-index: 4;
-        background-size: 200% 200%;
-        animation: scrollGradient 8s linear infinite;
-      }
-
-      @keyframes scrollGradient {
-        0% {
-          background-position: 0% 0%;
-        }
-        100% {
-          background-position: 200% 0%;
-        }
-      }
-
-      .gobutton:hover {
-        transform: scale(0.98);
-      }
-
-      #gradientBar {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border-radius: 20px;
-        z-index: 0;
-        pointer-events: none;
-      }
-
-      .gobutton-text {
-        color: #0f1645;
-        font-weight: bold;
-        font-size: clamp(15.5rem, 5vw, 5rem);
-        text-shadow: 1px 1px 0 #ffffffaa;
-        z-index: 1;
-        position: relative;
-      }
-
-      .cards {
-        position: fixed;
-        top: -70px;
-        right: -63px;
-        width: 130px;
-        height: auto;
-        z-index: 2;
-        pointer-events: none;
-        user-select: none;
-      }
-
-      .leveling-img,
-      .shop-img,
-      .trading-img,
-      .gifting-img {
-        position: fixed;
-        top: 54%;
-        right: 13%;
-        opacity: 0;
-        width: 100%;
-        height: 600px;
-        object-fit: contain;
-        border-radius: 20px;
-        pointer-events: none;
-        z-index: 3;
-      }
-
-      #endImg {
-        top: 52% !important; /* Moved up by 2% */
-      }
-
-      @keyframes flyInRight {
-        0% {
-          right: -150%;
-          opacity: 0;
-          transform: translateY(-50%);
-        }
-        100% {
-          right: 13%;
-          opacity: 1;
-          transform: translateY(-50%);
-        }
-      }
-
-      @keyframes flyOutRight {
-        0% {
-          right: 13%;
-          opacity: 1;
-          transform: translateY(-50%);
-        }
-        100% {
-          right: -150%;
-          opacity: 0;
-          transform: translateY(-50%);
-        }
-      }
-
-      @keyframes flyInLeft {
-        0% {
-          right: 150%;
-          opacity: 0;
-          transform: translateY(-50%);
-        }
-        100% {
-          right: 13%;
-          opacity: 1;
-          transform: translateY(-50%);
-        }
-      }
-
-      @keyframes flyOutLeft {
-        0% {
-          right: 13%;
-          opacity: 1;
-          transform: translateY(-50%);
-        }
-        100% {
-          right: 150%;
-          opacity: 0;
-          transform: translateY(-50%);
-        }
-      }
-
-      .visible {
-        right: 13% !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        transform: translateY(-50%) !important;
-        animation-fill-mode: forwards;
-      }
-
-      .fly-in-right {
-        animation: flyInRight 0.8s forwards;
-        pointer-events: auto !important;
-      }
-
-      .fly-out-right {
-        animation: flyOutRight 0.8s forwards;
-        pointer-events: none !important;
-      }
-
-      .fly-in-left {
-        animation: flyInLeft 0.8s forwards;
-        pointer-events: auto !important;
-      }
-
-      .fly-out-left {
-        animation: flyOutLeft 0.8s forwards;
-        pointer-events: none !important;
-      }
-
-      .nav-buttons {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        display: flex;
-        gap: 15px;
-        z-index: 10;
-      }
-
-      .nav-button {
-        width: 40px;
-        height: 40px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.3s ease;
-      }
-
-      .nav-button:hover:not(.disabled) {
-        background: rgba(255, 255, 255, 0.5);
-      }
-
-      .nav-button.disabled {
-        cursor: default;
-        opacity: 0.3;
-      }
-
-      .chevron {
-        width: 20px;
-        height: 20px;
-        fill: white;
-      }
-
-      #checkOutButton {
-        display: none;
-        margin-top: 20px;
-        font-size: 2rem;
-        padding: 15px 30px;
-        border-radius: 15px;
-        border: none;
-        color: #0f1645;
-        cursor: pointer;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
-        opacity: 0;
-        transition: opacity 0.8s ease;
-        text-decoration: none;
-        position: fixed;
-        top: 85%;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 5;
-        font-weight: bold;
-        text-shadow: 1px 1px 0 #ffffffaa;
-        background-size: 200% 200%;
-        animation: scrollGradient 8s linear infinite;
-        transition: 0.6s ease-in-out
-      }
-
-      .checkOutButton {
-        text-decoration: none;
-      }
-
-      @keyframes scrollGradient {
-        0% {
-          background-position: 0% 0%;
-        }
-        100% {
-          background-position: 200% 0%;
-        }
-      }
-    </style>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   </head>
+  <style>
+    @font-face {
+      font-family: "Panton";
+      src: url("./Fonts/Panton.ttf") format("truetype");
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+      overflow-y: hidden;
+      overflow-x: hidden;
+    }
+    body {
+      background-image: url(./Assets/background.png);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      font-family: Panton;
+    }
+
+    .logo {
+      width: 20%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      left: 50%;
+    }
+
+    .line {
+      width: 95%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      margin-top: -1.3%;
+      left: 50%;
+    }
+
+    .rect1 {
+      width: 24%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      margin-top: 3.5%;
+      left: 85%;
+    }
+
+    .rect2 {
+      width: 50%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      margin-top: 20%;
+      left: 22%;
+      z-index: 1; /* lower than texts */
+    }
+
+    .tbox {
+      width: 35%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      margin-top: -43%;
+      left: 29%;
+    }
+
+    /* Make #rectangles the positioning context */
+    #rectangles {
+      position: relative;
+    }
+
+    /* texts absolutely positioned over rect2 */
+    .text1 {
+      position: absolute;
+      top: 46%; /* adjust this value to move vertically */
+      left: 34%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+    .text2 {
+      position: absolute;
+      top: 46%; /* adjust this value to move vertically */
+      left: 59%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+    /* block */
+    .blockstxt {
+      position: absolute;
+      top: 55%; /* adjust this value to move vertically */
+      left: 47%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+
+    .blockspo {
+      position: absolute;
+      top: 59%; /* adjust this value to move vertically */
+      left: 45%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+    .blockspt {
+      position: absolute;
+      top: 59%; /* adjust this value to move vertically */
+      left: 49%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+    /* health */
+    .healthtxt {
+      position: absolute;
+      top: 68%; /* adjust this value to move vertically */
+      left: 47%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+
+    .healthpo {
+      position: absolute;
+      top: 71%; /* adjust this value to move vertically */
+      left: 45%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+    .healthpt {
+      position: absolute;
+      top: 71%; /* adjust this value to move vertically */
+      left: 49%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+    /* damage limit */
+
+    .damageltxt {
+      position: absolute;
+      top: 77%; /* adjust this value to move vertically */
+      left: 47%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+
+    .damagelpo {
+      position: absolute;
+      top: 80%; /* adjust this value to move vertically */
+      left: 45%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+    .damagelpt {
+      position: absolute;
+      top: 80%; /* adjust this value to move vertically */
+      left: 49%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+
+    /* target split */
+
+    .targettxt {
+      position: absolute;
+      top: 85%; /* adjust this value to move vertically */
+      left: 47%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+
+    .targetpo {
+      position: absolute;
+      top: 88%; /* adjust this value to move vertically */
+      left: 45%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+    .targetpt {
+      position: absolute;
+      top: 88%; /* adjust this value to move vertically */
+      left: 49%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%); /* center at left/top */
+      z-index: 10; /* high so it's on top */
+      color: white;
+      font-size: 30px;
+      white-space: nowrap; /* optional: prevent wrapping */
+    }
+
+    /* Command Lines */
+    .cl1 {
+      position: absolute;
+      top: 44%; /* adjust this value to move vertically */
+      left: 27%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%);
+      width: 12%;
+      height: 4%;
+      background-color: black;
+      color: gray;
+      font-family: Panton;
+      border-radius: 15px;
+      border-color: white;
+      border-style: solid;
+    }
+
+    .cl2 {
+      position: absolute;
+      top: 91%; /* adjust this value to move vertically */
+      left: 85%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%);
+      width: 21%;
+      height: 5%;
+      background-color: black;
+      color: gray;
+      font-family: Panton;
+      border-radius: 15px;
+      border-color: white;
+      border-style: solid;
+    }
+
+    /* Block Button */
+
+    .blockbt {
+      position: absolute;
+      top: 44%; /* adjust this value to move vertically */
+      left: 67%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%);
+      width: 8%;
+      height: 5%;
+      background-image: linear-gradient(90deg, #50DBCB, #FFEF3D);
+      color: black;
+      font-size: 30px;
+      font-weight: bolder;
+      font-family: Panton;
+      border-radius: 15px;
+      border-color: white;
+      border-width: 3px;
+      border-style: solid;
+    }  
+
+    .discord {
+      position: absolute;
+      top: 5%; /* adjust this value to move vertically */
+      left: 92%; /* adjust this value to move horizontally */
+      transform: translate(-50%, -50%);
+      background-color: black;
+      color: gray;
+      font-family: Panton;
+      border-radius: 15px;
+      border-color: white;
+      border-style: solid;
+      transition: 0.6s ease-in-out;
+    }
+
+    .discord:hover {
+      filter:brightness(0.5);
+      scale: calc(0.9);
+    }
+    </style>
   <body>
-    <div class="logo-container">
-      <img
-        src="./Assets/START/VOCADECKS LOGO NO GLINT 315.png"
-        alt="Logo"
-        class="logo"
-      />
+    <div id="logoline">
+      <img src="./Assets/SERIES_1_LOGO.png" class="logo" />
+      <img src="./Assets/ICONS/Line_120.png" class="line" />
     </div>
-
-    <div class="slide container-fluid">
-      <div class="rectangle" id="rectangle">
-        <img
-          src="./Assets/START/series 0 showcase 6.png"
-          class="cards"
-          alt="Cards Showcase"
-        />
-        <div class="text-container">
-          <h1 class="startt1">
-            VocaDecks is a fun way to keep users engaged in servers. When you
-            add our bot to your server, it will track users’ messages and
-            activity, rewarding them with levels. Each level unlocks points or a
-            new card featuring a unique Vocaloid character! Personas such as
-            Hatsune Miku, Kasane Teto, and CaseO can be found on the cards,
-            along with many more. Users can also purchase cards using their
-            points. Show off your cards and even battle with their stats against
-            fellow server members! Trading, gifting, and seasonal tournaments
-            are also available. All of our cards are uniquely designed,
-            featuring a mix of fan art and official artwork. Add VocaDecks to
-            your server to bring a touch of whimsy and competition to your chat!
-          </h1>
-          <div class="light-bar"></div>
+    <div id="rectangles">
+      <img src="./Assets/ICONS/COMMAND_OVERRIDE.png" class="rect1" />
+      <img src="./Assets/ICONS/Rectangle_149.png" class="rect2" />
+      <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
+      <div>
+        <h1 class="text1">PLAYER ONE</h1>
+        <h1 class="text2">PLAYER TWO</h1>
+        <!--Blocks-->
         </div>
-        <button class="gobutton" id="goButton">
-          <canvas id="gradientBar" width="1000" height="380"></canvas>
-          <span class="gobutton-text">GO!</span>
+        <h1 class="blockstxt">BLOCKS</h1>
+        <h1 class="blockspo">0</h1>
+        <h1 class="blockspt">0</h1>
+        </div>
+        <!--Health-->
+        <h1 class="healthtxt">HEALTH</h1>
+        <h1 class="healthpo">0</h1>
+        <h1 class="healthpt">0</h1>
+        <!--Damage Limit-->
+        <h1 class="damageltxt">DAMAGE L</h1>
+        <h1 class="damagelpo">0</h1>
+        <h1 class="damagelpt">0</h1>
+
+        <!--Target Split-->
+        <h1 class="targettxt">TARGET S</h1>
+        <h1 class="targetpo">0</h1>
+        <h1 class="targetpt">0</h1>
+      </div>
+      <!-- Command Lines-->
+      <div>
+        <form>
+          <input type="text" id="lname" name="lname" placeholder="ATTACK... (LIMIT 50)" class="cl1">
+          <input type="text" id="lname" name="lname" placeholder="COMMAND..." class="cl2">
+        </form>
+      </div>
+      <!-- Block Button -->
+       <div>
+        <button class="blockbt">
+          BLOCK
         </button>
-      </div>
+       </div>
+       <!-- Pointer -->
+        <!-- <div>
+          <img src="./Assets/ICONS/pointer.png">
+        </div> -->
     </div>
 
-    <img
-      src="./Assets/LEVELING.png"
-      alt="Leveling"
-      class="leveling-img"
-      id="levelingImg"
-    />
-    <img
-      src="./Assets/SHOP_SYSTEM.png"
-      alt="Shop"
-      class="shop-img"
-      id="shopImg"
-    />
-    <img
-      src="./Assets/TRADING.png"
-      alt="Trading"
-      class="trading-img"
-      id="tradingImg"
-    />
-    <img
-      src="./Assets/GIFTING.png"
-      alt="Gifting"
-      class="gifting-img"
-      id="giftingImg"
-    />
-    <img
-      src="./Assets/END/Post.png"
-      alt="End Slide"
-      class="gifting-img"
-      id="endImg"
-      style="
-        opacity: 0;
-        pointer-events: none;
-        position: fixed;
-        top: 52%;
-        right: 13%;
-        height: 600px;
-        border-radius: 20px;
-        object-fit: contain;
-        z-index: 3;
-      "
-    />
-    <button id="checkOutButton">
-      <canvas
-        id="checkoutGradient"
-        width="600"
-        height="100"
-        style="
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          border-radius: 15px;
-          z-index: 0;
-          pointer-events: none;
-        "
-      ></canvas>
-      <a href="https://discord.com/oauth2/authorize?client_id=1381732660115804232" target="_blank"><span style="position: relative; z-index: 1" class="checkOutButton">Check it out now!</span></a>
-    </button>
-    <img src="./Assets/START/Coral With Shadow.png" alt="Coral" class="coral" />
-
-    <!-- Navigation Buttons -->
-    <div class="nav-buttons" id="navButtons" style="display: none">
-      <div class="nav-button disabled" id="backButton" title="Back">
-        <svg class="chevron" viewBox="0 0 24 24">
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-        </svg>
+    <div id="buttons">
+      <img
+        src="./Assets/ICONS/back.png"
+        class="back"
+        style="margin-left: 15px; position: relative; bottom: 45px" />
+      <img
+        src="./Assets/ICONS/Settings.png"
+        class="back"
+        style="margin-left: 15px; position: relative; bottom:45px" />
+      <img src="./Assets/ICONS/DC_LOGIN_BUTTON.png" class="discord">
       </div>
-      <div class="nav-button" id="nextButton" title="Next">
-        <svg class="chevron" viewBox="0 0 24 24">
-          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" />
-        </svg>
-      </div>
-    </div>
-
-    <script>
-      const images = [
-        document.getElementById("levelingImg"),
-        document.getElementById("shopImg"),
-        document.getElementById("tradingImg"),
-        document.getElementById("giftingImg"),
-        document.getElementById("endImg"),
-      ];
-
-      const checkOutButton = document.getElementById("checkOutButton");
-      let currentIndex = 0;
-      const nextButton = document.getElementById("nextButton");
-      const backButton = document.getElementById("backButton");
-      const navButtons = document.getElementById("navButtons");
-      const goButton = document.getElementById("goButton");
-      const rectangle = document.getElementById("rectangle");
-
-      function flyOutRight(el) {
-        el.classList.remove(
-          "fly-in-left",
-          "fly-in-right",
-          "fly-out-left",
-          "fly-out-right",
-          "visible"
-        );
-        el.classList.add("fly-out-right");
-      }
-
-      function flyInLeft(el) {
-        el.classList.remove(
-          "fly-in-left",
-          "fly-in-right",
-          "fly-out-left",
-          "fly-out-right",
-          "visible"
-        );
-        el.classList.add("fly-in-left");
-      }
-
-      function flyOutLeft(el) {
-        el.classList.remove(
-          "fly-in-left",
-          "fly-in-right",
-          "fly-out-left",
-          "fly-out-right",
-          "visible"
-        );
-        el.classList.add("fly-out-left");
-      }
-
-      function flyInRight(el) {
-        el.classList.remove(
-          "fly-in-left",
-          "fly-in-right",
-          "fly-out-left",
-          "fly-out-right",
-          "visible"
-        );
-        el.classList.add("fly-in-right");
-      }
-
-      function showImage(index, direction) {
-        images.forEach((img, i) => {
-          if (i === index) {
-            if (direction === "left") {
-              flyInLeft(img);
-            } else {
-              flyInRight(img);
-            }
-
-            // If it's the end image, trigger button fade-in after 0.5s
-            if (i === images.length - 1) {
-              setTimeout(() => {
-                checkOutButton.style.display = "block";
-                requestAnimationFrame(() => {
-                  checkOutButton.style.opacity = "1";
-                });
-              }, 500);
-            } else {
-              checkOutButton.style.opacity = "0";
-              setTimeout(() => (checkOutButton.style.display = "none"), 500);
-            }
-          } else if (i === currentIndex) {
-            if (direction === "left") {
-              flyOutLeft(img);
-            } else {
-              flyOutRight(img);
-            }
-
-            img.addEventListener("animationend", function handler() {
-              img.style.opacity = 0;
-              img.style.pointerEvents = "none";
-              img.classList.remove("fly-out-left", "fly-out-right", "visible");
-              img.removeEventListener("animationend", handler);
-            });
-          } else {
-            img.classList.remove(
-              "fly-in-left",
-              "fly-in-right",
-              "fly-out-left",
-              "fly-out-right",
-              "visible"
-            );
-            img.style.opacity = 0;
-            img.style.pointerEvents = "none";
-          }
-        });
-        updateNavButtons();
-        currentIndex = index;
-      }
-
-      function updateNavButtons() {
-        backButton.classList.toggle("disabled", currentIndex === 0);
-        nextButton.classList.toggle(
-          "disabled",
-          currentIndex === images.length - 1
-        );
-      }
-
-      goButton.addEventListener("click", () => {
-        goButton.style.display = "none";
-        rectangle.style.display = "none";
-        navButtons.style.display = "flex";
-
-        currentIndex = 0;
-        showImage(currentIndex, "left");
-      });
-
-      nextButton.addEventListener("click", () => {
-        if (currentIndex < images.length - 1) {
-          const oldIndex = currentIndex;
-          currentIndex++;
-          showImage(currentIndex, "left");
-        }
-      });
-
-      backButton.addEventListener("click", () => {
-        if (currentIndex > 0) {
-          const oldIndex = currentIndex;
-          currentIndex--;
-          showImage(currentIndex, "right");
-        }
-      });
-
-      images.forEach((img) => {
-        img.style.opacity = 0;
-        img.style.pointerEvents = "none";
-      });
-    </script>
-
-    <script>
-      const canvas1 = document.getElementById("gradientBar");
-      const canvas2 = document.getElementById("checkoutGradient");
-      const ctx1 = canvas1.getContext("2d");
-      const ctx2 = canvas2.getContext("2d");
-
-      const color1 = [0, 232, 240];
-      const color2 = [245, 231, 70];
-
-      let offset = 0;
-
-      function lerp(a, b, t) {
-        return a + (b - a) * t;
-      }
-
-      function drawGradientTo(ctx, width, height) {
-        const imageData = ctx.createImageData(width, height);
-        const data = imageData.data;
-        const diagonalLength = Math.sqrt(width * width + height * height);
-
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            let pos = (x + y + offset) % diagonalLength;
-            let t = pos / diagonalLength;
-            t = t - Math.floor(t);
-            let gradientT = t < 0.5 ? t * 2 : 1 - (t - 0.5) * 2;
-
-            const r = Math.round(lerp(color1[0], color2[0], gradientT));
-            const g = Math.round(lerp(color1[1], color2[1], gradientT));
-            const b = Math.round(lerp(color1[2], color2[2], gradientT));
-
-            const index = (y * width + x) * 4;
-            data[index] = r;
-            data[index + 1] = g;
-            data[index + 2] = b;
-            data[index + 3] = 255;
-          }
-        }
-
-        ctx.putImageData(imageData, 0, 0);
-      }
-
-      function animateGradients() {
-        const w1 = canvas1.width,
-          h1 = canvas1.height;
-        const w2 = canvas2.width,
-          h2 = canvas2.height;
-
-        drawGradientTo(ctx1, w1, h1);
-        drawGradientTo(ctx2, w2, h2);
-
-        offset += 1.5;
-        requestAnimationFrame(animateGradients);
-      }
-
-      animateGradients();
-    </script>
   </body>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+
+<script>
+  // Helper to get query param
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  // Save token in localStorage with expiry check
+  function saveToken(token) {
+    localStorage.setItem("discordToken", token);
+    localStorage.setItem("discordTokenSavedAt", Date.now());
+  }
+
+  // Check if token expired (48 hours)
+  function isTokenValid(token) {
+    try {
+      const decoded = jwt_decode(token);
+      // decoded.exp is in seconds, Date.now() in ms
+      return decoded.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
+  }
+
+  function renderLoggedIn(user) {
+    const discordBtn = document.querySelector(".discord");
+    discordBtn.innerHTML = `
+      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" style="width:32px; height:32px; border-radius:50%; vertical-align:middle; margin-right: 8px;" />
+      <span>${user.username}</span>
+    `;
+
+    // Add click toggle for logout + userID
+    let infoDiv = document.getElementById("discordUserInfo");
+    if (!infoDiv) {
+      infoDiv = document.createElement("div");
+      infoDiv.id = "discordUserInfo";
+      infoDiv.style.position = "absolute";
+      infoDiv.style.top = "60px";
+      infoDiv.style.right = "10px";
+      infoDiv.style.background = "rgba(0,0,0,0.8)";
+      infoDiv.style.color = "white";
+      infoDiv.style.padding = "10px";
+      infoDiv.style.borderRadius = "10px";
+      infoDiv.style.display = "none";
+      infoDiv.style.zIndex = "100";
+      document.body.appendChild(infoDiv);
+    }
+
+    infoDiv.innerHTML = `
+      <div>UserID: ${user.id}</div>
+      <button id="logoutBtn">Logout</button>
+    `;
+
+    discordBtn.onclick = () => {
+      infoDiv.style.display = infoDiv.style.display === "none" ? "block" : "none";
+    };
+
+    document.getElementById("logoutBtn").onclick = () => {
+      localStorage.removeItem("discordToken");
+      localStorage.removeItem("discordTokenSavedAt");
+      infoDiv.style.display = "none";
+      location.reload();
+    };
+  }
+
+  function renderLoggedOut() {
+    const discordBtn = document.querySelector(".discord");
+    discordBtn.innerHTML = `<img src="./Assets/ICONS/DC_LOGIN_BUTTON.png" alt="Discord Login" />`;
+    discordBtn.onclick = () => {
+      window.location.href = "/.netlify/functions/auth-discord";
+    };
+  }
+
+  // Main flow
+  (function () {
+    const urlToken = getQueryParam("token");
+    if (urlToken) {
+      saveToken(urlToken);
+      // Remove token from URL so it doesn't persist in history
+      history.replaceState(null, null, location.pathname);
+    }
+
+    const token = localStorage.getItem("discordToken");
+
+    if (token && isTokenValid(token)) {
+      // decode token and show logged in UI
+      const user = jwt_decode(token);
+      renderLoggedIn(user);
+    } else {
+      renderLoggedOut();
+    }
+  })();
+</script>
+
 </html>
