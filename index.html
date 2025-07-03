@@ -230,25 +230,41 @@
     }
 
     #discordUserInfo {
-      display: none;
+      position: absolute;
+      top: 5%;
+      left: 92%;
+      transform: translate(-50%, 0);
       background-color: rgba(0, 0, 0, 0.85);
       color: white;
-      padding: 10px 15px;
+      padding: 5px 15px;
       border-radius: 15px;
       z-index: 100;
-      text-align: center;
       font-size: 14px;
+      max-width: 280px;
+      cursor: default;
+      user-select: none;
     }
-
-    #discordUserInfo img {
+    #discordUserInfo .user-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #discordUserInfo .user-row img {
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      margin-bottom: 5px;
     }
-
-    #discordUserInfo button {
+    #discordUserInfo .user-row .username {
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #discordUserInfo .dropdown-content {
       margin-top: 8px;
+      border-top: 1px solid #444;
+      padding-top: 8px;
+    }
+    #discordUserInfo button {
+      margin-top: 5px;
       padding: 4px 10px;
       border-radius: 8px;
       border: none;
@@ -256,7 +272,6 @@
       color: white;
       cursor: pointer;
     }
-
     #discordUserInfo button:hover {
       background: #cc4444;
     }
@@ -307,31 +322,29 @@
         class="back"
         style="margin-left: 15px; position: relative; bottom: 45px" />
       <a
-        href="https://discord.com/oauth2/authorize?client_id=1381732660115804232&response_type=code&redirect_uri=https%3A%2F%2Fvocadecks.com%2F.netlify%2Ffunctions%2Fauth-discord-callback&scope=identify">
+        href="https://discord.com/oauth2/authorize?client_id=1381732660115804232&response_type=code&redirect_uri=https%3A%2F%2Fvocadecks.com%2F.netlify%2Ffunctions%2Fauth-discord-callback&scope=identify"
+        id="discordLoginBtnWrapper">
         <img
           src="./Assets/ICONS/DC_LOGIN_BUTTON.png"
           class="discord"
           id="discordLoginBtn" />
       </a>
-      <div id="discordUserInfo"></div>
+      <div id="discordUserInfo" style="display: none"></div>
     </div>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    // Helper to get query param from URL
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
     }
 
-    // Save token to localStorage with timestamp
     function saveToken(token) {
       localStorage.setItem("discordToken", token);
       localStorage.setItem("discordTokenSavedAt", Date.now());
     }
 
-    // Check token expiration via JWT 'exp'
     function isTokenValid(token) {
       try {
         const decoded = jwt_decode(token);
@@ -341,46 +354,56 @@
       }
     }
 
-    // Show logged-in UI with user info and logout button
     function renderLoggedIn(user) {
-      const loginBtn = document.getElementById("discordLoginBtn");
-      if (loginBtn) {
-        loginBtn.style.opacity = "0";
-        loginBtn.style.pointerEvents = "none";
+      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
+      if (loginBtnWrapper) {
+        loginBtnWrapper.style.display = "none";
       }
 
       const infoDiv = document.getElementById("discordUserInfo");
+
       infoDiv.innerHTML = `
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
-        <div><strong>${user.username}</strong></div>
-        <div style="font-size: 12px;">ID: ${user.id}</div>
-        <button id="logoutBtn">Logout</button>
+        <div class="user-row" id="userRow">
+          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
+          <div class="username">${user.username}</div>
+        </div>
+        <div class="dropdown-content" id="dropdownContent" style="display:none;">
+          <div>ID: ${user.id}</div>
+          <button id="logoutBtn">Logout</button>
+        </div>
       `;
       infoDiv.style.display = "block";
+
+      const userRow = document.getElementById("userRow");
+      const dropdownContent = document.getElementById("dropdownContent");
+
+      userRow.onclick = () => {
+        if (dropdownContent.style.display === "none") {
+          dropdownContent.style.display = "block";
+        } else {
+          dropdownContent.style.display = "none";
+        }
+      };
 
       document.getElementById("logoutBtn").onclick = () => {
         localStorage.removeItem("discordToken");
         localStorage.removeItem("discordTokenSavedAt");
         infoDiv.style.display = "none";
-        loginBtn.style.opacity = "1";
-        loginBtn.style.pointerEvents = "auto";
+        loginBtnWrapper.style.display = "inline-block";
         location.reload();
       };
     }
 
-    // Show logged-out UI: display login button, hide info
     function renderLoggedOut() {
-      const loginBtn = document.getElementById("discordLoginBtn");
-      if (loginBtn) {
-        loginBtn.style.opacity = "1";
-        loginBtn.style.pointerEvents = "auto";
+      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
+      if (loginBtnWrapper) {
+        loginBtnWrapper.style.display = "inline-block";
       }
       const infoDiv = document.getElementById("discordUserInfo");
       infoDiv.style.display = "none";
       infoDiv.innerHTML = "";
     }
 
-    // On page load, check for token param or saved token and render accordingly
     (function () {
       const urlToken = getQueryParam("token");
       if (urlToken) {
