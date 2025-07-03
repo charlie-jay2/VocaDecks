@@ -5,9 +5,7 @@
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   </head>
   <style>
@@ -61,7 +59,7 @@
       transform: translateX(-50%);
       margin-top: 20%;
       left: 22%;
-      z-index: 1; /* lower than texts */
+      z-index: 1;
     }
 
     .tbox {
@@ -73,167 +71,94 @@
       left: 29%;
     }
 
-    /* Make #rectangles the positioning context */
     #rectangles {
       position: relative;
     }
 
-    /* texts absolutely positioned over rect2 */
-    .text1 {
-      position: absolute;
-      top: 46%; /* adjust this value to move vertically */
-      left: 34%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-    .text2 {
-      position: absolute;
-      top: 46%; /* adjust this value to move vertically */
-      left: 59%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-    /* block */
-    .blockstxt {
-      position: absolute;
-      top: 55%; /* adjust this value to move vertically */
-      left: 47%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-
-    .blockspo {
-      position: absolute;
-      top: 59%; /* adjust this value to move vertically */
-      left: 45%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-    .blockspt {
-      position: absolute;
-      top: 59%; /* adjust this value to move vertically */
-      left: 49%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-    /* health */
-    .healthtxt {
-      position: absolute;
-      top: 68%; /* adjust this value to move vertically */
-      left: 47%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-
-    .healthpo {
-      position: absolute;
-      top: 71%; /* adjust this value to move vertically */
-      left: 45%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-    .healthpt {
-      position: absolute;
-      top: 71%; /* adjust this value to move vertically */
-      left: 49%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-    /* damage limit */
-
-    .damageltxt {
-      position: absolute;
-      top: 77%; /* adjust this value to move vertically */
-      left: 47%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-
-    .damagelpo {
-      position: absolute;
-      top: 80%; /* adjust this value to move vertically */
-      left: 45%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-    .damagelpt {
-      position: absolute;
-      top: 80%; /* adjust this value to move vertically */
-      left: 49%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-
-    /* target split */
-
-    .targettxt {
-      position: absolute;
-      top: 85%; /* adjust this value to move vertically */
-      left: 47%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
-
-    .targetpo {
-      position: absolute;
-      top: 88%; /* adjust this value to move vertically */
-      left: 45%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
-      color: white;
-      font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
-    }
+    .text1,
+    .text2,
+    .blockstxt,
+    .blockspo,
+    .blockspt,
+    .healthtxt,
+    .healthpo,
+    .healthpt,
+    .damageltxt,
+    .damagelpo,
+    .damagelpt,
+    .targettxt,
+    .targetpo,
     .targetpt {
       position: absolute;
-      top: 88%; /* adjust this value to move vertically */
-      left: 49%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%); /* center at left/top */
-      z-index: 10; /* high so it's on top */
+      transform: translate(-50%, -50%);
+      z-index: 10;
       color: white;
       font-size: 30px;
-      white-space: nowrap; /* optional: prevent wrapping */
+      white-space: nowrap;
     }
 
-    /* Command Lines */
+    .text1 {
+      top: 46%;
+      left: 34%;
+    }
+    .text2 {
+      top: 46%;
+      left: 59%;
+      font-size: 30px;
+    }
+    .blockstxt {
+      top: 55%;
+      left: 47%;
+    }
+    .blockspo {
+      top: 59%;
+      left: 45%;
+    }
+    .blockspt {
+      top: 59%;
+      left: 49%;
+    }
+    .healthtxt {
+      top: 68%;
+      left: 47%;
+    }
+    .healthpo {
+      top: 71%;
+      left: 45%;
+    }
+    .healthpt {
+      top: 71%;
+      left: 49%;
+    }
+    .damageltxt {
+      top: 77%;
+      left: 47%;
+    }
+    .damagelpo {
+      top: 80%;
+      left: 45%;
+    }
+    .damagelpt {
+      top: 80%;
+      left: 49%;
+    }
+    .targettxt {
+      top: 85%;
+      left: 47%;
+    }
+    .targetpo {
+      top: 88%;
+      left: 45%;
+    }
+    .targetpt {
+      top: 88%;
+      left: 49%;
+    }
+
     .cl1 {
       position: absolute;
-      top: 44%; /* adjust this value to move vertically */
-      left: 27%; /* adjust this value to move horizontally */
+      top: 44%;
+      left: 27%;
       transform: translate(-50%, -50%);
       width: 12%;
       height: 4%;
@@ -247,8 +172,8 @@
 
     .cl2 {
       position: absolute;
-      top: 91%; /* adjust this value to move vertically */
-      left: 85%; /* adjust this value to move horizontally */
+      top: 91%;
+      left: 85%;
       transform: translate(-50%, -50%);
       width: 21%;
       height: 5%;
@@ -260,16 +185,14 @@
       border-style: solid;
     }
 
-    /* Block Button */
-
     .blockbt {
       position: absolute;
-      top: 44%; /* adjust this value to move vertically */
-      left: 67%; /* adjust this value to move horizontally */
+      top: 44%;
+      left: 67%;
       transform: translate(-50%, -50%);
       width: 8%;
       height: 5%;
-      background-image: linear-gradient(90deg, #50DBCB, #FFEF3D);
+      background-image: linear-gradient(90deg, #50dbcb, #ffef3d);
       color: black;
       font-size: 30px;
       font-weight: bolder;
@@ -278,13 +201,17 @@
       border-color: white;
       border-width: 3px;
       border-style: solid;
-    }  
+    }
+
+    .discord,
+    #discordUserInfo {
+      position: absolute;
+      top: 5%;
+      left: 92%;
+      transform: translate(-50%, -50%);
+    }
 
     .discord {
-      position: absolute;
-      top: 5%; /* adjust this value to move vertically */
-      left: 92%; /* adjust this value to move horizontally */
-      transform: translate(-50%, -50%);
       background-color: black;
       color: gray;
       font-family: Panton;
@@ -292,13 +219,48 @@
       border-color: white;
       border-style: solid;
       transition: 0.6s ease-in-out;
+      cursor: pointer;
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .discord:hover {
-      filter:brightness(0.5);
+      filter: brightness(0.5);
       scale: calc(0.9);
     }
-    </style>
+
+    #discordUserInfo {
+      display: none;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 15px;
+      z-index: 100;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    #discordUserInfo img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-bottom: 5px;
+    }
+
+    #discordUserInfo button {
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: none;
+      background: #ff5555;
+      color: white;
+      cursor: pointer;
+    }
+
+    #discordUserInfo button:hover {
+      background: #cc4444;
+    }
+  </style>
   <body>
     <div id="logoline">
       <img src="./Assets/SERIES_1_LOGO.png" class="logo" />
@@ -311,43 +273,28 @@
       <div>
         <h1 class="text1">PLAYER ONE</h1>
         <h1 class="text2">PLAYER TWO</h1>
-        <!--Blocks-->
-        </div>
-        <h1 class="blockstxt">BLOCKS</h1>
-        <h1 class="blockspo">0</h1>
-        <h1 class="blockspt">0</h1>
-        </div>
-        <!--Health-->
-        <h1 class="healthtxt">HEALTH</h1>
-        <h1 class="healthpo">0</h1>
-        <h1 class="healthpt">0</h1>
-        <!--Damage Limit-->
-        <h1 class="damageltxt">DAMAGE L</h1>
-        <h1 class="damagelpo">0</h1>
-        <h1 class="damagelpt">0</h1>
-
-        <!--Target Split-->
-        <h1 class="targettxt">TARGET S</h1>
-        <h1 class="targetpo">0</h1>
-        <h1 class="targetpt">0</h1>
       </div>
-      <!-- Command Lines-->
+      <h1 class="blockstxt">BLOCKS</h1>
+      <h1 class="blockspo">0</h1>
+      <h1 class="blockspt">0</h1>
+      <h1 class="healthtxt">HEALTH</h1>
+      <h1 class="healthpo">0</h1>
+      <h1 class="healthpt">0</h1>
+      <h1 class="damageltxt">DAMAGE L</h1>
+      <h1 class="damagelpo">0</h1>
+      <h1 class="damagelpt">0</h1>
+      <h1 class="targettxt">TARGET S</h1>
+      <h1 class="targetpo">0</h1>
+      <h1 class="targetpt">0</h1>
       <div>
         <form>
-          <input type="text" id="lname" name="lname" placeholder="ATTACK... (LIMIT 50)" class="cl1">
-          <input type="text" id="lname" name="lname" placeholder="COMMAND..." class="cl2">
+          <input type="text" placeholder="ATTACK... (LIMIT 50)" class="cl1" />
+          <input type="text" placeholder="COMMAND..." class="cl2" />
         </form>
       </div>
-      <!-- Block Button -->
-       <div>
-        <button class="blockbt">
-          BLOCK
-        </button>
-       </div>
-       <!-- Pointer -->
-        <!-- <div>
-          <img src="./Assets/ICONS/pointer.png">
-        </div> -->
+      <div>
+        <button class="blockbt">BLOCK</button>
+      </div>
     </div>
 
     <div id="buttons">
@@ -358,107 +305,96 @@
       <img
         src="./Assets/ICONS/Settings.png"
         class="back"
-        style="margin-left: 15px; position: relative; bottom:45px" />
-      <a href="https://discord.com/oauth2/authorize?client_id=1381732660115804232&response_type=code&redirect_uri=https%3A%2F%2Fvocadecks.com%2F.netlify%2Ffunctions%2Fauth-discord-callback&scope=identify" >
-        <img src="./Assets/ICONS/DC_LOGIN_BUTTON.png" class="discord">
+        style="margin-left: 15px; position: relative; bottom: 45px" />
+      <a
+        href="https://discord.com/oauth2/authorize?client_id=1381732660115804232&response_type=code&redirect_uri=https%3A%2F%2Fvocadecks.com%2F.netlify%2Ffunctions%2Fauth-discord-callback&scope=identify">
+        <img
+          src="./Assets/ICONS/DC_LOGIN_BUTTON.png"
+          class="discord"
+          id="discordLoginBtn" />
       </a>
-      </div>
+      <div id="discordUserInfo"></div>
+    </div>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
-
-<script>
-  // Helper to get query param
-  function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-  }
-
-  // Save token in localStorage with expiry check
-  function saveToken(token) {
-    localStorage.setItem("discordToken", token);
-    localStorage.setItem("discordTokenSavedAt", Date.now());
-  }
-
-  // Check if token expired (48 hours)
-  function isTokenValid(token) {
-    try {
-      const decoded = jwt_decode(token);
-      // decoded.exp is in seconds, Date.now() in ms
-      return decoded.exp * 1000 > Date.now();
-    } catch {
-      return false;
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <script>
+    // Helper to get query param from URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
     }
-  }
 
-  function renderLoggedIn(user) {
-    const discordBtn = document.querySelector(".discord");
-    discordBtn.innerHTML = `
-      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" style="width:32px; height:32px; border-radius:50%; vertical-align:middle; margin-right: 8px;" />
-      <span>${user.username}</span>
-    `;
+    // Save token to localStorage with timestamp
+    function saveToken(token) {
+      localStorage.setItem("discordToken", token);
+      localStorage.setItem("discordTokenSavedAt", Date.now());
+    }
 
-    // Add click toggle for logout + userID
-    let infoDiv = document.getElementById("discordUserInfo");
-    if (!infoDiv) {
-      infoDiv = document.createElement("div");
-      infoDiv.id = "discordUserInfo";
-      infoDiv.style.position = "absolute";
-      infoDiv.style.top = "60px";
-      infoDiv.style.right = "10px";
-      infoDiv.style.background = "rgba(0,0,0,0.8)";
-      infoDiv.style.color = "white";
-      infoDiv.style.padding = "10px";
-      infoDiv.style.borderRadius = "10px";
+    // Check token expiration via JWT 'exp'
+    function isTokenValid(token) {
+      try {
+        const decoded = jwt_decode(token);
+        return decoded.exp * 1000 > Date.now();
+      } catch {
+        return false;
+      }
+    }
+
+    // Show logged-in UI with user info and logout button
+    function renderLoggedIn(user) {
+      const loginBtn = document.getElementById("discordLoginBtn");
+      if (loginBtn) {
+        loginBtn.style.opacity = "0";
+        loginBtn.style.pointerEvents = "none";
+      }
+
+      const infoDiv = document.getElementById("discordUserInfo");
+      infoDiv.innerHTML = `
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
+        <div><strong>${user.username}</strong></div>
+        <div style="font-size: 12px;">ID: ${user.id}</div>
+        <button id="logoutBtn">Logout</button>
+      `;
+      infoDiv.style.display = "block";
+
+      document.getElementById("logoutBtn").onclick = () => {
+        localStorage.removeItem("discordToken");
+        localStorage.removeItem("discordTokenSavedAt");
+        infoDiv.style.display = "none";
+        loginBtn.style.opacity = "1";
+        loginBtn.style.pointerEvents = "auto";
+        location.reload();
+      };
+    }
+
+    // Show logged-out UI: display login button, hide info
+    function renderLoggedOut() {
+      const loginBtn = document.getElementById("discordLoginBtn");
+      if (loginBtn) {
+        loginBtn.style.opacity = "1";
+        loginBtn.style.pointerEvents = "auto";
+      }
+      const infoDiv = document.getElementById("discordUserInfo");
       infoDiv.style.display = "none";
-      infoDiv.style.zIndex = "100";
-      document.body.appendChild(infoDiv);
+      infoDiv.innerHTML = "";
     }
 
-    infoDiv.innerHTML = `
-      <div>UserID: ${user.id}</div>
-      <button id="logoutBtn">Logout</button>
-    `;
+    // On page load, check for token param or saved token and render accordingly
+    (function () {
+      const urlToken = getQueryParam("token");
+      if (urlToken) {
+        saveToken(urlToken);
+        history.replaceState(null, null, location.pathname);
+      }
 
-    discordBtn.onclick = () => {
-      infoDiv.style.display = infoDiv.style.display === "none" ? "block" : "none";
-    };
-
-    document.getElementById("logoutBtn").onclick = () => {
-      localStorage.removeItem("discordToken");
-      localStorage.removeItem("discordTokenSavedAt");
-      infoDiv.style.display = "none";
-      location.reload();
-    };
-  }
-
-  function renderLoggedOut() {
-    const discordBtn = document.querySelector(".discord");
-    discordBtn.innerHTML = `<img src="./Assets/ICONS/DC_LOGIN_BUTTON.png" alt="Discord Login" />`;
-    discordBtn.onclick = () => {
-      window.location.href = "/.netlify/functions/auth-discord";
-    };
-  }
-
-  // Main flow
-  (function () {
-    const urlToken = getQueryParam("token");
-    if (urlToken) {
-      saveToken(urlToken);
-      // Remove token from URL so it doesn't persist in history
-      history.replaceState(null, null, location.pathname);
-    }
-
-    const token = localStorage.getItem("discordToken");
-
-    if (token && isTokenValid(token)) {
-      // decode token and show logged in UI
-      const user = jwt_decode(token);
-      renderLoggedIn(user);
-    } else {
-      renderLoggedOut();
-    }
-  })();
-</script>
-
+      const token = localStorage.getItem("discordToken");
+      if (token && isTokenValid(token)) {
+        const user = jwt_decode(token);
+        renderLoggedIn(user);
+      } else {
+        renderLoggedOut();
+      }
+    })();
+  </script>
 </html>
