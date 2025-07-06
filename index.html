@@ -276,6 +276,16 @@
     #discordUserInfo button:hover {
       background: #cc4444;
     }
+
+    /* NEW: dropdown style */
+    #playerOneCards {
+      position: absolute;
+      top: 52%;
+      left: 34%;
+      transform: translate(-50%, -50%);
+      z-index: 11;
+      width: 18%;
+    }
   </style>
   <body>
     <div id="logoline">
@@ -288,6 +298,11 @@
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
       <div>
         <h1 class="text1">PLAYER ONE</h1>
+        <!-- NEW dropdown under PLAYER ONE -->
+        <select id="playerOneCards" class="form-control">
+          <option value="">-- Your Cards --</option>
+        </select>
+
         <h1 class="text2">PLAYER TWO</h1>
       </div>
       <h1 class="blockstxt">BLOCKS</h1>
@@ -379,18 +394,14 @@
       const dropdownContent = document.getElementById("dropdownContent");
 
       userRow.onclick = () => {
-        if (dropdownContent.style.display === "none") {
-          dropdownContent.style.display = "block";
-        } else {
-          dropdownContent.style.display = "none";
-        }
+        dropdownContent.style.display =
+          dropdownContent.style.display === "none" ? "block" : "none";
       };
 
       document.getElementById("logoutBtn").onclick = () => {
         localStorage.removeItem("discordToken");
         localStorage.removeItem("discordTokenSavedAt");
-        infoDiv.style.display = "none";
-        loginBtnWrapper.style.display = "inline-block";
+        renderLoggedOut();
         location.reload();
       };
     }
@@ -405,6 +416,26 @@
       infoDiv.innerHTML = "";
     }
 
+    // ── NEW: Fetch user cards and populate dropdown ─────────────────────────────
+    async function fetchUserCards(discordID) {
+      const res = await fetch(
+        `/.netlify/functions/getUserCards?discordID=${discordID}`
+      );
+      if (!res.ok) return [];
+      return await res.json();
+    }
+
+    function populateCardDropdown(cards) {
+      const sel = document.getElementById("playerOneCards");
+      sel.innerHTML = '<option value="">-- Your Cards --</option>';
+      cards.forEach((c) => {
+        const o = document.createElement("option");
+        o.value = c;
+        o.textContent = c;
+        sel.appendChild(o);
+      });
+    }
+
     (function () {
       const urlToken = getQueryParam("token");
       if (urlToken) {
@@ -416,9 +447,17 @@
       if (token && isTokenValid(token)) {
         const user = jwt_decode(token);
         renderLoggedIn(user);
+
+        // fetch cards and populate dropdown
+        fetchUserCards(user.id).then(populateCardDropdown);
       } else {
         renderLoggedOut();
       }
     })();
+
+    // ── Your existing battle system scripts begin here ─────────────────────────
+    // (UNCHANGED: command handling, matchmaking, animations, everything else)
+    // … the rest of your 300+ lines of JS battle code …
+    // ─────────────────────────────────────────────────────────────────────────
   </script>
 </html>
