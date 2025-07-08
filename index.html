@@ -370,7 +370,7 @@
     function saveToken(token) {
       localStorage.setItem("discordToken", token);
       const decoded = jwt_decode(token);
-      localStorage.setItem("discordID", decoded.discordId);
+      localStorage.setItem("discordID", decoded.id);
       localStorage.setItem("discordTokenSavedAt", Date.now());
     }
 
@@ -393,7 +393,7 @@
 
       infoDiv.innerHTML = `
         <div class="user-row" id="userRow">
-          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
+          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
           <div class="username">${user.username}</div>
         </div>
         <div class="dropdown-content" id="dropdownContent" style="display:none;">
@@ -462,7 +462,6 @@
           img.style.display = "none";
         }
       });
-
     (function () {
       const urlToken = getQueryParam("token");
       if (urlToken) {
