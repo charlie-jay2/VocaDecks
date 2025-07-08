@@ -11,7 +11,7 @@ exports.handler = async function (event, context) {
     };
   }
 
-  if (typeof token === "string" && token.startsWith("Bearer ")) {
+  if (token.startsWith("Bearer ")) {
     token = token.slice(7);
   }
 
@@ -29,10 +29,11 @@ exports.handler = async function (event, context) {
   try {
     await client.connect();
 
+    // Query by discordId, NOT userId
     const dbUser = await client
       .db("Test")
       .collection("users")
-      .findOne({ userId: decoded.id });
+      .findOne({ discordId: decoded.id });
 
     if (!dbUser) {
       return {

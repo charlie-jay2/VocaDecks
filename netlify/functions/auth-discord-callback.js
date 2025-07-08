@@ -1,7 +1,6 @@
-// netlify/functions/auth-discord-callback.js
-
 const fetch = require("node-fetch");
 const jwt = require("jsonwebtoken");
+const { MongoClient } = require("mongodb");
 
 exports.handler = async (event) => {
   const {
@@ -9,6 +8,7 @@ exports.handler = async (event) => {
     DISCORD_CLIENT_SECRET,
     DISCORD_REDIRECT_URI,
     SESSION_SECRET,
+    MONGO_URI,
   } = process.env;
   const query = event.queryStringParameters;
 
@@ -45,6 +45,33 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: "Failed to fetch user data" };
   }
 
+  // Connect to MongoDB and upsert user
+  const client = new MongoClient(MONGO_URI);
+  try {
+    await client.connect();
+    const users = client.db("Test").collection("users");
+
+    // Upsert user by Discord ID:
+    await users.updateOne(
+      { discordId: userData.id },
+      {
+        $set: {
+          discordId: userData.id,
+          username: `${userData.username}#${userData.discriminator}`,
+          avatar: userData.avatar,
+          lastLogin: new Date(),
+        },
+        $setOnInsert: {
+          cards: [], // initialize cards array on first insert
+          createdAt: new Date(),
+        },
+      },
+      { upsert: true }
+    );
+  } finally {
+    await client.close();
+  }
+
   // Create JWT token with user info (expires in 48 hours)
   const jwtToken = jwt.sign(
     {
@@ -56,12 +83,11 @@ exports.handler = async (event) => {
     { expiresIn: "48h" }
   );
 
-  // Redirect back to frontend with token as hash (or query param)
-  // Using hash so token is not sent to server logs etc
+  // Redirect back to frontend with token in query string
   return {
     statusCode: 302,
     headers: {
-      Location: `/?token=${jwtToken}`, // or use #token=${jwtToken} if preferred
+      Location: `/?token=${jwtToken}`,
     },
   };
 };
