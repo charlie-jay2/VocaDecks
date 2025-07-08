@@ -1,155 +1,67 @@
-require("dotenv").config(); // Load .env for local dev
+// netlify/functions/auth-discord-callback.js
 
-const mongoose = require("mongoose");
 const fetch = require("node-fetch");
 const jwt = require("jsonwebtoken");
-const querystring = require("querystring");
 
-// Load environment variables
-const {
-  DISCORD_CLIENT_ID,
-  DISCORD_CLIENT_SECRET,
-  DISCORD_REDIRECT_URI,
-  SESSION_SECRET,
-  MONGO_URI,
-} = process.env;
+exports.handler = async (event) => {
+  const {
+    DISCORD_CLIENT_ID,
+    DISCORD_CLIENT_SECRET,
+    DISCORD_REDIRECT_URI,
+    SESSION_SECRET,
+  } = process.env;
+  const query = event.queryStringParameters;
 
-// Check required env vars
-if (
-  !DISCORD_CLIENT_ID ||
-  !DISCORD_CLIENT_SECRET ||
-  !DISCORD_REDIRECT_URI ||
-  !SESSION_SECRET
-) {
-  console.error("❌ Missing Discord or session env vars");
-}
-if (!MONGO_URI) {
-  console.error("❌ Missing MONGO_URI for MongoDB connection");
-}
-
-// MongoDB connection function
-async function connectDB() {
-  if (!MONGO_URI) {
-    throw new Error("MONGO_URI environment variable is not set");
+  if (!query.code) {
+    return { statusCode: 400, body: "Missing code" };
   }
 
-  if (mongoose.connection.readyState === 1) {
-    console.log("✅ Already connected to MongoDB");
-    return;
+  // Exchange code for access token
+  const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: DISCORD_CLIENT_ID,
+      client_secret: DISCORD_CLIENT_SECRET,
+      grant_type: "authorization_code",
+      code: query.code,
+      redirect_uri: DISCORD_REDIRECT_URI,
+      scope: "identify",
+    }),
+  });
+
+  const tokenData = await tokenRes.json();
+  if (!tokenData.access_token) {
+    return { statusCode: 400, body: "Failed to get access token" };
   }
 
-  try {
-    await mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("✅ MongoDB connected");
-  } catch (err) {
-    console.error("❌ MongoDB connection error:", err);
-    throw err;
+  // Fetch user info
+  const userRes = await fetch("https://discord.com/api/users/@me", {
+    headers: { Authorization: `Bearer ${tokenData.access_token}` },
+  });
+  const userData = await userRes.json();
+
+  if (!userData.id) {
+    return { statusCode: 400, body: "Failed to fetch user data" };
   }
-}
 
-// Example User schema
-const UserSchema = new mongoose.Schema({
-  discordId: String,
-  username: String,
-  avatar: String,
-  accessToken: String,
-  refreshToken: String,
-});
-const User = mongoose.models.User || mongoose.model("User", UserSchema);
+  // Create JWT token with user info (expires in 48 hours)
+  const jwtToken = jwt.sign(
+    {
+      id: userData.id,
+      username: `${userData.username}#${userData.discriminator}`,
+      avatar: userData.avatar,
+    },
+    SESSION_SECRET,
+    { expiresIn: "48h" }
+  );
 
-exports.handler = async (event, context) => {
-  try {
-    await connectDB();
-
-    const code = event.queryStringParameters.code;
-    if (!code) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Missing Discord code parameter" }),
-      };
-    }
-
-    // Exchange code for access token
-    const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: querystring.stringify({
-        client_id: DISCORD_CLIENT_ID,
-        client_secret: DISCORD_CLIENT_SECRET,
-        grant_type: "authorization_code",
-        code,
-        redirect_uri: DISCORD_REDIRECT_URI,
-      }),
-    });
-
-    const tokenData = await tokenResponse.json();
-    if (!tokenResponse.ok) {
-      console.error("❌ Discord token exchange failed:", tokenData);
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Failed to get access token" }),
-      };
-    }
-
-    const { access_token, refresh_token } = tokenData;
-
-    // Fetch user info from Discord API
-    const userResponse = await fetch("https://discord.com/api/users/@me", {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
-    const userData = await userResponse.json();
-    if (!userResponse.ok) {
-      console.error("❌ Discord user fetch failed:", userData);
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Failed to fetch user info" }),
-      };
-    }
-
-    const { id: discordId, username, avatar } = userData;
-
-    // Upsert user in DB
-    const user = await User.findOneAndUpdate(
-      { discordId },
-      {
-        username,
-        avatar,
-        accessToken: access_token,
-        refreshToken: refresh_token,
-      },
-      { upsert: true, new: true }
-    );
-    console.log("✅ User saved/updated:", user.discordId);
-
-    // Create JWT payload and sign
-    const payload = {
-      discordId: user.discordId,
-      username: user.username,
-      avatar: user.avatar,
-    };
-    console.log("JWT payload:", payload);
-
-    const token = jwt.sign(payload, SESSION_SECRET, { expiresIn: "7d" });
-
-    console.log("Generated JWT token:", token);
-
-    // Redirect with token as cookie and query param
-    return {
-      statusCode: 302,
-      headers: {
-        Location: `https://vocadecks.com?token=${token}`,
-        "Set-Cookie": `session=${token}; HttpOnly; Path=/; Max-Age=604800; Secure`,
-      },
-      body: "",
-    };
-  } catch (err) {
-    console.error("❌ Error in auth callback:", err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal server error" }),
-    };
-  }
+  // Redirect back to frontend with token as hash (or query param)
+  // Using hash so token is not sent to server logs etc
+  return {
+    statusCode: 302,
+    headers: {
+      Location: `/?token=${jwtToken}`, // or use #token=${jwtToken} if preferred
+    },
+  };
 };
