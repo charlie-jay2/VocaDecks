@@ -370,7 +370,7 @@
     function saveToken(token) {
       localStorage.setItem("discordToken", token);
       const decoded = jwt_decode(token);
-      localStorage.setItem("discordID", decoded.id);
+      localStorage.setItem("discordId", decoded.id);
       localStorage.setItem("discordTokenSavedAt", Date.now());
     }
 
@@ -414,7 +414,7 @@
       document.getElementById("logoutBtn").onclick = () => {
         localStorage.removeItem("discordToken");
         localStorage.removeItem("discordTokenSavedAt");
-        localStorage.removeItem("discordID");
+        localStorage.removeItem("discordId");
         renderLoggedOut();
         location.reload();
       };
@@ -430,10 +430,10 @@
       infoDiv.innerHTML = "";
     }
 
-    async function fetchUserCards(discordID) {
-      if (!discordID) return [];
+    async function fetchUserCards(discordId) {
+      if (!discordId) return [];
       const res = await fetch(
-        `/.netlify/functions/getUserCards?discordID=${discordID}`
+        `/.netlify/functions/getUserCards?discordId=${discordId}`
       );
       if (!res.ok) return [];
       return await res.json();
@@ -470,11 +470,11 @@
       }
 
       const token = localStorage.getItem("discordToken");
-      const discordID = localStorage.getItem("discordID");
-      if (token && isTokenValid(token) && discordID) {
+      const discordId = localStorage.getItem("discordId");
+      if (token && isTokenValid(token) && discordId) {
         const user = jwt_decode(token);
         renderLoggedIn(user);
-        fetchUserCards(discordID).then(populateCardDropdown);
+        fetchUserCards(discordId).then(populateCardDropdown);
       } else {
         renderLoggedOut();
       }
