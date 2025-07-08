@@ -23,7 +23,6 @@ exports.handler = async function (event, context) {
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.SESSION_SECRET);
-      console.log("Decoded JWT:", decoded);
     } catch (e) {
       return {
         statusCode: 401,
@@ -34,19 +33,8 @@ exports.handler = async function (event, context) {
     const db = client.db("users");
     const users = db.collection("users");
 
-    // Change this key to whatever your JWT stores for user ID, e.g., decoded.id, decoded.userId, decoded.sub, etc.
-    const userId = decoded.id || decoded.userId || decoded.sub;
-    console.log("Looking for user with ID:", userId);
-
-    if (!userId) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "User ID not found in token" }),
-      };
-    }
-
-    const userDoc = await users.findOne({ discordId: userId });
-    console.log("Found userDoc:", userDoc);
+    // Use 'userId' field here instead of 'discordId'
+    const userDoc = await users.findOne({ userId: decoded.id });
 
     if (!userDoc) {
       return {
