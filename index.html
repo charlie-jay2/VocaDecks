@@ -453,7 +453,8 @@
       cards.forEach((c) => {
         const o = document.createElement("option");
         o.value = c;
-        o.textContent = c;
+        // Remove extension from filename for display:
+        o.textContent = c.replace(/\.[^/.]+$/, "");
         sel.appendChild(o);
       });
     }
