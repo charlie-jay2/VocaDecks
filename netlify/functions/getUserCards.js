@@ -1,45 +1,47 @@
 // netlify/functions/getUserCards.js
-const { MongoClient } = require("mongodb");
-const jwt = require("jsonwebtoken");
 
-exports.handler = async function (event, context) {
-  const token = event.queryStringParameters?.token;
-  if (!token)
-    return {
-      statusCode: 401,
-      body: JSON.stringify({ error: "Token missing" }),
-    };
+const mongoose = require("mongoose");
+const User = require("../../models/User");
 
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.SESSION_SECRET);
-  } catch {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({ error: "Invalid token" }),
-    };
+let dbConnected = false;
+
+async function connectDB(uri) {
+  if (dbConnected) return;
+  await mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  dbConnected = true;
+}
+
+exports.handler = async (event) => {
+  const { MONGO_URI } = process.env;
+  const { discordID } = event.queryStringParameters;
+
+  if (!discordID) {
+    return { statusCode: 400, body: "Missing discordID" };
   }
 
-  const client = new MongoClient(process.env.MONGO_URI);
   try {
-    await client.connect();
-    const dbUser = await client
-      .db("vocadecks")
-      .collection("users")
-      .findOne({ userId: decoded.id });
-    if (!dbUser)
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ error: "User not found" }),
-      };
+    await connectDB(MONGO_URI);
+
+    const user = await User.findOne({ userId: discordID });
+    if (!user) {
+      return { statusCode: 404, body: "User not found" };
+    }
+
+    // Cards in MongoDB are stored like "Gumi R"
+    const cardNames = user.cards; // already clean
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ cards: dbUser.cards || [] }),
+      body: JSON.stringify(cardNames),
     };
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
-  } finally {
-    client.close();
+    console.error("Error fetching user cards:", err);
+    return {
+      statusCode: 500,
+      body: "Internal server error",
+    };
   }
 };

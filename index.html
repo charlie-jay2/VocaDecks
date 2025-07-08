@@ -286,6 +286,15 @@
       z-index: 11;
       width: 18%;
     }
+    /* NEW: selected card image */
+    #selectedCardImage {
+      position: absolute;
+      top: 60%;
+      left: 34%;
+      transform: translate(-50%, -50%);
+      width: 20%;
+      z-index: 11;
+    }
   </style>
   <body>
     <div id="logoline">
@@ -298,11 +307,14 @@
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
       <div>
         <h1 class="text1">PLAYER ONE</h1>
-        <!-- NEW dropdown under PLAYER ONE -->
         <select id="playerOneCards" class="form-control">
           <option value="">-- Your Cards --</option>
         </select>
-
+        <img
+          id="selectedCardImage"
+          src=""
+          alt="Selected Card"
+          style="display: none" />
         <h1 class="text2">PLAYER TWO</h1>
       </div>
       <h1 class="blockstxt">BLOCKS</h1>
@@ -416,7 +428,6 @@
       infoDiv.innerHTML = "";
     }
 
-    // ── NEW: Fetch user cards and populate dropdown ─────────────────────────────
     async function fetchUserCards(discordID) {
       const res = await fetch(
         `/.netlify/functions/getUserCards?discordID=${discordID}`
@@ -436,6 +447,19 @@
       });
     }
 
+    document
+      .getElementById("playerOneCards")
+      .addEventListener("change", function () {
+        const selected = this.value;
+        const img = document.getElementById("selectedCardImage");
+        if (selected) {
+          img.src = `./Cards/${selected}.png`;
+          img.style.display = "block";
+        } else {
+          img.style.display = "none";
+        }
+      });
+
     (function () {
       const urlToken = getQueryParam("token");
       if (urlToken) {
@@ -447,17 +471,10 @@
       if (token && isTokenValid(token)) {
         const user = jwt_decode(token);
         renderLoggedIn(user);
-
-        // fetch cards and populate dropdown
         fetchUserCards(user.id).then(populateCardDropdown);
       } else {
         renderLoggedOut();
       }
     })();
-
-    // ── Your existing battle system scripts begin here ─────────────────────────
-    // (UNCHANGED: command handling, matchmaking, animations, everything else)
-    // … the rest of your 300+ lines of JS battle code …
-    // ─────────────────────────────────────────────────────────────────────────
   </script>
 </html>

@@ -2,6 +2,19 @@
 
 const fetch = require("node-fetch");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const User = require("../../models/User");
+
+let dbConnected = false;
+
+async function connectDB(uri) {
+  if (dbConnected) return;
+  await mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  dbConnected = true;
+}
 
 exports.handler = async (event) => {
   const {
@@ -9,7 +22,9 @@ exports.handler = async (event) => {
     DISCORD_CLIENT_SECRET,
     DISCORD_REDIRECT_URI,
     SESSION_SECRET,
+    MONGO_URI,
   } = process.env;
+
   const query = event.queryStringParameters;
 
   if (!query.code) {
@@ -35,7 +50,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: "Failed to get access token" };
   }
 
-  // Fetch user info
+  // Fetch user info from Discord
   const userRes = await fetch("https://discord.com/api/users/@me", {
     headers: { Authorization: `Bearer ${tokenData.access_token}` },
   });
@@ -43,6 +58,23 @@ exports.handler = async (event) => {
 
   if (!userData.id) {
     return { statusCode: 400, body: "Failed to fetch user data" };
+  }
+
+  // Connect to MongoDB
+  await connectDB(MONGO_URI);
+
+  // Check if user exists
+  let user = await User.findOne({ userId: userData.id });
+  if (!user) {
+    // Create new user if not found
+    user = new User({
+      userId: userData.id,
+      // default level, xp, points, etc. already set in schema
+    });
+    await user.save();
+    console.log(`Created new user ${userData.id}`);
+  } else {
+    console.log(`Existing user ${userData.id} logged in`);
   }
 
   // Create JWT token with user info (expires in 48 hours)
@@ -56,12 +88,11 @@ exports.handler = async (event) => {
     { expiresIn: "48h" }
   );
 
-  // Redirect back to frontend with token as hash (or query param)
-  // Using hash so token is not sent to server logs etc
+  // Redirect back to frontend with token
   return {
     statusCode: 302,
     headers: {
-      Location: `/?token=${jwtToken}`, // or use #token=${jwtToken} if preferred
+      Location: `/?token=${jwtToken}`,
     },
   };
 };
