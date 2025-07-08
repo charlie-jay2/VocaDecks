@@ -31,7 +31,7 @@ exports.handler = async function (event, context) {
 
     // Query by discordId, NOT userId
     const dbUser = await client
-      .db("Test")
+      .db("test")
       .collection("users")
       .findOne({ discordId: decoded.id });
 

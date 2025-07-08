@@ -49,7 +49,7 @@ exports.handler = async (event) => {
   const client = new MongoClient(MONGO_URI);
   try {
     await client.connect();
-    const users = client.db("Test").collection("users");
+    const users = client.db("test").collection("users");
 
     // Upsert user by Discord ID:
     await users.updateOne(
