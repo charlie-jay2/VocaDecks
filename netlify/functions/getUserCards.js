@@ -3,12 +3,18 @@ const { MongoClient } = require("mongodb");
 const jwt = require("jsonwebtoken");
 
 exports.handler = async function (event, context) {
-  const token = event.queryStringParameters?.token;
-  if (!token)
+  let token = event.queryStringParameters?.token;
+  if (!token) {
     return {
       statusCode: 401,
       body: JSON.stringify({ error: "Token missing" }),
     };
+  }
+
+  // Strip "Bearer " prefix if present
+  if (token.startsWith("Bearer ")) {
+    token = token.slice(7);
+  }
 
   let decoded;
   try {
@@ -27,11 +33,12 @@ exports.handler = async function (event, context) {
       .db("Test")
       .collection("users")
       .findOne({ userId: decoded.id });
-    if (!dbUser)
+    if (!dbUser) {
       return {
         statusCode: 404,
         body: JSON.stringify({ error: "User not found" }),
       };
+    }
 
     return {
       statusCode: 200,
@@ -40,6 +47,6 @@ exports.handler = async function (event, context) {
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   } finally {
-    client.close();
+    await client.close();
   }
 };
