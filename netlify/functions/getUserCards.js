@@ -33,7 +33,8 @@ exports.handler = async function (event, context) {
     const db = client.db("users");
     const users = db.collection("users");
 
-    const userDoc = await users.findOne({ discordId: decoded.id });
+    // Changed discordId to userId to match your schema
+    const userDoc = await users.findOne({ userId: decoded.id });
 
     if (!userDoc) {
       return {
