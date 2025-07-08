@@ -370,7 +370,7 @@
     function saveToken(token) {
       localStorage.setItem("discordToken", token);
       const decoded = jwt_decode(token);
-      localStorage.setItem("discordId", decoded.id);
+      localStorage.setItem("discordId", decoded.discordId);
       localStorage.setItem("discordTokenSavedAt", Date.now());
     }
 
@@ -393,8 +393,8 @@
 
       infoDiv.innerHTML = `
         <div class="user-row" id="userRow">
-          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
-          <div class="username">${user.username}</div>
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
+        <div class="username">${user.username}</div>
         </div>
         <div class="dropdown-content" id="dropdownContent" style="display:none;">
           <div>ID: ${user.id}</div>

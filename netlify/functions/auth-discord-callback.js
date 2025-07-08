@@ -126,7 +126,11 @@ exports.handler = async (event, context) => {
 
     // Create JWT
     const token = jwt.sign(
-      { discordId: user.discordId, username: user.username },
+      {
+        discordId: user.discordId,
+        username: user.username,
+        avatar: user.avatar,
+      },
       SESSION_SECRET,
       { expiresIn: "7d" }
     );
