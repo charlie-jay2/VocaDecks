@@ -30,10 +30,10 @@ exports.handler = async function (event, context) {
       };
     }
 
-    const db = client.db("users");
+    const db = client.db("test");
     const users = db.collection("users");
 
-    // Use 'userId' field here instead of 'discordId'
+    // NOTE: Query by 'userId' here, not 'discordId'
     const userDoc = await users.findOne({ userId: decoded.id });
 
     if (!userDoc) {
