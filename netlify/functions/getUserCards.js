@@ -24,7 +24,7 @@ exports.handler = async function (event, context) {
   try {
     await client.connect();
     const dbUser = await client
-      .db("vocadecks")
+      .db("Test")
       .collection("users")
       .findOne({ userId: decoded.id });
     if (!dbUser)

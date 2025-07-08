@@ -417,12 +417,16 @@
     }
 
     // ── NEW: Fetch user cards and populate dropdown ─────────────────────────────
-    async function fetchUserCards(discordID) {
+    async function fetchUserCards(token) {
       const res = await fetch(
-        `/.netlify/functions/getUserCards?discordID=${discordID}`
+        `/.netlify/functions/getUserCards?token=${token}`
       );
-      if (!res.ok) return [];
-      return await res.json();
+      if (!res.ok) {
+        console.error("Failed to fetch cards", await res.json());
+        return [];
+      }
+      const data = await res.json();
+      return data.cards || [];
     }
 
     function populateCardDropdown(cards) {
@@ -448,8 +452,8 @@
         const user = jwt_decode(token);
         renderLoggedIn(user);
 
-        // fetch cards and populate dropdown
-        fetchUserCards(user.id).then(populateCardDropdown);
+        // fetch cards and populate dropdown using token
+        fetchUserCards(token).then(populateCardDropdown);
       } else {
         renderLoggedOut();
       }
