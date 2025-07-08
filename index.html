@@ -450,11 +450,31 @@
     function populateCardDropdown(cards) {
       const sel = document.getElementById("playerOneCards");
       sel.innerHTML = '<option value="">-- Your Cards --</option>';
+
+      // Map rarity codes to names
+      const rarityMap = {
+        r1: "common",
+        r2: "extra",
+        r3: "rare",
+        r4: "legendary",
+        r5: "untouched",
+      };
+
       cards.forEach((c) => {
         const o = document.createElement("option");
+
+        // Extract rarity code (like r1, r2) from start of filename
+        const rarityMatch = c.match(/^r[1-5]/);
+        const rarityCode = rarityMatch ? rarityMatch[0] : null;
+        const rarityText = rarityCode ? rarityMap[rarityCode] : "unknown";
+
+        // Remove the rarity prefix and extension from the filename
+        let cardName = c.replace(/^r[1-5]/, ""); // Remove rarity prefix
+        cardName = cardName.replace(/\.[^/.]+$/, ""); // Remove file extension
+        cardName = cardName.trim(); // Trim spaces
+
         o.value = c;
-        // Remove extension from filename for display:
-        o.textContent = c.replace(/\.[^/.]+$/, "");
+        o.textContent = `${cardName} (${rarityText})`;
         sel.appendChild(o);
       });
     }
