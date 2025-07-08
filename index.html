@@ -372,6 +372,12 @@
       }
       localStorage.setItem("discordToken", token);
       localStorage.setItem("discordTokenSavedAt", Date.now());
+
+      // Clean up the URL (remove ?token=...)
+      if (window.history.replaceState) {
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
     }
 
     function isTokenValid(token) {
@@ -502,7 +508,6 @@
           urlToken = urlToken.slice(7);
         }
         saveToken(urlToken);
-        history.replaceState(null, null, location.pathname);
       }
 
       const token = localStorage.getItem("discordToken");
