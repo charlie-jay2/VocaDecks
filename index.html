@@ -357,8 +357,7 @@
     }
 
     function saveToken(token) {
-      // Remove "Bearer " if it exists before saving
-      if (token.startsWith("Bearer ")) {
+      if (typeof token === "string" && token.startsWith("Bearer ")) {
         token = token.slice(7);
       }
       localStorage.setItem("discordToken", token);
@@ -422,15 +421,20 @@
 
     // ── NEW: Fetch user cards and populate dropdown ─────────────────────────────
     async function fetchUserCards(token) {
-      const res = await fetch(
-        `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
-      );
-      if (!res.ok) {
-        console.error("Failed to fetch cards", await res.json());
+      try {
+        const res = await fetch(
+          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
+        );
+        if (!res.ok) {
+          console.error("Failed to fetch cards", await res.json());
+          return [];
+        }
+        const data = await res.json();
+        return data.cards || [];
+      } catch (e) {
+        console.error("Network or other fetch error:", e);
         return [];
       }
-      const data = await res.json();
-      return data.cards || [];
     }
 
     function populateCardDropdown(cards) {
@@ -438,7 +442,7 @@
       sel.innerHTML = '<option value="">-- Your Cards --</option>';
       cards.forEach((c) => {
         const o = document.createElement("option");
-        o.value = c;
+        o.value = c; // If c is string like "CardName"
         o.textContent = c;
         sel.appendChild(o);
       });

@@ -1,11 +1,9 @@
-// netlify/functions/getUserCards.js
 const { MongoClient } = require("mongodb");
 const jwt = require("jsonwebtoken");
 
 exports.handler = async function (event, context) {
   let token = event.queryStringParameters?.token;
 
-  // Ensure token is a non-empty string before using startsWith
   if (typeof token !== "string" || token.length === 0) {
     return {
       statusCode: 401,
@@ -13,8 +11,7 @@ exports.handler = async function (event, context) {
     };
   }
 
-  // Strip "Bearer " prefix if present
-  if (token.startsWith("Bearer ")) {
+  if (typeof token === "string" && token.startsWith("Bearer ")) {
     token = token.slice(7);
   }
 
@@ -31,6 +28,7 @@ exports.handler = async function (event, context) {
   const client = new MongoClient(process.env.MONGO_URI);
   try {
     await client.connect();
+
     const dbUser = await client
       .db("Test")
       .collection("users")
