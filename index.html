@@ -352,132 +352,111 @@
         href="https://discord.com/oauth2/authorize?client_id=1381732660115804232&response_type=code&redirect_uri=https%3A%2F%2Fvocadecks.com%2F.netlify%2Ffunctions%2Fauth-discord-callback&scope=identify"
         id="discordLoginBtnWrapper">
         <img
-          src="./Assets/ICONS/DC_LOGIN_BUTTON.png"
+          src="./Assets/ICONS/discord.png"
           class="discord"
-          id="discordLoginBtn" />
+          style="margin-left: 15px; position: relative; bottom: 45px" />
       </a>
       <div id="discordUserInfo" style="display: none"></div>
     </div>
-  </body>
-  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
-  <script>
-    function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
-    }
 
-    function saveToken(token) {
-      localStorage.setItem("discordToken", token);
-      const decoded = jwt_decode(token);
-      localStorage.setItem("discordId", decoded.discordId);
-      localStorage.setItem("discordTokenSavedAt", Date.now());
-    }
+    <script>
+      // Load cards from localStorage and populate the select dropdown
+      const playerOneCardsSelect = document.getElementById("playerOneCards");
+      const selectedCardImage = document.getElementById("selectedCardImage");
 
-    function isTokenValid(token) {
-      try {
-        const decoded = jwt_decode(token);
-        return decoded.exp * 1000 > Date.now();
-      } catch {
-        return false;
-      }
-    }
-
-    function renderLoggedIn(user) {
-      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
-      if (loginBtnWrapper) {
-        loginBtnWrapper.style.display = "none";
+      function loadCards() {
+        let cardsData = localStorage.getItem("cards");
+        if (cardsData) {
+          try {
+            let cards = JSON.parse(cardsData);
+            // Clear existing options except the placeholder
+            playerOneCardsSelect.innerHTML =
+              '<option value="">-- Your Cards --</option>';
+            for (const cardId in cards) {
+              const card = cards[cardId];
+              const option = document.createElement("option");
+              option.value = cardId;
+              option.text = card.name;
+              playerOneCardsSelect.appendChild(option);
+            }
+          } catch (e) {
+            console.error("Failed to parse cards JSON", e);
+          }
+        }
       }
 
-      const infoDiv = document.getElementById("discordUserInfo");
+      loadCards();
 
-      infoDiv.innerHTML = `
-        <div class="user-row" id="userRow">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
-        <div class="username">${user.username}</div>
-        </div>
-        <div class="dropdown-content" id="dropdownContent" style="display:none;">
-          <div>ID: ${user.id}</div>
-          <button id="logoutBtn">Logout</button>
-        </div>
-      `;
-      infoDiv.style.display = "block";
-
-      const userRow = document.getElementById("userRow");
-      const dropdownContent = document.getElementById("dropdownContent");
-
-      userRow.onclick = () => {
-        dropdownContent.style.display =
-          dropdownContent.style.display === "none" ? "block" : "none";
-      };
-
-      document.getElementById("logoutBtn").onclick = () => {
-        localStorage.removeItem("discordToken");
-        localStorage.removeItem("discordTokenSavedAt");
-        localStorage.removeItem("discordId");
-        renderLoggedOut();
-        location.reload();
-      };
-    }
-
-    function renderLoggedOut() {
-      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
-      if (loginBtnWrapper) {
-        loginBtnWrapper.style.display = "inline-block";
-      }
-      const infoDiv = document.getElementById("discordUserInfo");
-      infoDiv.style.display = "none";
-      infoDiv.innerHTML = "";
-    }
-
-    async function fetchUserCards(discordId) {
-      if (!discordId) return [];
-      const res = await fetch(
-        `/.netlify/functions/getUserCards?discordId=${discordId}`
-      );
-      if (!res.ok) return [];
-      return await res.json();
-    }
-
-    function populateCardDropdown(cards) {
-      const sel = document.getElementById("playerOneCards");
-      sel.innerHTML = '<option value="">-- Your Cards --</option>';
-      cards.forEach((c) => {
-        const o = document.createElement("option");
-        o.value = c;
-        o.textContent = c;
-        sel.appendChild(o);
-      });
-    }
-
-    document
-      .getElementById("playerOneCards")
-      .addEventListener("change", function () {
-        const selected = this.value;
-        const img = document.getElementById("selectedCardImage");
-        if (selected) {
-          img.src = `./Cards/${selected}.png`;
-          img.style.display = "block";
-        } else {
-          img.style.display = "none";
+      // Update card image when selection changes
+      playerOneCardsSelect.addEventListener("change", () => {
+        const selectedCardId = playerOneCardsSelect.value;
+        if (!selectedCardId) {
+          selectedCardImage.style.display = "none";
+          selectedCardImage.src = "";
+          return;
+        }
+        const cardsData = localStorage.getItem("cards");
+        if (!cardsData) return;
+        try {
+          const cards = JSON.parse(cardsData);
+          const card = cards[selectedCardId];
+          if (card && card.image) {
+            selectedCardImage.src = card.image;
+            selectedCardImage.style.display = "block";
+          } else {
+            selectedCardImage.style.display = "none";
+            selectedCardImage.src = "";
+          }
+        } catch (e) {
+          console.error("Failed to parse cards JSON", e);
         }
       });
-    (function () {
-      const urlToken = getQueryParam("token");
-      if (urlToken) {
-        saveToken(urlToken);
-        history.replaceState(null, null, location.pathname);
+
+      // Discord user info logic
+      const discordLoginBtnWrapper = document.getElementById(
+        "discordLoginBtnWrapper"
+      );
+      const discordUserInfoDiv = document.getElementById("discordUserInfo");
+
+      function showUserInfo(user) {
+        discordUserInfoDiv.innerHTML = `
+          <div class="user-row">
+            <img src="${user.avatar}" alt="User Avatar" />
+            <div class="username">${user.username}#${user.discriminator}</div>
+          </div>
+          <div class="dropdown-content">
+            <button id="logoutBtn">Logout</button>
+          </div>
+        `;
+        discordUserInfoDiv.style.display = "block";
+
+        document.getElementById("logoutBtn").onclick = () => {
+          localStorage.removeItem("discordUser");
+          discordUserInfoDiv.style.display = "none";
+          discordLoginBtnWrapper.style.display = "inline-block";
+        };
       }
 
-      const token = localStorage.getItem("discordToken");
-      const discordId = localStorage.getItem("discordId");
-      if (token && isTokenValid(token) && discordId) {
-        const user = jwt_decode(token);
-        renderLoggedIn(user);
-        fetchUserCards(discordId).then(populateCardDropdown);
-      } else {
-        renderLoggedOut();
+      function hideUserInfo() {
+        discordUserInfoDiv.style.display = "none";
+        discordUserInfoDiv.innerHTML = "";
       }
-    })();
-  </script>
+
+      // Check if user is logged in (store user info in localStorage on login)
+      const discordUser = localStorage.getItem("discordUser");
+      if (discordUser) {
+        discordLoginBtnWrapper.style.display = "none";
+        try {
+          const user = JSON.parse(discordUser);
+          showUserInfo(user);
+        } catch (e) {
+          console.error("Invalid user data in localStorage");
+          discordLoginBtnWrapper.style.display = "inline-block";
+        }
+      } else {
+        discordLoginBtnWrapper.style.display = "inline-block";
+        hideUserInfo();
+      }
+    </script>
+  </body>
 </html>

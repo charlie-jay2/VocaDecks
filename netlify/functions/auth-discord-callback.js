@@ -1,7 +1,7 @@
 require("dotenv").config(); // Load .env for local dev
 
 const mongoose = require("mongoose");
-const fetch = require("node-fetch"); // Assuming you're using node-fetch
+const fetch = require("node-fetch");
 const jwt = require("jsonwebtoken");
 const querystring = require("querystring");
 
@@ -124,18 +124,19 @@ exports.handler = async (event, context) => {
     );
     console.log("✅ User saved/updated:", user.discordId);
 
-    // Create JWT
-    const token = jwt.sign(
-      {
-        discordId: user.discordId,
-        username: user.username,
-        avatar: user.avatar,
-      },
-      SESSION_SECRET,
-      { expiresIn: "7d" }
-    );
+    // Create JWT payload and sign
+    const payload = {
+      discordId: user.discordId,
+      username: user.username,
+      avatar: user.avatar,
+    };
+    console.log("JWT payload:", payload);
 
-    // Redirect with token as cookie or query param
+    const token = jwt.sign(payload, SESSION_SECRET, { expiresIn: "7d" });
+
+    console.log("Generated JWT token:", token);
+
+    // Redirect with token as cookie and query param
     return {
       statusCode: 302,
       headers: {
