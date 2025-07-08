@@ -1,41 +1,41 @@
 const { MongoClient } = require("mongodb");
 const jwt = require("jsonwebtoken");
 
+let client;
+
 exports.handler = async function (event, context) {
-  let token = event.queryStringParameters?.token;
+  context.callbackWaitsForEmptyEventLoop = false;
 
-  if (typeof token !== "string" || token.length === 0) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({ error: "Token missing or invalid" }),
-    };
-  }
-
-  if (token.startsWith("Bearer ")) {
-    token = token.slice(7);
-  }
-
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.SESSION_SECRET);
-  } catch {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({ error: "Invalid token" }),
-    };
-  }
-
-  const client = new MongoClient(process.env.MONGO_URI);
-  try {
+  if (!client) {
+    client = new MongoClient(process.env.MONGO_URI);
     await client.connect();
+  }
 
-    // Query by discordId, NOT userId
-    const dbUser = await client
-      .db("test")
-      .collection("users")
-      .findOne({ discordId: decoded.id });
+  try {
+    const token = event.queryStringParameters?.token;
+    if (!token) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ error: "No token provided" }),
+      };
+    }
 
-    if (!dbUser) {
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.SESSION_SECRET);
+    } catch (e) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ error: "Invalid or expired token" }),
+      };
+    }
+
+    const db = client.db("users");
+    const users = db.collection("users");
+
+    const userDoc = await users.findOne({ discordId: decoded.id });
+
+    if (!userDoc) {
       return {
         statusCode: 404,
         body: JSON.stringify({ error: "User not found" }),
@@ -44,14 +44,13 @@ exports.handler = async function (event, context) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ cards: dbUser.cards || [] }),
+      body: JSON.stringify({ cards: userDoc.cards || [] }),
     };
-  } catch (err) {
+  } catch (error) {
+    console.error("Error in getUserCards:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message }),
+      body: JSON.stringify({ error: "Internal Server Error" }),
     };
-  } finally {
-    await client.close();
   }
 };
