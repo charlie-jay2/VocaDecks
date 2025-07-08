@@ -423,7 +423,7 @@
     // ── NEW: Fetch user cards and populate dropdown ─────────────────────────────
     async function fetchUserCards(token) {
       const res = await fetch(
-        `/.netlify/functions/getUserCards?token=${token}`
+        `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
       );
       if (!res.ok) {
         console.error("Failed to fetch cards", await res.json());

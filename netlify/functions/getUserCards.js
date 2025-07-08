@@ -4,10 +4,12 @@ const jwt = require("jsonwebtoken");
 
 exports.handler = async function (event, context) {
   let token = event.queryStringParameters?.token;
-  if (!token) {
+
+  // Ensure token is a non-empty string before using startsWith
+  if (typeof token !== "string" || token.length === 0) {
     return {
       statusCode: 401,
-      body: JSON.stringify({ error: "Token missing" }),
+      body: JSON.stringify({ error: "Token missing or invalid" }),
     };
   }
 
@@ -33,6 +35,7 @@ exports.handler = async function (event, context) {
       .db("Test")
       .collection("users")
       .findOne({ userId: decoded.id });
+
     if (!dbUser) {
       return {
         statusCode: 404,
@@ -45,7 +48,10 @@ exports.handler = async function (event, context) {
       body: JSON.stringify({ cards: dbUser.cards || [] }),
     };
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message }),
+    };
   } finally {
     await client.close();
   }
