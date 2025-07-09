@@ -295,6 +295,16 @@
     <div id="rectangles">
       <img src="./Assets/ICONS/COMMAND_OVERRIDE.png" class="rect1" />
       <img src="./Assets/ICONS/Rectangle_149.png" class="rect2" />
+      <div
+        id="selectedCardContainer"
+        style="
+          position: absolute;
+          top: 65%; /* adjust this as needed */
+          left: 47%;
+          transform: translate(-50%, -50%);
+          z-index: 12;
+          text-align: center;
+        "></div>
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
       <div>
         <h1 class="text1">PLAYER ONE</h1>
@@ -346,16 +356,6 @@
           id="discordLoginBtn" />
       </a>
       <div id="discordUserInfo" style="display: none"></div>
-      <div
-        id="cardImagesContainer"
-        style="
-          position: absolute;
-          top: 60%;
-          left: 34%;
-          width: 300px;
-          display: flex;
-          flex-wrap: wrap;
-        "></div>
     </div>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
@@ -435,7 +435,6 @@
       infoDiv.innerHTML = "";
     }
 
-    // ── Fetch user cards and populate dropdown ─────────────────────────────
     async function fetchUserCards(token) {
       try {
         const res = await fetch(
@@ -457,7 +456,6 @@
       const sel = document.getElementById("playerOneCards");
       sel.innerHTML = '<option value="">-- Your Cards --</option>';
 
-      // Map rarity codes to names
       const rarityMap = {
         r1: "common",
         r2: "extra",
@@ -468,16 +466,13 @@
 
       cards.forEach((c) => {
         const o = document.createElement("option");
-
-        // Extract rarity code (like r1, r2) from start of filename
         const rarityMatch = c.match(/^r[1-5]/);
         const rarityCode = rarityMatch ? rarityMatch[0] : null;
         const rarityText = rarityCode ? rarityMap[rarityCode] : "unknown";
 
-        // Remove the rarity prefix and extension from the filename
-        let cardName = c.replace(/^r[1-5]/, ""); // Remove rarity prefix
-        cardName = cardName.replace(/\.[^/.]+$/, ""); // Remove file extension
-        cardName = cardName.trim(); // Trim spaces
+        let cardName = c.replace(/^r[1-5]/, "");
+        cardName = cardName.replace(/\.[^/.]+$/, "");
+        cardName = cardName.trim();
 
         o.value = c;
         o.textContent = `${cardName} (${rarityText})`;
@@ -485,20 +480,29 @@
       });
     }
 
-    function showCardImages(cards) {
-      const container = document.getElementById("cardImagesContainer");
-      if (!container) return; // if container not in DOM, skip
+    function displaySelectedCard(cardFileName) {
+      const rect2 = document.querySelector(".rect2");
+      if (!rect2) return;
 
-      container.innerHTML = ""; // clear previous images
-      cards.forEach((card) => {
+      // Remove any previous card image
+      const existingCardImg = document.getElementById("selectedCardImage");
+      if (existingCardImg) {
+        existingCardImg.remove();
+      }
+
+      if (cardFileName) {
         const img = document.createElement("img");
-        img.src = `/Cards/${encodeURIComponent(card)}`;
-        img.alt = card;
-        img.style.width = "80px";
+        img.id = "selectedCardImage";
+        img.src = `/Cards/${encodeURIComponent(cardFileName)}`;
+        img.alt = cardFileName;
+        img.style.position = "absolute";
+        img.style.top = rect2.offsetTop + "px";
+        img.style.left = rect2.offsetLeft + "px";
+        img.style.width = rect2.offsetWidth + "px";
         img.style.height = "auto";
-        img.style.margin = "4px";
-        container.appendChild(img);
-      });
+        img.style.zIndex = 12;
+        document.getElementById("rectangles").appendChild(img);
+      }
     }
 
     (function () {
@@ -517,7 +521,13 @@
 
         fetchUserCards(token).then((cards) => {
           populateCardDropdown(cards);
-          showCardImages(cards);
+
+          // Add change event to dropdown
+          const sel = document.getElementById("playerOneCards");
+          sel.addEventListener("change", function () {
+            const selectedCard = this.value;
+            displaySelectedCard(selectedCard);
+          });
         });
       } else {
         renderLoggedOut();
