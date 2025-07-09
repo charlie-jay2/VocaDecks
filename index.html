@@ -1,659 +1,540 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8" />
-    <title>VocaDecks Card Battle</title>
     <link
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
     <link rel="icon" type="image/x-icon" href="/Assets/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
-    <style>
-      /* Font Face for Panton - custom font */
-      @font-face {
-        font-family: "Panton";
-        src: url("./Fonts/Panton.otf") format("truetype");
-        font-weight: normal;
-        font-style: normal;
-        font-display: swap;
-        overflow-y: hidden;
-        overflow-x: hidden;
-      }
-
-      /* Body and background styling */
-      body {
-        background-image: url(./Assets/background.png);
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center;
-        font-family: Panton, sans-serif;
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-        overflow-y: hidden;
-      }
-
-      /* Logo at the top center */
-      .logo {
-        width: 20%;
-        height: auto;
-        position: relative;
-        transform: translateX(-50%);
-        left: 50%;
-        margin-top: 10px;
-      }
-
-      /* Thin line below the logo */
-      .line {
-        width: 95%;
-        height: auto;
-        position: relative;
-        transform: translateX(-50%);
-        margin-top: -1.3%;
-        left: 50%;
-      }
-
-      /* Rectangles positioned on the right and center-left */
-      .rect1 {
-        width: 24%;
-        height: auto;
-        position: relative;
-        transform: translateX(-50%);
-        margin-top: 3.5%;
-        left: 85%;
-      }
-
-      .rect2 {
-        width: 50%;
-        height: auto;
-        position: relative;
-        transform: translateX(-50%);
-        margin-top: 20%;
-        left: 22%;
-        z-index: 1;
-      }
-
-      /* Textbox on left center */
-      .tbox {
-        width: 35%;
-        height: auto;
-        position: relative;
-        transform: translateX(-50%);
-        margin-top: -43%;
-        left: 29%;
-      }
-
-      /* Container for all rectangles */
-      #rectangles {
-        position: relative;
-        height: 900px; /* ensures container height */
-      }
-
-      /* Text styles - absolute positioned */
-      .text1,
-      .text2,
-      .blockstxt,
-      .blockspo,
-      .blockspt,
-      .healthtxt,
-      .healthpo,
-      .healthpt,
-      .damageltxt,
-      .damagelpo,
-      .damagelpt,
-      .targettxt,
-      .targetpo,
-      .targetpt {
-        position: absolute;
-        transform: translate(-50%, -50%);
-        z-index: 10;
-        color: white;
-        font-size: 30px;
-        white-space: nowrap;
-        user-select: none;
-        font-weight: 700;
-      }
-
-      /* Positioning PLAYER ONE and PLAYER TWO */
-      .text1 {
-        top: 46%;
-        left: 34%;
-      }
-      .text2 {
-        top: 46%;
-        left: 59%;
-        font-size: 30px;
-      }
-
-      /* Blocks text and values */
-      .blockstxt {
-        top: 55%;
-        left: 47%;
-      }
-      .blockspo {
-        top: 59%;
-        left: 45%;
-      }
-      .blockspt {
-        top: 59%;
-        left: 49%;
-      }
-
-      /* Health text and values */
-      .healthtxt {
-        top: 68%;
-        left: 47%;
-      }
-      .healthpo {
-        top: 71%;
-        left: 45%;
-      }
-      .healthpt {
-        top: 71%;
-        left: 49%;
-      }
-
-      /* Damage L text and values */
-      .damageltxt {
-        top: 77%;
-        left: 47%;
-      }
-      .damagelpo {
-        top: 80%;
-        left: 45%;
-      }
-      .damagelpt {
-        top: 80%;
-        left: 49%;
-      }
-
-      /* Target S text and values */
-      .targettxt {
-        top: 85%;
-        left: 47%;
-      }
-      .targetpo {
-        top: 88%;
-        left: 45%;
-      }
-      .targetpt {
-        top: 88%;
-        left: 49%;
-      }
-
-      /* Command input box (top left) */
-      .cl1 {
-        position: absolute;
-        top: 39%;
-        left: 27%;
-        transform: translate(-50%, -50%);
-        width: 12%;
-        height: 4%;
-        background-color: black;
-        color: gray;
-        font-family: Panton;
-        border-radius: 15px;
-        border-color: white;
-        border-style: solid;
-        font-size: 14px;
-        padding-left: 10px;
-      }
-
-      /* Command input box (bottom right) */
-      .cl2 {
-        position: absolute;
-        top: 91%;
-        left: 85%;
-        transform: translate(-50%, -50%);
-        width: 21%;
-        height: 5%;
-        background-color: black;
-        color: gray;
-        font-family: Panton;
-        border-radius: 15px;
-        border-color: white;
-        border-style: solid;
-        font-size: 14px;
-        padding-left: 10px;
-      }
-
-      /* BLOCK button */
-      .blockbt {
-        position: absolute;
-        top: 39%;
-        left: 67%;
-        transform: translate(-50%, -50%);
-        width: 8%;
-        height: 5%;
-        background-image: linear-gradient(90deg, #50dbcb, #ffef3d);
-        color: black;
-        font-size: 30px;
-        font-weight: bolder;
-        font-family: Panton;
-        border-radius: 15px;
-        border-color: white;
-        border-width: 3px;
-        border-style: solid;
-        cursor: pointer;
-        user-select: none;
-        box-shadow: 0 0 8px #50dbcb;
-        transition: all 0.3s ease;
-      }
-      .blockbt:hover {
-        box-shadow: 0 0 15px #ffef3d;
-        transform: translate(-50%, -50%) scale(1.05);
-      }
-
-      /* Discord login button and user info */
-      .discord,
-      #discordUserInfo {
-        position: absolute;
-        top: 5%;
-        left: 92%;
-        transform: translate(-50%, -50%);
-        font-family: Panton;
-      }
-
-      .discord {
-        background-color: black;
-        color: gray;
-        border-radius: 15px;
-        border-color: white;
-        border-style: solid;
-        transition: 0.6s ease-in-out;
-        cursor: pointer;
-        opacity: 1;
-        pointer-events: auto;
-        width: 120px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .discord:hover {
-        filter: brightness(0.5);
-        scale: 0.9;
-      }
-
-      /* Discord user info panel */
-      #discordUserInfo {
-        position: absolute;
-        top: 5%;
-        left: 92%;
-        transform: translate(-50%, 0);
-        background-color: rgba(0, 0, 0, 0.85);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 15px;
-        z-index: 100;
-        font-size: 14px;
-        max-width: 280px;
-        cursor: default;
-        user-select: none;
-        box-shadow: 0 0 10px black;
-      }
-      #discordUserInfo .user-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      #discordUserInfo .user-row img {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-      }
-      #discordUserInfo .user-row .username {
-        font-weight: bold;
-        cursor: pointer;
-      }
-      #discordUserInfo .dropdown-content {
-        margin-top: 8px;
-        border-top: 1px solid #444;
-        padding-top: 8px;
-      }
-      #discordUserInfo button {
-        margin-top: 5px;
-        padding: 4px 10px;
-        border-radius: 8px;
-        border: none;
-        background: #ff5555;
-        color: white;
-        cursor: pointer;
-      }
-      #discordUserInfo button:hover {
-        background: #cc4444;
-      }
-
-      /* Dropdown style for cards */
-      #playerOneCards {
-        position: absolute;
-        top: 52%;
-        left: 34%;
-        transform: translate(-50%, -50%);
-        z-index: 11;
-        width: 18%;
-        font-family: Panton;
-        font-weight: 600;
-        font-size: 16px;
-        border-radius: 10px;
-        padding: 6px;
-      }
-
-      /* Selected card container with loader gif */
-      #selectedCardContainer {
-        position: absolute;
-        top: 50%;
-        left: 22%;
-        transform: translate(-50%, -50%);
-        z-index: 999;
-        pointer-events: none;
-        width: 180px; /* card width */
-        height: 270px; /* card height */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 20px;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-      }
-
-      /* Loader gif inside card container */
-      #loadingGif {
-        max-width: 50px;
-        max-height: 50px;
-        display: none; /* hidden initially */
-      }
-
-      /* Selected card image styling */
-      #selectedCardImage {
-        max-width: 100%;
-        max-height: 100%;
-        display: none; /* show after load */
-        pointer-events: none;
-        border-radius: 15px;
-        box-shadow: 0 0 10px #00fff7;
-      }
-
-      /* Back and Settings button icons */
-      #buttons img.back {
-        margin-left: 15px;
-        position: relative;
-        bottom: 45px;
-        cursor: pointer;
-        width: 45px;
-        height: auto;
-        filter: drop-shadow(0 0 3px black);
-        transition: transform 0.3s ease;
-      }
-      #buttons img.back:hover {
-        transform: scale(1.1);
-      }
-    </style>
   </head>
+  <style>
+    @font-face {
+      font-family: "Panton";
+      src: url("./Fonts/Panton.otf") format("truetype");
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+      overflow-y: hidden;
+      overflow-x: hidden;
+    }
+    body {
+      background-image: url(./Assets/background.png);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      font-family: Panton;
+    }
 
+    .logo {
+      width: 20%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      left: 50%;
+    }
+
+    .line {
+      width: 95%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      margin-top: -1.3%;
+      left: 50%;
+    }
+
+    .rect1 {
+      width: 24%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      margin-top: 3.5%;
+      left: 85%;
+    }
+
+    .rect2 {
+      width: 50%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      margin-top: 20%;
+      left: 22%;
+      z-index: 1;
+    }
+
+    .tbox {
+      width: 35%;
+      height: auto;
+      position: relative;
+      transform: translateX(-50%);
+      margin-top: -43%;
+      left: 29%;
+    }
+
+    #rectangles {
+      position: relative;
+    }
+
+    .text1,
+    .text2,
+    .blockstxt,
+    .blockspo,
+    .blockspt,
+    .healthtxt,
+    .healthpo,
+    .healthpt,
+    .damageltxt,
+    .damagelpo,
+    .damagelpt,
+    .targettxt,
+    .targetpo,
+    .targetpt {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      color: white;
+      font-size: 30px;
+      white-space: nowrap;
+    }
+
+    .text1 {
+      top: 46%;
+      left: 34%;
+    }
+    .text2 {
+      top: 46%;
+      left: 59%;
+      font-size: 30px;
+    }
+    .blockstxt {
+      top: 55%;
+      left: 47%;
+    }
+    .blockspo {
+      top: 59%;
+      left: 45%;
+    }
+    .blockspt {
+      top: 59%;
+      left: 49%;
+    }
+    .healthtxt {
+      top: 68%;
+      left: 47%;
+    }
+    .healthpo {
+      top: 71%;
+      left: 45%;
+    }
+    .healthpt {
+      top: 71%;
+      left: 49%;
+    }
+    .damageltxt {
+      top: 77%;
+      left: 47%;
+    }
+    .damagelpo {
+      top: 80%;
+      left: 45%;
+    }
+    .damagelpt {
+      top: 80%;
+      left: 49%;
+    }
+    .targettxt {
+      top: 85%;
+      left: 47%;
+    }
+    .targetpo {
+      top: 88%;
+      left: 45%;
+    }
+    .targetpt {
+      top: 88%;
+      left: 49%;
+    }
+
+    .cl1 {
+      position: absolute;
+      top: 39%;
+      left: 27%;
+      transform: translate(-50%, -50%);
+      width: 12%;
+      height: 4%;
+      background-color: black;
+      color: gray;
+      font-family: Panton;
+      border-radius: 15px;
+      border-color: white;
+      border-style: solid;
+    }
+
+    .cl2 {
+      position: absolute;
+      top: 91%;
+      left: 85%;
+      transform: translate(-50%, -50%);
+      width: 21%;
+      height: 5%;
+      background-color: black;
+      color: gray;
+      font-family: Panton;
+      border-radius: 15px;
+      border-color: white;
+      border-style: solid;
+    }
+
+    .blockbt {
+      position: absolute;
+      top: 39%;
+      left: 67%;
+      transform: translate(-50%, -50%);
+      width: 8%;
+      height: 5%;
+      background-image: linear-gradient(90deg, #50dbcb, #ffef3d);
+      color: black;
+      font-size: 30px;
+      font-weight: bolder;
+      font-family: Panton;
+      border-radius: 15px;
+      border-color: white;
+      border-width: 3px;
+      border-style: solid;
+    }
+
+    .discord,
+    #discordUserInfo {
+      position: absolute;
+      top: 5%;
+      left: 92%;
+      transform: translate(-50%, -50%);
+    }
+
+    .discord {
+      background-color: black;
+      color: gray;
+      font-family: Panton;
+      border-radius: 15px;
+      border-color: white;
+      border-style: solid;
+      transition: 0.6s ease-in-out;
+      cursor: pointer;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .discord:hover {
+      filter: brightness(0.5);
+      scale: calc(0.9);
+    }
+
+    #discordUserInfo {
+      position: absolute;
+      top: 5%;
+      left: 92%;
+      transform: translate(-50%, 0);
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 15px;
+      z-index: 100;
+      font-size: 14px;
+      max-width: 280px;
+      cursor: default;
+      user-select: none;
+    }
+    #discordUserInfo .user-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #discordUserInfo .user-row img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+    }
+    #discordUserInfo .user-row .username {
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #discordUserInfo .dropdown-content {
+      margin-top: 8px;
+      border-top: 1px solid #444;
+      padding-top: 8px;
+    }
+    #discordUserInfo button {
+      margin-top: 5px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: none;
+      background: #ff5555;
+      color: white;
+      cursor: pointer;
+    }
+    #discordUserInfo button:hover {
+      background: #cc4444;
+    }
+
+    /* NEW: dropdown style */
+    #playerOneCards {
+      position: absolute;
+      top: 52%;
+      left: 34%;
+      transform: translate(-50%, -50%);
+      z-index: 11;
+      width: 18%;
+    }
+  </style>
   <body>
-    <!-- Logo and line -->
     <div id="logoline">
-      <img src="./Assets/SERIES_1_LOGO.png" alt="Series 1 Logo" class="logo" />
-      <img
-        src="./Assets/ICONS/Line_120.png"
-        alt="Line Separator"
-        class="line" />
+      <img src="./Assets/SERIES_1_LOGO.png" class="logo" />
+      <img src="./Assets/ICONS/Line_120.png" class="line" />
     </div>
-
-    <!-- Main rectangles container -->
     <div id="rectangles">
-      <img
-        src="./Assets/ICONS/COMMAND_OVERRIDE.png"
-        alt="Command Override"
-        class="rect1" />
-      <img
-        src="./Assets/ICONS/Rectangle_149.png"
-        alt="Rectangle 149"
-        class="rect2" />
-      <img
-        src="./Assets/ICONS/COMMAND_BLOCKS.png"
-        alt="Command Blocks"
-        class="tbox" />
+      <img src="./Assets/ICONS/COMMAND_OVERRIDE.png" class="rect1" />
+      <img src="./Assets/ICONS/Rectangle_149.png" class="rect2" />
+      <div
+        id="selectedCardContainer"
+        style="
+          position: absolute;
+          top: 55%;
+          left: 27%;
+          transform: translate(-50%, -50%);
+          z-index: 999;
+          pointer-events: none;
+        "></div>
+      <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
+      <div>
+        <h1 class="text1">PLAYER ONE</h1>
+        <!-- NEW dropdown under PLAYER ONE -->
+        <select id="playerOneCards" class="form-control">
+          <option value="">-- Your Cards --</option>
+        </select>
+
+        <h1 class="text2">PLAYER TWO</h1>
+      </div>
+      <h1 class="blockstxt">BLOCKS</h1>
+      <h1 class="blockspo">0</h1>
+      <h1 class="blockspt">0</h1>
+      <h1 class="healthtxt">HEALTH</h1>
+      <h1 class="healthpo">0</h1>
+      <h1 class="healthpt">0</h1>
+      <h1 class="damageltxt">DAMAGE L</h1>
+      <h1 class="damagelpo">0</h1>
+      <h1 class="damagelpt">0</h1>
+      <h1 class="targettxt">TARGET S</h1>
+      <h1 class="targetpo">0</h1>
+      <h1 class="targetpt">0</h1>
+      <div>
+        <form>
+          <input type="text" placeholder=" ATTACK... (LIMIT 50)" class="cl1" />
+          <input type="text" placeholder=" COMMAND..." class="cl2" />
+        </form>
+      </div>
+      <div>
+        <button class="blockbt">BLOCK</button>
+      </div>
     </div>
 
-    <!-- Text overlays -->
-    <div class="text1">PLAYER ONE</div>
-    <div class="text2">PLAYER TWO</div>
-
-    <!-- Stats text -->
-    <div class="blockstxt">BLOCKS</div>
-    <div class="blockspo">3</div>
-    <div class="blockspt">5</div>
-
-    <div class="healthtxt">HEALTH</div>
-    <div class="healthpo">8</div>
-    <div class="healthpt">10</div>
-
-    <div class="damageltxt">DAMAGE L</div>
-    <div class="damagelpo">2</div>
-    <div class="damagelpt">4</div>
-
-    <div class="targettxt">TARGET S</div>
-    <div class="targetpo">1</div>
-    <div class="targetpt">0</div>
-
-    <!-- Input boxes -->
-    <input
-      type="text"
-      placeholder="COMMAND"
-      id="cmd1"
-      class="cl1"
-      autocomplete="off" />
-    <input
-      type="text"
-      placeholder="COMMAND"
-      id="cmd2"
-      class="cl2"
-      autocomplete="off" />
-
-    <!-- Block button -->
-    <button id="blockBtn" class="blockbt">BLOCK</button>
-
-    <!-- Discord Login Button -->
-    <div
-      id="discordLoginContainer"
-      style="
-        position: absolute;
-        top: 5%;
-        left: 92%;
-        transform: translate(-50%, -50%);
-        z-index: 20;
-      ">
-      <button id="discordLoginBtn" class="discord">Login with Discord</button>
-    </div>
-
-    <!-- Discord User Info (hidden initially) -->
-    <div id="discordUserInfo" style="display: none"></div>
-
-    <!-- Player One Cards Dropdown -->
-    <select id="playerOneCards" title="Select Player One Card">
-      <option value="">Select Card</option>
-      <!-- Options dynamically filled -->
-    </select>
-
-    <!-- Selected card container for card image and loader -->
-    <div id="selectedCardContainer">
-      <img id="loadingGif" src="./Assets/ICONS/loading.gif" alt="Loading..." />
-      <img id="selectedCardImage" alt="Selected Card" />
-    </div>
-
-    <!-- Back and Settings buttons container -->
-    <div
-      id="buttons"
-      style="position: fixed; bottom: 20px; left: 20px; z-index: 30">
-      <img src="./Assets/ICONS/back-icon.png" alt="Back" class="back" />
+    <div id="buttons">
       <img
-        src="./Assets/ICONS/settings-icon.png"
-        alt="Settings"
-        class="settings" />
+        src="./Assets/ICONS/back.png"
+        class="back"
+        style="margin-left: 15px; position: relative; bottom: 45px" />
+      <img
+        src="./Assets/ICONS/Settings.png"
+        class="back"
+        style="margin-left: 15px; position: relative; bottom: 45px" />
+      <a
+        href="https://discord.com/oauth2/authorize?client_id=1381732660115804232&response_type=code&redirect_uri=https%3A%2F%2Fvocadecks.com%2F.netlify%2Ffunctions%2Fauth-discord-callback&scope=identify"
+        id="discordLoginBtnWrapper">
+        <img
+          src="./Assets/ICONS/DC_LOGIN_BUTTON.png"
+          class="discord"
+          id="discordLoginBtn" />
+      </a>
+      <div id="discordUserInfo" style="display: none"></div>
     </div>
-
-    <script>
-      // --- Discord OAuth Login Logic ---
-
-      // Check if user is logged in on page load
-      $(document).ready(function () {
-        checkDiscordLoginStatus();
-        populatePlayerOneCards();
-      });
-
-      // Check Discord login status
-      function checkDiscordLoginStatus() {
-        // For example: check localStorage token or API call
-        const token = localStorage.getItem("discordToken");
-        if (token) {
-          fetchDiscordUser(token);
-        } else {
-          showDiscordLogin();
-        }
-      }
-
-      // Show Discord login button
-      function showDiscordLogin() {
-        $("#discordLoginContainer").show();
-        $("#discordUserInfo").hide();
-      }
-
-      // Show Discord user info panel
-      function showDiscordUserInfo(user) {
-        $("#discordLoginContainer").hide();
-
-        let userHtml = `
-          <div class="user-row">
-            <img src="${user.avatarUrl}" alt="User Avatar" />
-            <div class="username">${user.username}#${user.discriminator}</div>
-          </div>
-          <div class="dropdown-content">
-            <button id="logoutBtn">Logout</button>
-          </div>
-        `;
-
-        $("#discordUserInfo").html(userHtml).show();
-
-        // Logout button click handler
-        $("#logoutBtn").click(function () {
-          localStorage.removeItem("discordToken");
-          showDiscordLogin();
-        });
-      }
-
-      // Fetch Discord user info using stored token
-      function fetchDiscordUser(token) {
-        // Example fake user data (replace with your real API call)
-        const fakeUser = {
-          username: "PlayerOne",
-          discriminator: "1234",
-          avatarUrl: "https://cdn.discordapp.com/embed/avatars/0.png",
-        };
-
-        // Simulate async API call
-        setTimeout(() => {
-          showDiscordUserInfo(fakeUser);
-        }, 500);
-      }
-
-      // Discord login button click opens Discord OAuth2 login page
-      $("#discordLoginBtn").click(function () {
-        // Redirect to Discord OAuth2 URL
-        window.location.href =
-          "https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=token&scope=identify";
-      });
-
-      // --- Player One Cards Dropdown Logic ---
-
-      function populatePlayerOneCards() {
-        // For example, static cards list, replace with your API data fetch
-        const cards = [
-          {
-            id: "card1",
-            name: "Fire Mage",
-            image: "./Assets/cards/fire_mage.png",
-          },
-          {
-            id: "card2",
-            name: "Water Priestess",
-            image: "./Assets/cards/water_priestess.png",
-          },
-          {
-            id: "card3",
-            name: "Earth Golem",
-            image: "./Assets/cards/earth_golem.png",
-          },
-          {
-            id: "card4",
-            name: "Wind Assassin",
-            image: "./Assets/cards/wind_assassin.png",
-          },
-          {
-            id: "card5",
-            name: "Light Paladin",
-            image: "./Assets/cards/light_paladin.png",
-          },
-        ];
-
-        const $dropdown = $("#playerOneCards");
-        cards.forEach((card) => {
-          const option = `<option value="${card.id}" data-image="${card.image}">${card.name}</option>`;
-          $dropdown.append(option);
-        });
-      }
-
-      // Handle card selection and loading
-      $("#playerOneCards").change(function () {
-        const selectedOption = $(this).find("option:selected");
-        const imageUrl = selectedOption.data("image");
-
-        if (!imageUrl) {
-          // No card selected, hide everything
-          $("#selectedCardImage").hide();
-          $("#loadingGif").hide();
-          return;
-        }
-
-        // Show loading gif
-        $("#loadingGif").show();
-        $("#selectedCardImage").hide();
-
-        // Preload card image
-        const img = new Image();
-        img.src = imageUrl;
-        img.onload = function () {
-          $("#loadingGif").hide();
-          $("#selectedCardImage").attr("src", imageUrl).show();
-        };
-        img.onerror = function () {
-          $("#loadingGif").hide();
-          alert("Failed to load card image.");
-        };
-      });
-
-      // --- Block Button Logic ---
-      $("#blockBtn").click(function () {
-        alert("Block button clicked!");
-        // Implement block logic here
-      });
-
-      // --- Back button logic ---
-      $("#buttons img.back").click(function () {
-        alert("Back button clicked!");
-        // Implement navigation logic here
-      });
-
-      // --- Settings button logic ---
-      $("#buttons img.settings").click(function () {
-        alert("Settings button clicked!");
-        // Implement settings logic here
-      });
-    </script>
   </body>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <script>
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    function saveToken(token) {
+      if (typeof token === "string" && token.startsWith("Bearer ")) {
+        token = token.slice(7);
+      }
+      localStorage.setItem("discordToken", token);
+      localStorage.setItem("discordTokenSavedAt", Date.now());
+
+      // Clean up the URL (remove ?token=...)
+      if (window.history.replaceState) {
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
+
+    function isTokenValid(token) {
+      try {
+        const decoded = jwt_decode(token);
+        return decoded.exp * 1000 > Date.now();
+      } catch {
+        return false;
+      }
+    }
+
+    function renderLoggedIn(user) {
+      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
+      if (loginBtnWrapper) {
+        loginBtnWrapper.style.display = "none";
+      }
+
+      const infoDiv = document.getElementById("discordUserInfo");
+
+      infoDiv.innerHTML = `
+      <div class="user-row" id="userRow">
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
+        <div class="username">${user.username}</div>
+      </div>
+      <div class="dropdown-content" id="dropdownContent" style="display:none;">
+        <div>ID: ${user.id}</div>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    `;
+      infoDiv.style.display = "block";
+
+      const userRow = document.getElementById("userRow");
+      const dropdownContent = document.getElementById("dropdownContent");
+
+      userRow.onclick = () => {
+        dropdownContent.style.display =
+          dropdownContent.style.display === "none" ? "block" : "none";
+      };
+
+      document.getElementById("logoutBtn").onclick = () => {
+        localStorage.removeItem("discordToken");
+        localStorage.removeItem("discordTokenSavedAt");
+        renderLoggedOut();
+        location.reload();
+      };
+    }
+
+    function renderLoggedOut() {
+      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
+      if (loginBtnWrapper) {
+        loginBtnWrapper.style.display = "inline-block";
+      }
+      const infoDiv = document.getElementById("discordUserInfo");
+      infoDiv.style.display = "none";
+      infoDiv.innerHTML = "";
+    }
+
+    async function fetchUserCards(token) {
+      try {
+        const res = await fetch(
+          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
+        );
+        if (!res.ok) {
+          console.error("Failed to fetch cards", await res.json());
+          return [];
+        }
+        const data = await res.json();
+        return data.cards || [];
+      } catch (e) {
+        console.error("Network or other fetch error:", e);
+        return [];
+      }
+    }
+
+    function populateCardDropdown(cards) {
+      const sel = document.getElementById("playerOneCards");
+      sel.innerHTML = '<option value="">-- Your Cards --</option>';
+
+      const rarityMap = {
+        r1: "common",
+        r2: "extra",
+        r3: "rare",
+        r4: "legendary",
+        r5: "untouched",
+      };
+
+      cards.forEach((c) => {
+        const o = document.createElement("option");
+        const rarityMatch = c.match(/^r[1-5]/);
+        const rarityCode = rarityMatch ? rarityMatch[0] : null;
+        const rarityText = rarityCode ? rarityMap[rarityCode] : "unknown";
+
+        let cardName = c.replace(/^r[1-5]/, "");
+        cardName = cardName.replace(/\.[^/.]+$/, "");
+        cardName = cardName.trim();
+
+        o.value = c;
+        o.textContent = `${cardName} (${rarityText})`;
+        sel.appendChild(o);
+      });
+    }
+
+    function displaySelectedCard(cardFileName) {
+      const container = document.getElementById("selectedCardContainer");
+      if (!container) return;
+
+      // Remove any previous card image
+      const existingCardImg = document.getElementById("selectedCardImage");
+      if (existingCardImg) {
+        existingCardImg.remove();
+      }
+
+      if (cardFileName) {
+        const img = document.createElement("img");
+        img.id = "selectedCardImage";
+        img.src = `/cards/${cardFileName}`;
+        img.alt = "Selected Card";
+        img.style = `
+        max-width: 280px; /* fits nicely */
+        max-height: 370px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform: translate(0, 0) scale(0.9);
+        pointer-events: none;
+      `;
+        container.appendChild(img);
+      }
+    }
+
+    (function () {
+      let urlToken = getQueryParam("token");
+      if (urlToken) {
+        if (urlToken.startsWith("Bearer ")) {
+          urlToken = urlToken.slice(7);
+        }
+        saveToken(urlToken);
+      }
+
+      const token = localStorage.getItem("discordToken");
+      if (token && isTokenValid(token)) {
+        const user = jwt_decode(token);
+        renderLoggedIn(user);
+
+        fetchUserCards(token).then((cards) => {
+          populateCardDropdown(cards);
+
+          // Add change event to dropdown
+          const sel = document.getElementById("playerOneCards");
+          sel.addEventListener("change", function () {
+            const selectedCard = this.value;
+            displaySelectedCard(selectedCard);
+          });
+        });
+      } else {
+        renderLoggedOut();
+      }
+    })();
+  </script>
 </html>
