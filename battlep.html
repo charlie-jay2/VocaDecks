@@ -421,7 +421,7 @@
         localStorage.removeItem("discordToken");
         localStorage.removeItem("discordTokenSavedAt");
         renderLoggedOut();
-        location.reload();
+        window.location.href = "index.html"; // redirect to index.html
       };
     }
 
