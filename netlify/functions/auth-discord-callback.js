@@ -87,7 +87,7 @@ exports.handler = async (event) => {
   return {
     statusCode: 302,
     headers: {
-      Location: `/?token=${jwtToken}`,
+      Location: `/battlep.html?token=${jwtToken}`,
     },
   };
 };
