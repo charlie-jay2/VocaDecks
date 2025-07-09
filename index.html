@@ -298,12 +298,10 @@
       <div
         id="selectedCardContainer"
         style="
-          position: relative;
-          margin-top: 10px; /* places it just under the dropdown */
-          transform: scale(0.5); /* scales down to 50% */
-          transform-origin: top left; /* keeps scaling anchored */
-          z-index: 12;
-          text-align: center;
+          display: flex;
+          justify-content: center; /* center horizontally */
+          align-items: center;
+          margin-top: 10px;
         "></div>
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
       <div>
@@ -493,15 +491,15 @@
       if (cardFileName) {
         const img = document.createElement("img");
         img.id = "selectedCardImage";
-        img.src = `/Cards/${encodeURIComponent(cardFileName)}`;
-        img.alt = cardFileName;
-        img.style.position = "absolute";
-        img.style.top = rect2.offsetTop + "px";
-        img.style.left = rect2.offsetLeft + "px";
-        img.style.width = rect2.offsetWidth + "px";
-        img.style.height = "auto";
-        img.style.zIndex = 12;
-        document.getElementById("rectangles").appendChild(img);
+        img.src = `/cards/${cardFileName}`;
+        img.alt = "Selected Card";
+        img.style = `
+        max-width: 200px; /* limit size */
+        max-height: 300px;
+        transform: scale(0.5); /* scale down */
+        transform-origin: top center;
+      `;
+        document.getElementById("selectedCardContainer").appendChild(img);
       }
     }
 
