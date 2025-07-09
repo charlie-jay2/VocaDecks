@@ -358,6 +358,8 @@
   </body>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -396,15 +398,15 @@
       const infoDiv = document.getElementById("discordUserInfo");
 
       infoDiv.innerHTML = `
-      <div class="user-row" id="userRow">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
-        <div class="username">${user.username}</div>
-      </div>
-      <div class="dropdown-content" id="dropdownContent" style="display:none;">
-        <div>ID: ${user.id}</div>
-        <button id="logoutBtn">Logout</button>
-      </div>
-    `;
+    <div class="user-row" id="userRow">
+      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
+      <div class="username">${user.username}</div>
+    </div>
+    <div class="dropdown-content" id="dropdownContent" style="display:none;">
+      <div>ID: ${user.id}</div>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  `;
       infoDiv.style.display = "block";
 
       const userRow = document.getElementById("userRow");
