@@ -304,7 +304,13 @@
           transform: translate(-50%, -50%);
           z-index: 999;
           pointer-events: none;
+          width: 180px; /* same as card size */
+          height: 270px; /* same as card size */
+          display: flex;
+          align-items: center;
+          justify-content: center;
         ">
+        <!-- Loader GIF (centered by flexbox) -->
         <img
           id="loadingGif"
           src="./ASSETS/ICONS/loading.gif"
@@ -312,7 +318,7 @@
           style="
             max-width: 50px;
             max-height: 50px;
-            display: none; /* hidden by default */
+            display: none; /* hidden until loading */
           " />
       </div>
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
@@ -410,15 +416,15 @@
       const infoDiv = document.getElementById("discordUserInfo");
 
       infoDiv.innerHTML = `
-    <div class="user-row" id="userRow">
-      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
-      <div class="username">${user.username}</div>
-    </div>
-    <div class="dropdown-content" id="dropdownContent" style="display:none;">
-      <div>ID: ${user.id}</div>
-      <button id="logoutBtn">Logout</button>
-    </div>
-  `;
+        <div class="user-row" id="userRow">
+          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
+          <div class="username">${user.username}</div>
+        </div>
+        <div class="dropdown-content" id="dropdownContent" style="display:none;">
+          <div>ID: ${user.id}</div>
+          <button id="logoutBtn">Logout</button>
+        </div>
+      `;
       infoDiv.style.display = "block";
 
       const userRow = document.getElementById("userRow");
@@ -491,7 +497,6 @@
         sel.appendChild(o);
       });
     }
-
     function displaySelectedCard(cardFileName) {
       const container = document.getElementById("selectedCardContainer");
       const loader = document.getElementById("loadingGif");
@@ -505,7 +510,7 @@
       }
 
       if (cardFileName) {
-        // Show loader while the new image loads
+        // Show loader while new image loads
         loader.style.display = "block";
 
         const img = document.createElement("img");
@@ -513,23 +518,19 @@
         img.src = `/cards/${cardFileName}`;
         img.alt = "Selected Card";
         img.style = `
-      max-width: 180px;
-      max-height: 270px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      transform: translate(0, 0) scale(0.9);
-      pointer-events: none;
-      display: none; /* hide until loaded */
-    `;
+          max-width: 100%;
+          max-height: 100%;
+          display: none; /* hidden until loaded */
+          pointer-events: none;
+        `;
 
-        // Once the image finishes loading
+        // Once image loads, hide loader and show card
         img.onload = () => {
-          loader.style.display = "none"; // hide loader
-          img.style.display = "block"; // show the card
+          loader.style.display = "none";
+          img.style.display = "block";
         };
 
-        // If loading fails
+        // On load error, hide loader
         img.onerror = () => {
           loader.style.display = "none";
           console.error(`Failed to load card image: ${cardFileName}`);
@@ -537,7 +538,7 @@
 
         container.appendChild(img);
       } else {
-        // If no card is selected, hide loader too
+        // No card selected: hide loader
         loader.style.display = "none";
       }
     }
