@@ -298,10 +298,12 @@
       <div
         id="selectedCardContainer"
         style="
-          display: flex;
-          justify-content: center; /* center horizontally */
-          align-items: center;
-          margin-top: 10px;
+          position: absolute;
+          top: 50%;
+          left: 22%;
+          transform: translate(-50%, -50%);
+          z-index: 999;
+          pointer-events: none;
         "></div>
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
       <div>
@@ -481,8 +483,8 @@
     }
 
     function displaySelectedCard(cardFileName) {
-      const rect2 = document.querySelector(".rect2");
-      if (!rect2) return;
+      const container = document.getElementById("selectedCardContainer");
+      if (!container) return;
 
       // Remove any previous card image
       const existingCardImg = document.getElementById("selectedCardImage");
@@ -496,12 +498,15 @@
         img.src = `/cards/${cardFileName}`;
         img.alt = "Selected Card";
         img.style = `
-        max-width: 200px; /* limit size */
-        max-height: 300px;
-        transform: scale(0.5); /* scale down */
-        transform-origin: top center;
-      `;
-        document.getElementById("selectedCardContainer").appendChild(img);
+      max-width: 180px; /* fits nicely */
+      max-height: 270px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: translate(0, 0) scale(0.9);
+      pointer-events: none;
+    `;
+        container.appendChild(img);
       }
     }
 
