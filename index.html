@@ -299,12 +299,22 @@
         id="selectedCardContainer"
         style="
           position: absolute;
-          top: 55%;
-          left: 27%;
+          top: 50%;
+          left: 22%;
           transform: translate(-50%, -50%);
           z-index: 999;
           pointer-events: none;
-        "></div>
+        ">
+        <img
+          id="loadingGif"
+          src="./ASSETS/ICONS/loading.gif"
+          alt="Loading..."
+          style="
+            max-width: 50px;
+            max-height: 50px;
+            display: none; /* hidden by default */
+          " />
+      </div>
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
       <div>
         <h1 class="text1">PLAYER ONE</h1>
@@ -484,7 +494,9 @@
 
     function displaySelectedCard(cardFileName) {
       const container = document.getElementById("selectedCardContainer");
-      if (!container) return;
+      const loader = document.getElementById("loadingGif");
+
+      if (!container || !loader) return;
 
       // Remove any previous card image
       const existingCardImg = document.getElementById("selectedCardImage");
@@ -493,23 +505,42 @@
       }
 
       if (cardFileName) {
+        // Show loader while the new image loads
+        loader.style.display = "block";
+
         const img = document.createElement("img");
         img.id = "selectedCardImage";
         img.src = `/cards/${cardFileName}`;
         img.alt = "Selected Card";
         img.style = `
-      max-width: 280px; /* fits nicely */
-      max-height: 370px;
+      max-width: 180px;
+      max-height: 270px;
       position: absolute;
       top: 0;
       left: 0;
       transform: translate(0, 0) scale(0.9);
       pointer-events: none;
+      display: none; /* hide until loaded */
     `;
+
+        // Once the image finishes loading
+        img.onload = () => {
+          loader.style.display = "none"; // hide loader
+          img.style.display = "block"; // show the card
+        };
+
+        // If loading fails
+        img.onerror = () => {
+          loader.style.display = "none";
+          console.error(`Failed to load card image: ${cardFileName}`);
+        };
+
         container.appendChild(img);
+      } else {
+        // If no card is selected, hide loader too
+        loader.style.display = "none";
       }
     }
-
     (function () {
       let urlToken = getQueryParam("token");
       if (urlToken) {
