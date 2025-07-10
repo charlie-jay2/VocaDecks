@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema({
   specialCards: [String],
   messageCount: { type: Number, default: 0 },
   trades: { type: Number, default: 0 },
+  battlesWon: { type: Number, default: 0 },
+  battlesLost: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model("User", userSchema);

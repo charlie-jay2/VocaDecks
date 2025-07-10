@@ -3,6 +3,7 @@
     "jwt-decode": "^4.0.0",
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.1",
-    "netlify": "^22.2.1"
+    "netlify": "^22.2.1",
+    "node-fetch": "^3.3.2"
   }
 }

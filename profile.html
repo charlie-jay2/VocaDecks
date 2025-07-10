@@ -1,0 +1,126 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/x-icon" href="/Assets/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-display: swap;
+      }
+      body {
+        margin: 0;
+        font-family: Panton, sans-serif;
+        background: url(./Menu/bg.png) center/cover fixed no-repeat;
+        overflow: hidden;
+        color: white;
+      }
+
+      .profile-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.7);
+        padding: 30px;
+        border-radius: 20px;
+        width: 400px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+      }
+
+      .profile-avatar {
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        margin-bottom: 15px;
+        border: 3px solid #fff;
+      }
+
+      .profile-username {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .profile-stats {
+        text-align: left;
+        margin-top: 20px;
+      }
+
+      .profile-stats p {
+        margin: 5px 0;
+        font-size: 16px;
+      }
+
+      .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20px;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loader" class="loader">Loading profile...</div>
+    <div id="profile" class="profile-container" style="display: none">
+      <img id="avatar" class="profile-avatar" src="" alt="Avatar" />
+      <div id="username" class="profile-username"></div>
+      <div class="profile-stats">
+        <p><strong>Level:</strong> <span id="level"></span></p>
+        <p><strong>XP:</strong> <span id="xp"></span></p>
+        <p><strong>Points:</strong> <span id="points"></span></p>
+        <p><strong>Messages:</strong> <span id="messages"></span></p>
+        <p><strong>Battles Won:</strong> <span id="battlesWon"></span></p>
+        <p><strong>Battles Lost:</strong> <span id="battlesLost"></span></p>
+        <p><strong>Trades:</strong> <span id="trades"></span></p>
+      </div>
+    </div>
+
+    <script>
+      // Get token from URL or localStorage
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("token") || localStorage.getItem("token");
+
+      if (token) {
+        localStorage.setItem("token", token); // Save token for future requests
+        fetch("/.netlify/functions/get-user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to load user data");
+            return res.json();
+          })
+          .then((data) => {
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("profile").style.display = "block";
+
+            document.getElementById("avatar").src = data.avatar;
+            document.getElementById("username").innerText = data.username;
+            document.getElementById("level").innerText = data.level;
+            document.getElementById("xp").innerText = data.xp;
+            document.getElementById("points").innerText = data.points;
+            document.getElementById("messages").innerText = data.messageCount;
+            document.getElementById("battlesWon").innerText = data.battlesWon;
+            document.getElementById("battlesLost").innerText = data.battlesLost;
+            document.getElementById("trades").innerText = data.trades;
+          })
+          .catch((err) => {
+            console.error(err);
+            document.getElementById("loader").innerText =
+              "Error loading profile.";
+          });
+      } else {
+        document.getElementById("loader").innerText = "Not logged in.";
+      }
+    </script>
+  </body>
+</html>
