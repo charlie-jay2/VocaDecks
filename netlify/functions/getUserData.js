@@ -12,13 +12,16 @@ exports.handler = async function (event, context) {
   }
 
   try {
-    const token = event.queryStringParameters?.token;
-    if (!token) {
+    const authHeader =
+      event.headers.authorization || event.headers.Authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return {
         statusCode: 401,
         body: JSON.stringify({ error: "No token provided" }),
       };
     }
+
+    const token = authHeader.substring(7);
 
     let decoded;
     try {
@@ -33,7 +36,7 @@ exports.handler = async function (event, context) {
     const db = client.db("test");
     const users = db.collection("users");
 
-    const userDoc = await users.findOne({ userId: decoded.id });
+    const userDoc = await users.findOne({ discordId: decoded.id });
 
     if (!userDoc) {
       return {
