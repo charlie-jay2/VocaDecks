@@ -90,7 +90,7 @@
 
       if (token) {
         localStorage.setItem("token", token); // Save token for future requests
-        fetch("/.netlify/functions/get-user", {
+        fetch("/.netlify/functions/getUserData", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
