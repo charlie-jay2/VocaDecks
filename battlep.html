@@ -411,40 +411,37 @@
     }
 
     function displayCardImage(cardName) {
-      // The cardName is the name/id string, typically r1<name>.png or similar
-      // Display only if rarity is r1 (common) as you requested
-
       const container = document.getElementById("selectedCardContainer");
       if (!container) return;
 
-      // If empty selection, clear container
       if (!cardName) {
         container.innerHTML = "";
         return;
       }
 
-      // Check rarity prefix (r1 to r5)
       const rarityMatch = cardName.match(/^r([1-5])/i);
       if (!rarityMatch) {
-        container.innerHTML = ""; // no rarity prefix, clear
+        container.innerHTML = "";
         return;
       }
       const rarity = rarityMatch[1];
       if (rarity !== "1") {
-        container.innerHTML = ""; // only show r1 cards here
+        container.innerHTML = "";
         return;
       }
 
-      const imgSrc = `./Cards/${cardName}`;
+      // URL encode filename (handle spaces and special chars)
+      const encodedName = encodeURIComponent(cardName);
+
+      const imgSrc = `./Cards/${encodedName}`;
 
       container.innerHTML = `<img src="${imgSrc}" style="max-width:80%; max-height:200px; height:auto; user-select:none;" alt="Selected Card" />`;
     }
 
     function formatCardNameWithRarity(name) {
-      let cleanName = name.toLowerCase();
+      let cleanName = name;
 
-      // Ensure it ends with .png
-      if (!cleanName.endsWith(".png")) {
+      if (!cleanName.toLowerCase().endsWith(".png")) {
         cleanName += ".png";
       }
 
@@ -460,8 +457,7 @@
         5: "UNTOUCHED",
       };
 
-      // Remove rarity prefix and extension
-      const baseName = cleanName.replace(/^r[1-5]/i, "").replace(/\.png$/, "");
+      const baseName = cleanName.replace(/^r[1-5]/i, "").replace(/\.png$/i, "");
 
       return `${baseName.trim()} (${rarityMap[rarityNum] || "UNKNOWN"})`;
     }
@@ -490,24 +486,22 @@
 
       showDiscordUserInfo(decoded);
 
-      // Replace PLAYER ONE with username
       const playerOneHeading = document.querySelector(".text1");
       if (playerOneHeading) {
         playerOneHeading.textContent = decoded.username.toUpperCase();
       }
 
-      // Fetch cards and populate dropdown
       const cards = await fetchUserCards(token);
       const dropdown = document.getElementById("playerOneCards");
 
       if (dropdown) {
-        // Clear existing options except the default placeholder
         dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
 
         cards.forEach((card) => {
-          let val = (card.id || card.name || card).toLowerCase();
+          // Use exact filename casing and spaces from the data, do NOT lowercase
+          let val = card.name || card.id || card;
 
-          if (!val.endsWith(".png")) {
+          if (!val.toLowerCase().endsWith(".png")) {
             val += ".png";
           }
 
@@ -519,7 +513,6 @@
           dropdown.appendChild(option);
         });
 
-        // When user selects a card, show its image if rarity is r1
         dropdown.addEventListener("change", (e) => {
           const selectedCardName = e.target.value;
           displayCardImage(selectedCardName);
