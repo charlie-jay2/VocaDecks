@@ -78,6 +78,23 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
+    function isTokenValid(token) {
+      try {
+        const decoded = jwt_decode(token);
+        return decoded.exp * 1000 > Date.now();
+      } catch {
+        return false;
+      }
+    }
+
+    // Check if token is stored and valid; redirect if so
+    (function () {
+      const token = localStorage.getItem("discordToken");
+      if (token && isTokenValid(token)) {
+        window.location.href = "menu.html";
+      }
+    })();
+
     function startDiscordLogin() {
       window.location.href = "/.netlify/functions/auth-discord";
     }

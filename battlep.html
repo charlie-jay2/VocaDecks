@@ -398,12 +398,12 @@
       const infoDiv = document.getElementById("discordUserInfo");
 
       infoDiv.innerHTML = `
-      <div class="user-row" id="userRow">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
-        <div class="username">${user.username}</div>
-        <div>ID: ${user.id}</div>
-      </div>
-    `;
+    <div class="user-row" id="userRow">
+      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
+      <div class="username">${user.username}</div>
+      <div>ID: ${user.id}</div>
+    </div>
+  `;
       infoDiv.style.display = "block";
 
       // Replace PLAYER ONE with username in ALL CAPS
@@ -431,9 +431,9 @@
 
     async function fetchUserCards(token) {
       try {
-        const res = await fetch(
-          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
-        );
+        const res = await fetch("/.netlify/functions/getUserCards", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (!res.ok) {
           console.error("Failed to fetch cards", await res.json());
           return [];
@@ -490,14 +490,14 @@
         img.src = `/cards/${cardFileName}`;
         img.alt = "Selected Card";
         img.style = `
-        max-width: 280px; /* fits nicely */
-        max-height: 370px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        transform: translate(0, 0) scale(0.9);
-        pointer-events: none;
-      `;
+      max-width: 280px; /* fits nicely */
+      max-height: 370px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: translate(0, 0) scale(0.9);
+      pointer-events: none;
+    `;
         container.appendChild(img);
       }
     }
@@ -530,14 +530,5 @@
         renderLoggedOut();
       }
     })();
-
-    // In menu.html script
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
-    if (token) {
-      localStorage.setItem("token", token);
-      // optionally remove token from URL
-      history.replaceState(null, "", window.location.pathname);
-    }
   </script>
 </html>
