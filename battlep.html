@@ -309,232 +309,230 @@
       <div>
         <h1 class="text1">PLAYER ONE</h1>
         <!-- NEW dropdown under PLAYER ONE -->
-        <select id="playerOneCards" class="form-control">
-          <option value="">-- Your Cards --</option>
-        </select>
-
-        <h1 class="text2">PLAYER TWO</h1>
+        <select id="playerOneCards"></select>
       </div>
-      <h1 class="blockstxt">BLOCKS</h1>
-      <h1 class="blockspo">0</h1>
-      <h1 class="blockspt">0</h1>
-      <h1 class="healthtxt">HEALTH</h1>
-      <h1 class="healthpo">0</h1>
-      <h1 class="healthpt">0</h1>
-      <h1 class="damageltxt">DAMAGE L</h1>
-      <h1 class="damagelpo">0</h1>
-      <h1 class="damagelpt">0</h1>
-      <h1 class="targettxt">TARGET S</h1>
-      <h1 class="targetpo">0</h1>
-      <h1 class="targetpt">0</h1>
-      <div>
-        <form>
-          <input type="text" placeholder=" ATTACK... (LIMIT 50)" class="cl1" />
-          <input type="text" placeholder=" COMMAND..." class="cl2" />
-        </form>
+      <h1 class="text2">PLAYER TWO</h1>
+      <p class="blockstxt">BLOCKS</p>
+      <p class="blockspo">0</p>
+      <p class="blockspt">0</p>
+      <p class="healthtxt">HEALTH</p>
+      <p class="healthpo">100</p>
+      <p class="healthpt">100</p>
+      <p class="damageltxt">DAMAGE LEFT</p>
+      <p class="damagelpo">0</p>
+      <p class="damagelpt">0</p>
+      <p class="targettxt">TARGET</p>
+      <p class="targetpo">NONE</p>
+      <p class="targetpt">NONE</p>
+      <button class="blockbt">BLOCK</button>
+      <div id="discordUserInfo" style="display: none">
+        <div class="user-row">
+          <img id="discordUserAvatar" src="" alt="User avatar" />
+          <span id="discordUserName" class="username"></span>
+        </div>
+        <div class="dropdown-content">
+          <button id="logoutBtn">Logout</button>
+        </div>
       </div>
-      <div>
-        <button class="blockbt">BLOCK</button>
-      </div>
+      <button id="discordBtn" class="discord">Login</button>
     </div>
-
-    <div id="buttons">
-      <img
-        src="./Assets/ICONS/back.png"
-        class="back"
-        style="margin-left: 15px; position: relative; bottom: 45px" />
-      <img
-        src="./Assets/ICONS/Settings.png"
-        class="back"
-        style="margin-left: 15px; position: relative; bottom: 45px" />
-      <a
-        href="https://discord.com/oauth2/authorize?client_id=1381732660115804232&response_type=code&redirect_uri=https%3A%2F%2Fvocadecks.com%2F.netlify%2Ffunctions%2Fauth-discord-callback&scope=identify"
-        id="discordLoginBtnWrapper">
-        <img
-          src="./Assets/ICONS/DC_LOGIN_BUTTON.png"
-          class="discord"
-          id="discordLoginBtn" />
-      </a>
-      <div id="discordUserInfo" style="display: none"></div>
-    </div>
-  </body>
-  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
-  <script>
-    function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
-    }
-
-    function saveToken(token) {
-      if (typeof token === "string" && token.startsWith("Bearer ")) {
-        token = token.slice(7);
-      }
-      localStorage.setItem("discordToken", token);
-      localStorage.setItem("discordTokenSavedAt", Date.now());
-
-      // Clean up the URL (remove ?token=...)
-      if (window.history.replaceState) {
-        const newUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-      }
-    }
-
-    function isTokenValid(token) {
-      try {
-        const decoded = jwt_decode(token);
-        return decoded.exp * 1000 > Date.now();
-      } catch {
-        return false;
-      }
-    }
-
-    function renderLoggedIn(user) {
-      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
-      if (loginBtnWrapper) {
-        loginBtnWrapper.style.display = "none";
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <script>
+      // Utilities
+      function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
       }
 
-      const infoDiv = document.getElementById("discordUserInfo");
-
-      infoDiv.innerHTML = `
-      <div class="user-row" id="userRow">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
-        <div class="username">${user.username}</div>
-      </div>
-      <div class="dropdown-content" id="dropdownContent" style="display:none;">
-        <div>ID: ${user.id}</div>
-        <button id="logoutBtn">Logout</button>
-      </div>
-    `;
-      infoDiv.style.display = "block";
-
-      const userRow = document.getElementById("userRow");
-      const dropdownContent = document.getElementById("dropdownContent");
-
-      userRow.onclick = () => {
-        dropdownContent.style.display =
-          dropdownContent.style.display === "none" ? "block" : "none";
-      };
-
-      document.getElementById("logoutBtn").onclick = () => {
-        localStorage.removeItem("discordToken");
-        localStorage.removeItem("discordTokenSavedAt");
-        renderLoggedOut();
-        window.location.href = "index.html"; // redirect to index.html
-      };
-    }
-
-    function renderLoggedOut() {
-      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
-      if (loginBtnWrapper) {
-        loginBtnWrapper.style.display = "inline-block";
+      // Save token to localStorage
+      function saveToken(token) {
+        localStorage.setItem("discordToken", token);
       }
-      const infoDiv = document.getElementById("discordUserInfo");
-      infoDiv.style.display = "none";
-      infoDiv.innerHTML = "";
-    }
 
-    async function fetchUserCards(token) {
-      try {
-        const res = await fetch(
-          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
-        );
-        if (!res.ok) {
-          console.error("Failed to fetch cards", await res.json());
+      // Validate token expiration
+      function isTokenValid(token) {
+        try {
+          const decoded = jwt_decode(token);
+          if (!decoded.exp) return false;
+          const now = Date.now() / 1000;
+          return decoded.exp > now;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      // Build Discord avatar URL fallback
+      function getDiscordAvatarUrl(user) {
+        // user.avatar is a hash string, user.id is user id
+        if (user.avatar) {
+          // Animated avatar check: starts with 'a_'
+          const isAnimated = user.avatar.startsWith("a_");
+          const format = isAnimated ? "gif" : "png";
+          return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${format}?size=64`;
+        } else {
+          // Default avatar by discriminator mod 5 fallback
+          let discrim = user.discriminator;
+          if (!discrim) discrim = "0000";
+          const defaultAvatarNumber = parseInt(discrim) % 5;
+          return `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
+        }
+      }
+
+      // Render user info on top right when logged in
+      function renderLoggedIn(user) {
+        const btn = document.getElementById("discordBtn");
+        const userInfo = document.getElementById("discordUserInfo");
+        const userNameSpan = document.getElementById("discordUserName");
+        const userAvatar = document.getElementById("discordUserAvatar");
+
+        btn.style.display = "none"; // hide login button
+
+        userNameSpan.textContent = `${user.username}#${
+          user.discriminator || "0000"
+        }`;
+        userAvatar.src = getDiscordAvatarUrl(user);
+
+        userInfo.style.display = "block";
+
+        // Add logout handler
+        document.getElementById("logoutBtn").onclick = () => {
+          localStorage.removeItem("discordToken");
+          window.location.href = "menu.html";
+        };
+      }
+
+      // Show login button (when not logged in)
+      function renderLoggedOut() {
+        const btn = document.getElementById("discordBtn");
+        const userInfo = document.getElementById("discordUserInfo");
+        userInfo.style.display = "none";
+        btn.style.display = "block";
+        btn.textContent = "Login";
+        btn.onclick = () => {
+          // Redirect to login page or OAuth flow
+          window.location.href = "menu.html";
+        };
+      }
+
+      // Fetch user cards from API using token
+      async function fetchUserCards(token) {
+        try {
+          const response = await fetch(
+            "https://hypernet.netlify.app/.netlify/functions/getcards",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch cards");
+          }
+          const data = await response.json();
+          return data.cards || [];
+        } catch (err) {
+          console.error(err);
+          alert("Error fetching cards: " + err.message);
           return [];
         }
-        const data = await res.json();
-        return data.cards || [];
-      } catch (e) {
-        console.error("Network or other fetch error:", e);
-        return [];
-      }
-    }
-
-    function populateCardDropdown(cards) {
-      const sel = document.getElementById("playerOneCards");
-      sel.innerHTML = '<option value="">-- Your Cards --</option>';
-
-      const rarityMap = {
-        r1: "common",
-        r2: "extra",
-        r3: "rare",
-        r4: "legendary",
-        r5: "untouched",
-      };
-
-      cards.forEach((c) => {
-        const o = document.createElement("option");
-        const rarityMatch = c.match(/^r[1-5]/);
-        const rarityCode = rarityMatch ? rarityMatch[0] : null;
-        const rarityText = rarityCode ? rarityMap[rarityCode] : "unknown";
-
-        let cardName = c.replace(/^r[1-5]/, "");
-        cardName = cardName.replace(/\.[^/.]+$/, "");
-        cardName = cardName.trim();
-
-        o.value = c;
-        o.textContent = `${cardName} (${rarityText})`;
-        sel.appendChild(o);
-      });
-    }
-
-    function displaySelectedCard(cardFileName) {
-      const container = document.getElementById("selectedCardContainer");
-      if (!container) return;
-
-      // Remove any previous card image
-      const existingCardImg = document.getElementById("selectedCardImage");
-      if (existingCardImg) {
-        existingCardImg.remove();
       }
 
-      if (cardFileName) {
-        const img = document.createElement("img");
-        img.id = "selectedCardImage";
-        img.src = `/cards/${cardFileName}`;
-        img.alt = "Selected Card";
-        img.style = `
-        max-width: 280px; /* fits nicely */
-        max-height: 370px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        transform: translate(0, 0) scale(0.9);
-        pointer-events: none;
-      `;
-        container.appendChild(img);
-      }
-    }
+      // Populate cards dropdown with cards
+      function populateCardDropdown(cards) {
+        const select = document.getElementById("playerOneCards");
+        select.innerHTML = ""; // clear previous options
 
-    (function () {
-      let urlToken = getQueryParam("token");
-      if (urlToken) {
-        if (urlToken.startsWith("Bearer ")) {
-          urlToken = urlToken.slice(7);
+        if (!cards.length) {
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "No cards available";
+          select.appendChild(option);
+          return;
         }
-        saveToken(urlToken);
-      }
 
-      const token = localStorage.getItem("discordToken");
-      if (token && isTokenValid(token)) {
-        const user = jwt_decode(token);
-        renderLoggedIn(user);
-
-        fetchUserCards(token).then((cards) => {
-          populateCardDropdown(cards);
-
-          // Add change event to dropdown
-          const sel = document.getElementById("playerOneCards");
-          sel.addEventListener("change", function () {
-            const selectedCard = this.value;
-            displaySelectedCard(selectedCard);
-          });
+        cards.forEach((card) => {
+          const option = document.createElement("option");
+          option.value = card.id;
+          option.textContent = card.name;
+          select.appendChild(option);
         });
-      } else {
-        renderLoggedOut();
+
+        // Display first card image initially
+        if (cards[0]) {
+          displaySelectedCard(cards[0].id);
+        }
       }
-    })();
-  </script>
+
+      // Display selected card image
+      async function displaySelectedCard(cardId) {
+        const container = document.getElementById("selectedCardContainer");
+        if (!cardId) {
+          container.innerHTML = "";
+          return;
+        }
+        try {
+          // Fetch card data for this card id
+          // Assuming the card details endpoint exists (adjust URL accordingly)
+          const token = localStorage.getItem("discordToken");
+          if (!token) throw new Error("No token found");
+
+          const res = await fetch(
+            `https://hypernet.netlify.app/.netlify/functions/getcard?id=${cardId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (!res.ok) throw new Error("Failed to fetch card data");
+          const card = await res.json();
+
+          // Show the card image
+          container.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width: 300px; border-radius: 15px;" />`;
+        } catch (err) {
+          console.error(err);
+          container.innerHTML = "";
+        }
+      }
+
+      // MAIN IIFE on page load
+      (function () {
+        // Check for token param in URL, save if found
+        let urlToken = getQueryParam("token");
+        if (urlToken) {
+          if (urlToken.startsWith("Bearer ")) {
+            urlToken = urlToken.slice(7);
+          }
+          saveToken(urlToken);
+          // Remove token param from URL without reload
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
+
+        // Get token from localStorage
+        const token = localStorage.getItem("discordToken");
+
+        // Validate and decode token
+        if (token && isTokenValid(token)) {
+          const user = jwt_decode(token);
+          // user usually has fields: id, username, discriminator, avatar, exp, etc.
+          renderLoggedIn(user);
+
+          // Fetch and populate cards
+          fetchUserCards(token).then((cards) => {
+            populateCardDropdown(cards);
+
+            // Add change event to dropdown to update image
+            const sel = document.getElementById("playerOneCards");
+            sel.addEventListener("change", function () {
+              displaySelectedCard(this.value);
+            });
+          });
+        } else {
+          alert("You must be logged in to access this page.");
+          window.location.href = "menu.html";
+        }
+      })();
+    </script>
+  </body>
 </html>
