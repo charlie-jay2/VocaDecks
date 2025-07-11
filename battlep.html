@@ -437,11 +437,16 @@
 
       const imgSrc = `./Cards/${cardName}`;
 
-      container.innerHTML = `<img src="${imgSrc}" style="width:100%;height:auto;user-select:none;" alt="Selected Card" />`;
+      container.innerHTML = `<img src="${imgSrc}" style="max-width:80%; max-height:200px; height:auto; user-select:none;" alt="Selected Card" />`;
     }
 
     function formatCardNameWithRarity(name) {
-      let cleanName = name.replace(/\.png$/i, "");
+      let cleanName = name.toLowerCase();
+
+      // Ensure it ends with .png
+      if (!cleanName.endsWith(".png")) {
+        cleanName += ".png";
+      }
 
       const rarityMatch = cleanName.match(/^r([1-5])/i);
       if (!rarityMatch) return cleanName;
@@ -455,7 +460,8 @@
         5: "UNTOUCHED",
       };
 
-      const baseName = cleanName.replace(/^r[1-5]/i, "");
+      // Remove rarity prefix and extension
+      const baseName = cleanName.replace(/^r[1-5]/i, "").replace(/\.png$/, "");
 
       return `${baseName.trim()} (${rarityMap[rarityNum] || "UNKNOWN"})`;
     }
@@ -499,13 +505,16 @@
         dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
 
         cards.forEach((card) => {
-          const option = document.createElement("option");
-          option.value = card.id || card.name || card;
+          let val = (card.id || card.name || card).toLowerCase();
 
-          const displayName = formatCardNameWithRarity(
-            card.name || card.id || card
-          );
-          option.textContent = displayName;
+          if (!val.endsWith(".png")) {
+            val += ".png";
+          }
+
+          const option = document.createElement("option");
+          option.value = val;
+
+          option.textContent = formatCardNameWithRarity(val);
 
           dropdown.appendChild(option);
         });
