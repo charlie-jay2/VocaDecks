@@ -264,6 +264,27 @@
         background: linear-gradient(90deg, #29ff52 0%, #40e0d0 100%);
         transition: width 0.5s ease-in-out, background 0.8s ease-in-out;
       }
+
+      .logout {
+        position: absolute;
+        top: 7%;
+        left: 90%;
+        font-size: 50px;
+        width: auto;
+        border-radius: 15px;
+        height: 6%;
+        color: black;
+        background-color: red;
+        font-size: 27px;
+      }
+
+      .back {
+        width: auto;
+        height: 50px;
+        position: absolute;
+        top: 0.5%;
+        left: 0.5%;
+      }
     </style>
   </head>
   <body>
@@ -321,7 +342,42 @@
       <h1 class="battlel">BATTLES LOST:</h1>
       <h1 class="battleln">00,000,000</h1>
     </div>
+    <div>
+      <button class="logout">Logout</button>
+      <img
+        src="./Assets/ICONS/back.png"
+        class="back"
+        onclick="window.location.href='menu.html'" />
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3/build/jwt-decode.min.js"></script>
+    <!-- <script>
+      function isTokenValid(token) {
+        try {
+          const decoded = jwt_decode(token);
+          return decoded.exp * 1000 > Date.now();
+        } catch {
+          return false;
+        }
+      }
 
+      function renderLoggedOut() {
+        localStorage.removeItem("discordToken");
+        localStorage.removeItem("discordTokenSavedAt");
+        window.location.href = "index.html"; // Redirect to home page
+      }
+
+      document.querySelector(".logout").addEventListener("click", () => {
+        renderLoggedOut();
+      });
+
+      // Optional: check token validity on page load
+      (function () {
+        const token = localStorage.getItem("discordToken");
+        if (!token || !isTokenValid(token)) {
+          renderLoggedOut();
+        }
+      })();
+    </script> -->
     <script>
       const themes = {
         t1: {
