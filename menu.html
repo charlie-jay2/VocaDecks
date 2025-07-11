@@ -255,6 +255,20 @@
       pvbse.addEventListener("click", () => {
         window.location.href = "loading.html";
       });
+
+      // Parse token from URL query string
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+
+      if (token) {
+        // Store token in localStorage or sessionStorage
+        localStorage.setItem("jwtToken", token);
+
+        // Optionally remove token from URL for cleanliness
+        const url = new URL(window.location);
+        url.searchParams.delete("token");
+        window.history.replaceState({}, document.title, url.toString());
+      }
     </script>
   </body>
 </html>
