@@ -39,7 +39,6 @@ exports.handler = async function (event, context) {
     const db = client.db("test");
     const users = db.collection("users");
 
-    // Match on userId now (not discordId)
     const userDoc = await users.findOne({ userId: decoded.id });
 
     console.log("Mongo userDoc:", userDoc);
@@ -52,7 +51,6 @@ exports.handler = async function (event, context) {
       };
     }
 
-    // Add missing battlesWon and battlesLost if needed
     const updates = {};
     if (userDoc.battlesWon === undefined) updates.battlesWon = 0;
     if (userDoc.battlesLost === undefined) updates.battlesLost = 0;
