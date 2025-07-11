@@ -435,8 +435,7 @@
         return;
       }
 
-      // Build img URL from cardName assuming card images are under Assets/Cards/
-      const imgSrc = `./Assets/Cards/${cardName}`;
+      const imgSrc = `./Cards/${cardName}`;
 
       container.innerHTML = `<img src="${imgSrc}" style="width:100%;height:auto;user-select:none;" alt="Selected Card" />`;
     }
