@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <link
       rel="stylesheet"
@@ -269,6 +270,13 @@
         border-radius: 25px;
         overflow: hidden;
       }
+
+      .pb-fill {
+        height: 100%;
+        width: 0%;
+        background-color: #ffd700;
+        transition: width 0.5s ease-in-out;
+      }
     </style>
   </head>
   <body>
@@ -326,7 +334,9 @@
       <div class="pfp"></div>
       <h1 class="name">USERNAME</h1>
       <h1 class="level">LEVEL: 000</h1>
-      <div class="pb"></div>
+      <div class="pb">
+        <div class="pb-fill"></div>
+      </div>
       <h1 class="synthct">SYNTH CREDITS</h1>
       <img src="./Profile/SynthCredits.png" class="synthcl img-responsive" />
       <h1 class="synthc">00,000,000</h1>
@@ -366,12 +376,49 @@
       window.addEventListener("load", () => {
         const saved = localStorage.getItem("selectedTheme") || "t1";
         setTheme(saved);
+        loadUserData();
       });
 
       document.getElementById("reset-theme").addEventListener("click", () => {
         setTheme("t1");
         localStorage.removeItem("selectedTheme");
       });
+
+      function getXpForLevel(level) {
+        return level * 50;
+      }
+
+      async function loadUserData() {
+        try {
+          const response = await fetch("/.netlify/functions/getUserData", {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          });
+          if (!response.ok) throw new Error("Failed to fetch user data");
+          const data = await response.json();
+
+          document.querySelector(".name").textContent = data.username;
+          document.querySelector(".level").textContent = `LEVEL: ${data.level
+            .toString()
+            .padStart(3, "0")}`;
+          document.querySelector(".synthc").textContent =
+            data.points.toLocaleString();
+          document.querySelector(".battlewn").textContent =
+            data.battlesWon.toLocaleString();
+          document.querySelector(".battleln").textContent =
+            data.battlesLost.toLocaleString();
+
+          const neededXp = getXpForLevel(data.level);
+          const progress = Math.min(data.xp / neededXp, 1);
+          document.querySelector(".pb-fill").style.width = `${progress * 100}%`;
+
+          const pfpDiv = document.querySelector(".pfp");
+          pfpDiv.innerHTML = `<img src="${data.avatar}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;" />`;
+        } catch (err) {
+          console.error("Error loading user data:", err);
+        }
+      }
     </script>
   </body>
 </html>
