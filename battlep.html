@@ -385,16 +385,14 @@
     async function fetchUserCards(token) {
       try {
         const response = await fetch(
-          `/api/getUserCards?token=${encodeURIComponent(token)}`
+          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch user cards");
-        }
+        if (!response.ok) throw new Error("Failed to fetch user cards");
         const data = await response.json();
         return data.cards || [];
-      } catch (err) {
-        console.error(err);
-        return [];
+      } catch (error) {
+        console.error(error);
+        throw error;
       }
     }
 
