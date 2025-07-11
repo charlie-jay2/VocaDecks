@@ -358,10 +358,11 @@
       <div id="discordUserInfo" style="display: none"></div>
     </div>
   </body>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+
   <script>
-    async function getQueryParam(param) {
+    function getQueryParam(param) {
       return new URLSearchParams(window.location.search).get(param);
     }
 
@@ -369,6 +370,7 @@
       if (token?.startsWith("Bearer ")) token = token.slice(7);
       localStorage.setItem("discordToken", token);
       localStorage.setItem("discordTokenSavedAt", Date.now());
+      // Remove token from URL so it doesn’t linger
       history.replaceState(null, "", window.location.pathname);
     }
 
@@ -461,27 +463,56 @@
     }
 
     (async function () {
-      let t = await getQueryParam("token");
-      if (t) saveToken(t);
-      const stored = localStorage.getItem("discordToken");
-
-      if (stored) {
-        const user = await fetchDiscordUser(stored);
-        if (user) {
-          renderLoggedIn(user);
-          const cards = await fetchUserCards(stored);
-          populateCardDropdown(cards);
-          document
-            .getElementById("playerOneCards")
-            .addEventListener("change", (e) =>
-              displaySelectedCard(e.target.value)
-            );
-        } else {
-          renderLoggedOut();
-        }
-      } else {
-        renderLoggedOut();
+      // 1. Check token in URL, save it if present
+      let token = getQueryParam("token");
+      if (token) {
+        saveToken(token);
       }
+
+      // 2. Get token from localStorage
+      token = localStorage.getItem("discordToken");
+
+      if (!token) {
+        // No token? Redirect to login (index.html)
+        window.location.href = "index.html";
+        return;
+      }
+
+      // 3. Decode JWT to verify expiration (optional but recommended)
+      try {
+        const decoded = jwt_decode(token);
+        const now = Date.now() / 1000;
+        if (decoded.exp && decoded.exp < now) {
+          // Token expired
+          localStorage.removeItem("discordToken");
+          window.location.href = "index.html";
+          return;
+        }
+      } catch {
+        // Invalid token
+        localStorage.removeItem("discordToken");
+        window.location.href = "index.html";
+        return;
+      }
+
+      // 4. Fetch Discord user with token
+      const user = await fetchDiscordUser(token);
+      if (!user) {
+        // Invalid token or failed fetch
+        localStorage.removeItem("discordToken");
+        window.location.href = "index.html";
+        return;
+      }
+
+      // 5. Show logged in UI
+      renderLoggedIn(user);
+
+      // 6. Load cards and setup dropdown
+      const cards = await fetchUserCards(token);
+      populateCardDropdown(cards);
+      document
+        .getElementById("playerOneCards")
+        .addEventListener("change", (e) => displaySelectedCard(e.target.value));
     })();
   </script>
 </html>
