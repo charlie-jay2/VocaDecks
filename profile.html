@@ -410,7 +410,8 @@
             data.battlesLost.toLocaleString();
 
           const neededXp = getXpForLevel(data.level);
-          const progress = Math.min(data.xp / neededXp, 1);
+          // clamp to 99% so bar never looks full until actual level up
+          const progress = Math.min(data.xp / neededXp, 0.99);
           document.querySelector(".pb-fill").style.width = `${progress * 100}%`;
 
           const pfpDiv = document.querySelector(".pfp");

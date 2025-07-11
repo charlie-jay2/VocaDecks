@@ -51,6 +51,7 @@ exports.handler = async function (event, context) {
       };
     }
 
+    // Ensure missing fields are added
     const updates = {};
     if (userDoc.battlesWon === undefined) updates.battlesWon = 0;
     if (userDoc.battlesLost === undefined) updates.battlesLost = 0;
@@ -61,6 +62,16 @@ exports.handler = async function (event, context) {
       Object.assign(userDoc, updates);
     }
 
+    // XP bar calculation
+    const level = userDoc.level ?? 1;
+    const xp = userDoc.xp ?? 0;
+
+    const xpNeeded = level * 100; // Assuming 100 XP per level scaling
+    let xpPercent = (xp / xpNeeded) * 100;
+
+    // Clamp to 99% max to prevent bar from showing "full" before level up
+    xpPercent = Math.min(xpPercent, 99);
+
     const avatarURL = decoded.avatar
       ? `https://cdn.discordapp.com/avatars/${decoded.id}/${decoded.avatar}.png`
       : "https://cdn.discordapp.com/embed/avatars/0.png";
@@ -70,8 +81,10 @@ exports.handler = async function (event, context) {
       body: JSON.stringify({
         username: decoded.username,
         avatar: avatarURL,
-        level: userDoc.level ?? 1,
-        xp: userDoc.xp ?? 0,
+        level: level,
+        xp: xp,
+        xpNeeded: xpNeeded,
+        xpPercent: xpPercent,
         points: userDoc.points ?? 0,
         messageCount: userDoc.messageCount ?? 0,
         trades: userDoc.trades ?? 0,
