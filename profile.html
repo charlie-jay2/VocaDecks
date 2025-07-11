@@ -520,5 +520,21 @@
         setInterval(loadUserData, 5000);
       });
     </script>
+    <script>
+      (function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get("token");
+        if (token) {
+          localStorage.setItem("discordToken", token);
+          localStorage.setItem("discordTokenSavedAt", Date.now());
+          // Remove token from URL without reload
+          urlParams.delete("token");
+          const newUrl =
+            window.location.pathname +
+            (urlParams.toString() ? "?" + urlParams.toString() : "");
+          window.history.replaceState({}, document.title, newUrl);
+        }
+      })();
+    </script>
   </body>
 </html>
