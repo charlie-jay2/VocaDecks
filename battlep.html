@@ -359,8 +359,7 @@
     </div>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3/build/jwt-decode.min.js"></script>
   <script>
     function getQueryParam(param) {
       return new URLSearchParams(window.location.search).get(param);
@@ -368,10 +367,19 @@
 
     function saveToken(token) {
       if (token?.startsWith("Bearer ")) token = token.slice(7);
-      localStorage.setItem("discordToken", token);
+      localStorage.setItem("token", token);
       localStorage.setItem("discordTokenSavedAt", Date.now());
       // Remove token from URL so it doesn’t linger
       history.replaceState(null, "", window.location.pathname);
+    }
+
+    function isTokenValid(token) {
+      try {
+        const decoded = jwt_decode(token);
+        return decoded.exp * 1000 > Date.now();
+      } catch {
+        return false;
+      }
     }
 
     async function fetchDiscordUser(token) {
@@ -391,11 +399,11 @@
       document.getElementById("discordLoginBtnWrapper").style.display = "none";
       const infoDiv = document.getElementById("discordUserInfo");
       infoDiv.innerHTML = `
-    <div class="user-row">
-      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
-      <div class="username">${user.username}</div>
-      <div>ID: ${user.id}</div>
-    </div>`;
+      <div class="user-row">
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
+        <div class="username">${user.username}</div>
+        <div>ID: ${user.id}</div>
+      </div>`;
       infoDiv.style.display = "block";
 
       const po = document.querySelector(".text1");
@@ -403,13 +411,8 @@
     }
 
     function renderLoggedOut() {
-      document.getElementById("discordLoginBtnWrapper").style.display =
-        "inline-block";
-      const infoDiv = document.getElementById("discordUserInfo");
-      infoDiv.style.display = "none";
-      infoDiv.innerHTML = "";
-      const po = document.querySelector(".text1");
-      if (po) po.textContent = "PLAYER ONE";
+      localStorage.removeItem("token");
+      window.location.href = "index.html";
     }
 
     async function fetchUserCards(token) {
@@ -462,6 +465,11 @@
       }
     }
 
+    // Logout button logic (assuming you have a button with class 'logout')
+    document.querySelector(".logout")?.addEventListener("click", () => {
+      renderLoggedOut();
+    });
+
     (async function () {
       // 1. Check token in URL, save it if present
       let token = getQueryParam("token");
@@ -469,29 +477,12 @@
         saveToken(token);
       }
 
-      // 2. Get token from localStorage
-      token = localStorage.getItem("discordToken");
+      // 2. Get token from localStorage (same key as profile.html)
+      token = localStorage.getItem("token");
 
-      if (!token) {
-        // No token? Redirect to login (index.html)
-        window.location.href = "index.html";
-        return;
-      }
-
-      // 3. Decode JWT to verify expiration (optional but recommended)
-      try {
-        const decoded = jwt_decode(token);
-        const now = Date.now() / 1000;
-        if (decoded.exp && decoded.exp < now) {
-          // Token expired
-          localStorage.removeItem("discordToken");
-          window.location.href = "index.html";
-          return;
-        }
-      } catch {
-        // Invalid token
-        localStorage.removeItem("discordToken");
-        window.location.href = "index.html";
+      // 3. Validate token and redirect if invalid/missing
+      if (!token || !isTokenValid(token)) {
+        renderLoggedOut();
         return;
       }
 
@@ -499,8 +490,7 @@
       const user = await fetchDiscordUser(token);
       if (!user) {
         // Invalid token or failed fetch
-        localStorage.removeItem("discordToken");
-        window.location.href = "index.html";
+        renderLoggedOut();
         return;
       }
 
