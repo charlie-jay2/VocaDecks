@@ -474,7 +474,7 @@
           if (!token) throw new Error("No token found");
 
           const res = await fetch(
-            `https://hypernet.netlify.app/.netlify/functions/getUserCards?id=${cardId}`,
+            `https://vocadecks.netlify.app/.netlify/functions/getUserCards?id=${cardId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
