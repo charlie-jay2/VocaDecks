@@ -421,8 +421,14 @@
         localStorage.removeItem("discordToken");
         localStorage.removeItem("discordTokenSavedAt");
         renderLoggedOut();
-        window.location.href = "index.html"; // redirect to index.html
+        window.location.href = "index.html"; // redirect to index.html or wherever
       };
+
+      // Replace PLAYER ONE with username in ALL CAPS
+      const playerOneText = document.querySelector(".text1");
+      if (playerOneText) {
+        playerOneText.textContent = user.username.toUpperCase();
+      }
     }
 
     function renderLoggedOut() {
@@ -433,6 +439,12 @@
       const infoDiv = document.getElementById("discordUserInfo");
       infoDiv.style.display = "none";
       infoDiv.innerHTML = "";
+
+      // Revert text to PLAYER ONE when logged out
+      const playerOneText = document.querySelector(".text1");
+      if (playerOneText) {
+        playerOneText.textContent = "PLAYER ONE";
+      }
     }
 
     async function fetchUserCards(token) {
@@ -534,22 +546,6 @@
         });
       } else {
         renderLoggedOut();
-      }
-    })();
-  </script>
-  <script>
-    (function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get("token");
-      if (token) {
-        localStorage.setItem("discordToken", token);
-        localStorage.setItem("discordTokenSavedAt", Date.now());
-        // Remove token from URL without reload
-        urlParams.delete("token");
-        const newUrl =
-          window.location.pathname +
-          (urlParams.toString() ? "?" + urlParams.toString() : "");
-        window.history.replaceState({}, document.title, newUrl);
       }
     })();
   </script>
