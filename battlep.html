@@ -264,18 +264,8 @@
       border-top: 1px solid #444;
       padding-top: 8px;
     }
-    #discordUserInfo button {
-      margin-top: 5px;
-      padding: 4px 10px;
-      border-radius: 8px;
-      border: none;
-      background: #ff5555;
-      color: white;
-      cursor: pointer;
-    }
-    #discordUserInfo button:hover {
-      background: #cc4444;
-    }
+
+    /* Removed logout button styles because it's removed */
 
     /* NEW: dropdown style */
     #playerOneCards {
@@ -347,7 +337,7 @@
         src="./Assets/ICONS/Settings.png"
         class="back"
         style="margin-left: 15px; position: relative; bottom: 45px" />
-      <!-- Discord login button REMOVED -->
+      <!-- Keep discord user info div but empty initially -->
       <div id="discordUserInfo" style="display: none"></div>
     </div>
   </body>
@@ -366,7 +356,6 @@
       localStorage.setItem("token", token);
       localStorage.setItem("tokenSavedAt", Date.now());
 
-      // Clean up the URL (remove ?token=...)
       if (window.history.replaceState) {
         const newUrl =
           window.location.protocol +
@@ -393,66 +382,82 @@
       window.location.href = "index.html";
     }
 
-    function showDiscordUserInfo(user) {
-      const infoDiv = document.getElementById("discordUserInfo");
-      if (!user) {
-        infoDiv.style.display = "none";
-        return;
+    async function fetchUserCards(token) {
+      try {
+        const response = await fetch(
+          `/api/getUserCards?token=${encodeURIComponent(token)}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch user cards");
+        }
+        const data = await response.json();
+        return data.cards || [];
+      } catch (err) {
+        console.error(err);
+        return [];
       }
-      infoDiv.innerHTML = `
-        <div class="user-row">
-          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" />
-          <span class="username">${user.username}#${user.discriminator}</span>
-        </div>
-        <div class="dropdown-content">
-          <button id="logoutBtn">Logout</button>
-        </div>
-      `;
-      infoDiv.style.display = "block";
-
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("tokenSavedAt");
-        redirectToIndex();
-      });
     }
 
-    function init() {
+    function showDiscordUserInfo(user) {
+      // Only show username and avatar, NO logout button
+      const container = document.getElementById("discordUserInfo");
+      if (!container) return;
+
+      container.style.display = "block";
+      container.innerHTML = `
+        <div class="user-row">
+          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+          <span class="username" title="${user.username}">${user.username}</span>
+        </div>
+      `;
+    }
+
+    async function init() {
       let token = getToken();
 
       if (!token) {
-        // No token found, check URL param
         const urlToken = getQueryParam("token");
         if (urlToken) {
           saveToken(urlToken);
           token = urlToken;
         } else {
-          // No token in storage or URL => redirect
           redirectToIndex();
           return;
         }
       }
 
-      // Decode token
       const decoded = decodeToken(token);
       if (!decoded || !decoded.username || !decoded.id || !decoded.avatar) {
-        // Invalid token => clear and redirect
         localStorage.removeItem("token");
         localStorage.removeItem("tokenSavedAt");
         redirectToIndex();
         return;
       }
 
-      // Show Discord user info
       showDiscordUserInfo(decoded);
 
-      // Replace "PLAYER ONE" with username
+      // Replace PLAYER ONE with username
       const playerOneHeading = document.querySelector(".text1");
       if (playerOneHeading) {
         playerOneHeading.textContent = decoded.username.toUpperCase();
       }
 
-      // TODO: Populate dropdown or other UI using token/user info if needed
+      // Fetch cards and populate dropdown
+      const cards = await fetchUserCards(token);
+      const dropdown = document.getElementById("playerOneCards");
+
+      if (dropdown) {
+        // Clear existing options except the default placeholder
+        dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
+
+        cards.forEach((card) => {
+          // card object structure assumed: { id: ..., name: ... }
+          const option = document.createElement("option");
+          option.value = card.id || card.name || card;
+          option.textContent = card.name || card.id || card;
+          dropdown.appendChild(option);
+        });
+      }
     }
 
     window.onload = init;
