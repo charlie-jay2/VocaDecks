@@ -256,18 +256,13 @@
         window.location.href = "loading.html";
       });
 
-      // Parse token from URL query string
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get("token");
-
+      // In menu.html script
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("token");
       if (token) {
-        // Store token in localStorage or sessionStorage
-        localStorage.setItem("jwtToken", token);
-
-        // Optionally remove token from URL for cleanliness
-        const url = new URL(window.location);
-        url.searchParams.delete("token");
-        window.history.replaceState({}, document.title, url.toString());
+        localStorage.setItem("token", token);
+        // optionally remove token from URL
+        history.replaceState(null, "", window.location.pathname);
       }
     </script>
   </body>
