@@ -359,18 +359,25 @@
     </div>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3/build/jwt-decode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
     function getQueryParam(param) {
-      return new URLSearchParams(window.location.search).get(param);
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
     }
 
     function saveToken(token) {
-      if (token?.startsWith("Bearer ")) token = token.slice(7);
-      localStorage.setItem("token", token);
+      if (typeof token === "string" && token.startsWith("Bearer ")) {
+        token = token.slice(7);
+      }
+      localStorage.setItem("discordToken", token);
       localStorage.setItem("discordTokenSavedAt", Date.now());
-      // Remove token from URL so it doesn’t linger
-      history.replaceState(null, "", window.location.pathname);
+
+      // Clean up the URL (remove ?token=...)
+      if (window.history.replaceState) {
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
     }
 
     function isTokenValid(token) {
@@ -382,48 +389,65 @@
       }
     }
 
-    async function fetchDiscordUser(token) {
-      try {
-        const res = await fetch("https://discord.com/api/users/@me", {
-          headers: { Authorization: "Bearer " + token },
-        });
-        if (!res.ok) throw new Error("Failed to fetch user");
-        return await res.json();
-      } catch (e) {
-        console.error(e);
-        return null;
-      }
-    }
-
     function renderLoggedIn(user) {
-      document.getElementById("discordLoginBtnWrapper").style.display = "none";
+      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
+      if (loginBtnWrapper) {
+        loginBtnWrapper.style.display = "none";
+      }
+
       const infoDiv = document.getElementById("discordUserInfo");
+
       infoDiv.innerHTML = `
-    <div class="user-row">
-      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
-      <div class="username">${user.username}</div>
-      <div>ID: ${user.id}</div>
-    </div>`;
+      <div class="user-row" id="userRow">
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
+        <div class="username">${user.username}</div>
+      </div>
+      <div class="dropdown-content" id="dropdownContent" style="display:none;">
+        <div>ID: ${user.id}</div>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    `;
       infoDiv.style.display = "block";
 
-      const po = document.querySelector(".text1");
-      if (po) po.textContent = user.username.toUpperCase();
+      const userRow = document.getElementById("userRow");
+      const dropdownContent = document.getElementById("dropdownContent");
+
+      userRow.onclick = () => {
+        dropdownContent.style.display =
+          dropdownContent.style.display === "none" ? "block" : "none";
+      };
+
+      document.getElementById("logoutBtn").onclick = () => {
+        localStorage.removeItem("discordToken");
+        localStorage.removeItem("discordTokenSavedAt");
+        renderLoggedOut();
+        window.location.href = "index.html"; // redirect to index.html
+      };
     }
 
     function renderLoggedOut() {
-      localStorage.removeItem("token");
-      window.location.href = "index.html";
+      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
+      if (loginBtnWrapper) {
+        loginBtnWrapper.style.display = "inline-block";
+      }
+      const infoDiv = document.getElementById("discordUserInfo");
+      infoDiv.style.display = "none";
+      infoDiv.innerHTML = "";
     }
 
     async function fetchUserCards(token) {
       try {
-        const res = await fetch("/.netlify/functions/getUserCards", {
-          headers: { Authorization: "Bearer " + token },
-        });
-        if (!res.ok) throw new Error("cards fetch failed");
-        return (await res.json()).cards || [];
+        const res = await fetch(
+          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
+        );
+        if (!res.ok) {
+          console.error("Failed to fetch cards", await res.json());
+          return [];
+        }
+        const data = await res.json();
+        return data.cards || [];
       } catch (e) {
-        console.error(e);
+        console.error("Network or other fetch error:", e);
         return [];
       }
     }
@@ -431,78 +455,86 @@
     function populateCardDropdown(cards) {
       const sel = document.getElementById("playerOneCards");
       sel.innerHTML = '<option value="">-- Your Cards --</option>';
-      const rar = {
+
+      const rarityMap = {
         r1: "common",
         r2: "extra",
         r3: "rare",
         r4: "legendary",
         r5: "untouched",
       };
+
       cards.forEach((c) => {
-        const m = c.match(/^r[1-5]/),
-          code = m?.[0],
-          name = c
-            .replace(/^r[1-5]/, "")
-            .replace(/\.[^/.]+$/, "")
-            .trim();
-        const o = new Option(`${name} (${rar[code] || "unknown"})`, c);
-        sel.add(o);
+        const o = document.createElement("option");
+        const rarityMatch = c.match(/^r[1-5]/);
+        const rarityCode = rarityMatch ? rarityMatch[0] : null;
+        const rarityText = rarityCode ? rarityMap[rarityCode] : "unknown";
+
+        let cardName = c.replace(/^r[1-5]/, "");
+        cardName = cardName.replace(/\.[^/.]+$/, "");
+        cardName = cardName.trim();
+
+        o.value = c;
+        o.textContent = `${cardName} (${rarityText})`;
+        sel.appendChild(o);
       });
     }
 
-    function displaySelectedCard(name) {
-      const cont = document.getElementById("selectedCardContainer");
-      if (!cont) return;
-      const old = document.getElementById("selectedCardImage");
-      if (old) old.remove();
-      if (name) {
+    function displaySelectedCard(cardFileName) {
+      const container = document.getElementById("selectedCardContainer");
+      if (!container) return;
+
+      // Remove any previous card image
+      const existingCardImg = document.getElementById("selectedCardImage");
+      if (existingCardImg) {
+        existingCardImg.remove();
+      }
+
+      if (cardFileName) {
         const img = document.createElement("img");
         img.id = "selectedCardImage";
-        img.src = `/cards/${name}`;
-        img.style =
-          "max-width:280px;max-height:370px;position:absolute;top:0;left:0;transform:scale(0.9);pointer-events:none;";
-        cont.appendChild(img);
+        img.src = `/cards/${cardFileName}`;
+        img.alt = "Selected Card";
+        img.style = `
+        max-width: 280px; /* fits nicely */
+        max-height: 370px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform: translate(0, 0) scale(0.9);
+        pointer-events: none;
+      `;
+        container.appendChild(img);
       }
     }
 
-    // Logout button logic (assuming you have a button with class 'logout')
-    document.querySelector(".logout")?.addEventListener("click", () => {
-      renderLoggedOut();
-    });
-
-    (async function () {
-      // 1. Check token in URL, save it if present
-      let token = getQueryParam("token");
-      if (token) {
-        saveToken(token);
+    (function () {
+      let urlToken = getQueryParam("token");
+      if (urlToken) {
+        if (urlToken.startsWith("Bearer ")) {
+          urlToken = urlToken.slice(7);
+        }
+        saveToken(urlToken);
       }
 
-      // 2. Get token from localStorage (same key as profile.html)
-      token = localStorage.getItem("token");
+      const token = localStorage.getItem("discordToken");
+      if (token && isTokenValid(token)) {
+        const user = jwt_decode(token);
+        renderLoggedIn(user);
 
-      // 3. Validate token and redirect if invalid/missing
-      if (!token || !isTokenValid(token)) {
+        fetchUserCards(token).then((cards) => {
+          populateCardDropdown(cards);
+
+          // Add change event to dropdown
+          const sel = document.getElementById("playerOneCards");
+          sel.addEventListener("change", function () {
+            const selectedCard = this.value;
+            displaySelectedCard(selectedCard);
+          });
+        });
+      } else {
         renderLoggedOut();
-        return;
       }
-
-      // 4. Fetch Discord user with token
-      const user = await fetchDiscordUser(token);
-      if (!user) {
-        // Invalid token or failed fetch
-        renderLoggedOut();
-        return;
-      }
-
-      // 5. Show logged in UI
-      renderLoggedIn(user);
-
-      // 6. Load cards and setup dropdown
-      const cards = await fetchUserCards(token);
-      populateCardDropdown(cards);
-      document
-        .getElementById("playerOneCards")
-        .addEventListener("change", (e) => displaySelectedCard(e.target.value));
     })();
   </script>
 </html>
