@@ -276,18 +276,6 @@
       z-index: 11;
       width: 18%;
     }
-
-    /* New style for displayed card image */
-    #selectedCardDisplay {
-      position: absolute;
-      top: 60%;
-      left: 34%;
-      transform: translate(-50%, 0);
-      z-index: 12;
-      width: 18%;
-      text-align: center;
-      pointer-events: none; /* disable interaction */
-    }
   </style>
   <body>
     <div id="logoline">
@@ -314,9 +302,6 @@
         <select id="playerOneCards" class="form-control">
           <option value="">-- Your Cards --</option>
         </select>
-
-        <!-- Added container for selected card display -->
-        <div id="selectedCardDisplay"></div>
 
         <h1 class="text2">PLAYER TWO</h1>
       </div>
@@ -359,131 +344,181 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    // cards array will be accessible globally to event listener
-    let cards = [];
-
-    // Map rarity codes to names
-    const rarityMap = {
-      r1: "COMMON",
-      r2: "EXTRA",
-      r3: "RARE",
-      r4: "LEGENDARY",
-      r5: "UNTOUCHED",
-    };
-
-    // Format card name for dropdown display: remove .png, replace rarity prefix with name in brackets
-    function formatCardNameForDropdown(filename) {
-      // filename like r1CARD NAME.png
-      // Extract rarity code prefix (r1 to r5)
-      const rarityCodeMatch = filename.match(/^r[1-5]/i);
-      if (!rarityCodeMatch) return filename.replace(/\.png$/i, ""); // fallback
-
-      const rarityCode = rarityCodeMatch[0].toLowerCase();
-      const rarityName = rarityMap[rarityCode] || "UNKNOWN";
-
-      // Remove rarity prefix and extension
-      let cardBaseName = filename
-        .replace(/^r[1-5]/i, "")
-        .replace(/\.png$/i, "");
-
-      // Return with rarity name in brackets before card name
-      return `[${rarityName}] ${cardBaseName}`;
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
     }
 
-    // Format card name for image alt
-    function formatCardNameWithRarity(filename) {
-      return formatCardNameForDropdown(filename);
+    function saveToken(token) {
+      if (typeof token === "string" && token.startsWith("Bearer ")) {
+        token = token.slice(7);
+      }
+      localStorage.setItem("token", token);
+      localStorage.setItem("tokenSavedAt", Date.now());
+
+      if (window.history.replaceState) {
+        const newUrl =
+          window.location.protocol +
+          "//" +
+          window.location.host +
+          window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
+
+    function getToken() {
+      return localStorage.getItem("token");
+    }
+
+    function decodeToken(token) {
+      try {
+        return jwt_decode(token);
+      } catch {
+        return null;
+      }
+    }
+
+    function redirectToIndex() {
+      window.location.href = "index.html";
     }
 
     async function fetchUserCards(token) {
       try {
-        const response = await fetch("https://vocadecks.com/api/usercards", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          console.error("Failed to fetch user cards");
-          return [];
-        }
-
+        const response = await fetch(
+          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch user cards");
         const data = await response.json();
         return data.cards || [];
       } catch (error) {
-        console.error("Error fetching user cards:", error);
-        return [];
+        console.error(error);
+        throw error;
       }
     }
 
-    async function init() {
-      // Check login token cookie
-      const token = Cookies.get("token");
-      if (!token) {
-        window.location.href = "/login.html";
+    function showDiscordUserInfo(user) {
+      // Only show username and avatar, NO logout button
+      const container = document.getElementById("discordUserInfo");
+      if (!container) return;
+
+      container.style.display = "block";
+      container.innerHTML = `
+      <div class="user-row">
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+        <span class="username" title="${user.username}">${user.username}</span>
+      </div>
+    `;
+    }
+
+    function displayCardImage(cardName) {
+      // The cardName is the name/id string, typically r1<name>.png or similar
+      // Display only if rarity is r1 (common) as you requested
+
+      const container = document.getElementById("selectedCardContainer");
+      if (!container) return;
+
+      // If empty selection, clear container
+      if (!cardName) {
+        container.innerHTML = "";
         return;
       }
 
-      // Fetch user cards
-      cards = await fetchUserCards(token);
+      // Check rarity prefix (r1 to r5)
+      const rarityMatch = cardName.match(/^r([1-5])/i);
+      if (!rarityMatch) {
+        container.innerHTML = ""; // no rarity prefix, clear
+        return;
+      }
+      const rarity = rarityMatch[1];
+      if (rarity !== "1") {
+        container.innerHTML = ""; // only show r1 cards here
+        return;
+      }
 
-      // Get dropdown element
-      const playerOneCardsDropdown = document.getElementById("playerOneCards");
+      // Build img URL from cardName assuming card images are under Assets/Cards/
+      const imgSrc = `./Assets/Cards/${cardName}`;
 
-      // Clear dropdown
-      playerOneCardsDropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
-
-      // Add cards to dropdown with formatted names
-      cards.forEach((card) => {
-        const option = document.createElement("option");
-        option.value = card.name || card; // Use card name string or card object property
-        option.textContent = formatCardNameForDropdown(option.value);
-        playerOneCardsDropdown.appendChild(option);
-      });
-
-      // Setup selected card display area
-      const selectedCardDisplay = document.getElementById(
-        "selectedCardDisplay"
-      );
-      const cardBasePath = "./Cards/";
-
-      // Clear any previous display
-      selectedCardDisplay.innerHTML = "";
-
-      // Add event listener to update card image when dropdown changes
-      playerOneCardsDropdown.addEventListener("change", function () {
-        const selectedValue = this.value;
-        if (!selectedValue) {
-          selectedCardDisplay.innerHTML = ""; // clear display
-          return;
-        }
-
-        // Find the selected card in cards array (in case cards are objects or strings)
-        const selectedCard = cards.find((c) => (c.name || c) === selectedValue);
-
-        if (!selectedCard) {
-          selectedCardDisplay.textContent = "Card not found";
-          return;
-        }
-
-        const cardName = selectedCard.name || selectedValue;
-
-        // Create image element
-        const img = document.createElement("img");
-        img.src = `${cardBasePath}${cardName}`;
-        img.alt = formatCardNameWithRarity(cardName);
-        img.style.maxWidth = "180px";
-        img.style.maxHeight = "250px";
-        img.style.border = "2px solid white";
-        img.style.borderRadius = "12px";
-        img.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.7)";
-        img.style.marginTop = "10px";
-
-        selectedCardDisplay.innerHTML = "";
-        selectedCardDisplay.appendChild(img);
-      });
+      container.innerHTML = `<img src="${imgSrc}" style="width:100%;height:auto;user-select:none;" alt="Selected Card" />`;
     }
 
-    window.onload = init;
+    function formatCardNameWithRarity(name) {
+      let cleanName = name.replace(/\.png$/i, "");
+
+      const rarityMatch = cleanName.match(/^r([1-5])/i);
+      if (!rarityMatch) return cleanName;
+
+      const rarityNum = rarityMatch[1];
+      const rarityMap = {
+        1: "COMMON",
+        2: "EXTRA",
+        3: "RARE",
+        4: "LEGENDARY",
+        5: "UNTOUCHED",
+      };
+
+      const baseName = cleanName.replace(/^r[1-5]/i, "");
+
+      return `${baseName.trim()} (${rarityMap[rarityNum] || "UNKNOWN"})`;
+    }
+
+    async function init() {
+      let token = getToken();
+
+      if (!token) {
+        const urlToken = getQueryParam("token");
+        if (urlToken) {
+          saveToken(urlToken);
+          token = urlToken;
+        } else {
+          redirectToIndex();
+          return;
+        }
+      }
+
+      const decoded = decodeToken(token);
+      if (!decoded || !decoded.username || !decoded.id || !decoded.avatar) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("tokenSavedAt");
+        redirectToIndex();
+        return;
+      }
+
+      showDiscordUserInfo(decoded);
+
+      // Replace PLAYER ONE with username
+      const playerOneHeading = document.querySelector(".text1");
+      if (playerOneHeading) {
+        playerOneHeading.textContent = decoded.username.toUpperCase();
+      }
+
+      // Fetch cards and populate dropdown
+      const cards = await fetchUserCards(token);
+      const dropdown = document.getElementById("playerOneCards");
+
+      if (dropdown) {
+        // Clear existing options except the default placeholder
+        dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
+
+        cards.forEach((card) => {
+          const option = document.createElement("option");
+          option.value = card.id || card.name || card;
+
+          const displayName = formatCardNameWithRarity(
+            card.name || card.id || card
+          );
+          option.textContent = displayName;
+
+          dropdown.appendChild(option);
+        });
+
+        // When user selects a card, show its image if rarity is r1
+        dropdown.addEventListener("change", (e) => {
+          const selectedCardName = e.target.value;
+          displayCardImage(selectedCardName);
+        });
+      }
+    }
+
+    init();
   </script>
 </html>
