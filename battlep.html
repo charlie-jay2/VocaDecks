@@ -401,28 +401,10 @@
       <div class="user-row" id="userRow">
         <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
         <div class="username">${user.username}</div>
-      </div>
-      <div class="dropdown-content" id="dropdownContent" style="display:none;">
         <div>ID: ${user.id}</div>
-        <button id="logoutBtn">Logout</button>
       </div>
     `;
       infoDiv.style.display = "block";
-
-      const userRow = document.getElementById("userRow");
-      const dropdownContent = document.getElementById("dropdownContent");
-
-      userRow.onclick = () => {
-        dropdownContent.style.display =
-          dropdownContent.style.display === "none" ? "block" : "none";
-      };
-
-      document.getElementById("logoutBtn").onclick = () => {
-        localStorage.removeItem("discordToken");
-        localStorage.removeItem("discordTokenSavedAt");
-        renderLoggedOut();
-        window.location.href = "index.html"; // redirect to index.html or wherever
-      };
 
       // Replace PLAYER ONE with username in ALL CAPS
       const playerOneText = document.querySelector(".text1");
