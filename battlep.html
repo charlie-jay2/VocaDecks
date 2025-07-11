@@ -346,7 +346,7 @@
 
       // Save token to localStorage
       function saveToken(token) {
-        localStorage.setItem("discordToken", token);
+        localStorage.setItem("token", token);
       }
 
       // Validate token expiration
@@ -396,7 +396,7 @@
 
         // Add logout handler
         document.getElementById("logoutBtn").onclick = () => {
-          localStorage.removeItem("discordToken");
+          localStorage.removeItem("token");
           window.location.href = "menu.html";
         };
       }
@@ -473,7 +473,7 @@
         try {
           // Fetch card data for this card id
           // Assuming the card details endpoint exists (adjust URL accordingly)
-          const token = localStorage.getItem("discordToken");
+          const token = localStorage.getItem("token");
           if (!token) throw new Error("No token found");
 
           const res = await fetch(
@@ -510,7 +510,7 @@
         }
 
         // Get token from localStorage
-        const token = localStorage.getItem("discordToken");
+        const token = localStorage.getItem("token");
 
         // Validate and decode token
         if (token && isTokenValid(token)) {
