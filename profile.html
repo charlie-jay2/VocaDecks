@@ -429,6 +429,10 @@
           console.error("Error loading user data:", err);
         }
       }
+
+      // Call loadUserData immediately and then every 5 seconds
+      loadUserData();
+      setInterval(loadUserData, 5000);
     </script>
   </body>
 </html>
