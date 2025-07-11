@@ -77,31 +77,18 @@
         border: 8px solid transparent;
         border-radius: 15px;
         transition: border 0.3s ease;
+        position: fixed;
+        max-width: calc(23% - 80px);
+        max-height: calc(100% - 80px);
+        object-fit: contain;
+        z-index: 0;
       }
 
       .t1 {
-        position: fixed;
         top: 31%;
         left: 63%;
         transform: translate(-50%, -50%);
-        max-width: calc(23% - 80px);
-        max-height: calc(100% - 80px);
-        object-fit: contain;
-        z-index: 0;
       }
-
-      .t2,
-      .t3,
-      .t4,
-      .t5,
-      .t6 {
-        position: fixed;
-        max-width: calc(23% - 80px);
-        max-height: calc(100% - 80px);
-        object-fit: contain;
-        z-index: 0;
-      }
-
       .t2 {
         top: 54%;
         left: 63%;
@@ -274,14 +261,8 @@
       .pb-fill {
         height: 100%;
         width: 0%;
-        background: linear-gradient(
-          90deg,
-          #29ff52 0%,
-          #29ff52 25%,
-          #40e0d0 75%,
-          #40e0d0 100%
-        );
-        transition: width 0.5s ease-in-out;
+        background: linear-gradient(90deg, #29ff52 0%, #40e0d0 100%);
+        transition: width 0.5s ease-in-out, background 0.8s ease-in-out;
       }
     </style>
   </head>
@@ -354,12 +335,30 @@
 
     <script>
       const themes = {
-        t1: "./Menu/bg.png",
-        t2: "./Profile/MIDNIGHT_BLUE.png",
-        t3: "./Profile/TUNDRA_MANGO.png",
-        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
-        t5: "./Profile/CHERRIES__CREAM.png",
-        t6: "./Profile/SIREN_PURPLE.png",
+        t1: {
+          bg: "./Menu/bg.png",
+          gradient: ["#40e0d0", "#29ff52"],
+        },
+        t2: {
+          bg: "./Profile/MIDNIGHT_BLUE.png",
+          gradient: ["#e393ff", "#1b11fc"],
+        },
+        t3: {
+          bg: "./Profile/TUNDRA_MANGO.png",
+          gradient: ["#f16300", "#09b313"],
+        },
+        t4: {
+          bg: "./Profile/RADIANT_ROCKET_LOLLY.png",
+          gradient: ["#d01ae6", "#ebf415"],
+        },
+        t5: {
+          bg: "./Profile/CHERRIES__CREAM.png",
+          gradient: ["#ff54c0", "#ffe1e4"],
+        },
+        t6: {
+          bg: "./Profile/SIREN_PURPLE.png",
+          gradient: ["#ec1927", "#0617af"],
+        },
       };
 
       let lastChange = 0;
@@ -369,8 +368,16 @@
         if (now - lastChange < 1000) return;
         lastChange = now;
 
-        document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
+        // change background
+        document.body.style.background = `url(${themes[key].bg}) center/cover fixed no-repeat`;
 
+        // change progress bar gradient
+        const [start, end] = themes[key].gradient;
+        document.querySelector(
+          ".pb-fill"
+        ).style.background = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+
+        // update active theme border
         document
           .querySelectorAll(".t1, .t2, .t3, .t4, .t5, .t6")
           .forEach((el) => el.classList.remove("active-theme"));
@@ -416,7 +423,6 @@
             data.battlesLost.toLocaleString();
 
           const neededXp = getXpForLevel(data.level);
-          // clamp to 99% so bar never looks full until actual level up
           const progress = Math.min(data.xp / neededXp, 0.99);
           document.querySelector(".pb-fill").style.width = `${progress * 100}%`;
 
