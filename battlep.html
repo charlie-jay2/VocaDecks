@@ -391,11 +391,11 @@
       document.getElementById("discordLoginBtnWrapper").style.display = "none";
       const infoDiv = document.getElementById("discordUserInfo");
       infoDiv.innerHTML = `
-      <div class="user-row">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
-        <div class="username">${user.username}</div>
-        <div>ID: ${user.id}</div>
-      </div>`;
+    <div class="user-row">
+      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" />
+      <div class="username">${user.username}</div>
+      <div>ID: ${user.id}</div>
+    </div>`;
       infoDiv.style.display = "block";
 
       const po = document.querySelector(".text1");
