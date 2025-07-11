@@ -162,8 +162,8 @@
 
       .levelb {
         position: absolute;
-        top: 8.5%;
-        left: 46%;
+        top: 6%;
+        left: 53%;
         font-size: 40px;
         width: auto;
         height: 8%;
@@ -273,17 +273,6 @@
 
       <div>
         <h1 class="theme">THEME</h1>
-        <button
-          id="reset-theme"
-          class="btn btn-xs btn-default"
-          style="
-            position: absolute;
-            top: 16%;
-            left: 63.5%;
-            transform: translateX(-50%);
-          ">
-          RESET
-        </button>
         <img
           src="Menu/bg.png"
           class="t1 img-responsive"
@@ -368,16 +357,13 @@
         if (now - lastChange < 1000) return;
         lastChange = now;
 
-        // change background
         document.body.style.background = `url(${themes[key].bg}) center/cover fixed no-repeat`;
 
-        // change progress bar gradient
         const [start, end] = themes[key].gradient;
         document.querySelector(
           ".pb-fill"
         ).style.background = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
 
-        // update active theme border
         document
           .querySelectorAll(".t1, .t2, .t3, .t4, .t5, .t6")
           .forEach((el) => el.classList.remove("active-theme"));
@@ -425,6 +411,17 @@
           const neededXp = getXpForLevel(data.level);
           const progress = Math.min(data.xp / neededXp, 0.99);
           document.querySelector(".pb-fill").style.width = `${progress * 100}%`;
+
+          // level badge
+          const badge = document.querySelector(".levelb");
+          let src = "./Profile/C.png";
+          if (data.level >= 1 && data.level <= 10) src = "./Profile/C.png";
+          else if (data.level <= 40) src = "./Profile/E.png";
+          else if (data.level <= 90) src = "./Profile/R.png";
+          else if (data.level <= 110) src = "./Profile/L.png";
+          else if (data.level < 200) src = "./Profile/U.png";
+          else if (data.level === 200) src = "./Profile/I.png";
+          badge.src = src;
 
           const pfpDiv = document.querySelector(".pfp");
           pfpDiv.innerHTML = `<img src="${data.avatar}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;" />`;
