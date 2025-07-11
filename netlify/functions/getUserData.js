@@ -27,22 +27,44 @@ exports.handler = async function (event, context) {
     try {
       decoded = jwt.verify(token, process.env.SESSION_SECRET);
     } catch (e) {
+      console.error("JWT verification failed:", e);
       return {
         statusCode: 401,
         body: JSON.stringify({ error: "Invalid or expired token" }),
       };
     }
 
+    console.log("Decoded JWT:", decoded);
+
     const db = client.db("test");
     const users = db.collection("users");
 
     const userDoc = await users.findOne({ discordId: decoded.id });
 
+    console.log("Mongo userDoc:", userDoc);
+
     if (!userDoc) {
+      console.log("No user found for Discord ID:", decoded.id);
       return {
         statusCode: 404,
         body: JSON.stringify({ error: "User not found" }),
       };
+    }
+
+    // Add missing battlesWon and battlesLost fields if necessary
+    const updates = {};
+    if (userDoc.battlesWon === undefined) {
+      updates.battlesWon = 0;
+    }
+    if (userDoc.battlesLost === undefined) {
+      updates.battlesLost = 0;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      console.log("Adding missing fields for user:", updates);
+      await users.updateOne({ discordId: decoded.id }, { $set: updates });
+      // Also update in memory to return correct data immediately
+      Object.assign(userDoc, updates);
     }
 
     const avatarURL = decoded.avatar
@@ -54,11 +76,11 @@ exports.handler = async function (event, context) {
       body: JSON.stringify({
         username: decoded.username,
         avatar: avatarURL,
-        level: userDoc.level,
-        xp: userDoc.xp,
-        points: userDoc.points,
-        messageCount: userDoc.messageCount,
-        trades: userDoc.trades,
+        level: userDoc.level || 1,
+        xp: userDoc.xp || 0,
+        points: userDoc.points || 0,
+        messageCount: userDoc.messageCount || 0,
+        trades: userDoc.trades || 0,
         battlesWon: userDoc.battlesWon,
         battlesLost: userDoc.battlesLost,
         cards: userDoc.cards || [],
