@@ -363,14 +363,11 @@
 
       // Build Discord avatar URL fallback
       function getDiscordAvatarUrl(user) {
-        // user.avatar is a hash string, user.id is user id
         if (user.avatar) {
-          // Animated avatar check: starts with 'a_'
           const isAnimated = user.avatar.startsWith("a_");
           const format = isAnimated ? "gif" : "png";
           return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${format}?size=64`;
         } else {
-          // Default avatar by discriminator mod 5 fallback
           let discrim = user.discriminator;
           if (!discrim) discrim = "0000";
           const defaultAvatarNumber = parseInt(discrim) % 5;
@@ -385,7 +382,7 @@
         const userNameSpan = document.getElementById("discordUserName");
         const userAvatar = document.getElementById("discordUserAvatar");
 
-        btn.style.display = "none"; // hide login button
+        btn.style.display = "none";
 
         userNameSpan.textContent = `${user.username}#${
           user.discriminator || "0000"
@@ -394,14 +391,12 @@
 
         userInfo.style.display = "block";
 
-        // Add logout handler
         document.getElementById("logoutBtn").onclick = () => {
           localStorage.removeItem("token");
           window.location.href = "menu.html";
         };
       }
 
-      // Show login button (when not logged in)
       function renderLoggedOut() {
         const btn = document.getElementById("discordBtn");
         const userInfo = document.getElementById("discordUserInfo");
@@ -409,12 +404,10 @@
         btn.style.display = "block";
         btn.textContent = "Login";
         btn.onclick = () => {
-          // Redirect to login page or OAuth flow
           window.location.href = "menu.html";
         };
       }
 
-      // Fetch user cards from API using token
       async function fetchUserCards(token) {
         try {
           const response = await fetch(
@@ -434,10 +427,9 @@
         }
       }
 
-      // Populate cards dropdown with cards
       function populateCardDropdown(cards) {
         const select = document.getElementById("playerOneCards");
-        select.innerHTML = ""; // clear previous options
+        select.innerHTML = "";
 
         if (!cards.length) {
           const option = document.createElement("option");
@@ -454,13 +446,11 @@
           select.appendChild(option);
         });
 
-        // Display first card image initially
         if (cards[0]) {
           displaySelectedCard(cards[0].id);
         }
       }
 
-      // Display selected card image
       async function displaySelectedCard(cardId) {
         const container = document.getElementById("selectedCardContainer");
         if (!cardId) {
@@ -468,23 +458,17 @@
           return;
         }
         try {
-          // Fetch card data for this card id
-          // Assuming the card details endpoint exists (adjust URL accordingly)
           const token = localStorage.getItem("token");
           if (!token) throw new Error("No token found");
 
           const res = await fetch(
-            `https://vocadecks.netlify.app/.netlify/functions/getUserCards?id=${cardId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+            `https://vocadecks.netlify.app/.netlify/functions/getUserCards?token=${encodeURIComponent(
+              token
+            )}&cardId=${encodeURIComponent(cardId)}`
           );
           if (!res.ok) throw new Error("Failed to fetch card data");
           const card = await res.json();
 
-          // Show the card image
           container.innerHTML = `<img src="${card.image}" alt="${card.name}" style="width: 300px; border-radius: 15px;" />`;
         } catch (err) {
           console.error(err);
@@ -492,34 +476,26 @@
         }
       }
 
-      // MAIN IIFE on page load
       (function () {
-        // Check for token param in URL, save if found
         let urlToken = getQueryParam("token");
         if (urlToken) {
           if (urlToken.startsWith("Bearer ")) {
             urlToken = urlToken.slice(7);
           }
           saveToken(urlToken);
-          // Remove token param from URL without reload
           const cleanUrl = window.location.origin + window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
         }
 
-        // Get token from localStorage
         const token = localStorage.getItem("token");
 
-        // Validate and decode token
         if (token && isTokenValid(token)) {
           const user = jwt_decode(token);
-          // user usually has fields: id, username, discriminator, avatar, exp, etc.
           renderLoggedIn(user);
 
-          // Fetch and populate cards
           fetchUserCards(token).then((cards) => {
             populateCardDropdown(cards);
 
-            // Add change event to dropdown to update image
             const sel = document.getElementById("playerOneCards");
             sel.addEventListener("change", function () {
               displaySelectedCard(this.value);
