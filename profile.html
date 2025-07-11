@@ -5,120 +5,373 @@
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
     <meta charset="utf-8" />
     <link rel="icon" type="image/x-icon" href="/Assets/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <style>
       @font-face {
         font-family: "Panton";
         src: url("./Fonts/Panton.otf") format("truetype");
         font-display: swap;
       }
+
+      @font-face {
+        font-family: "NewMedia";
+        src: url("./Fonts/NewMedia.ttf") format("truetype");
+        font-display: swap;
+      }
+
       body {
         margin: 0;
         font-family: Panton, sans-serif;
         background: url(./Menu/bg.png) center/cover fixed no-repeat;
         overflow: hidden;
         color: white;
+        transition: background 0.8s ease;
       }
 
-      .profile-container {
-        position: absolute;
+      .bg,
+      .bg2,
+      .t1,
+      .t2,
+      .t3,
+      .t4,
+      .t5,
+      .t6,
+      .levelb,
+      .synthcl {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .bg {
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: rgba(0, 0, 0, 0.7);
-        padding: 30px;
-        border-radius: 20px;
-        width: 400px;
-        text-align: center;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+        max-width: calc(100% - 80px);
+        max-height: calc(100% - 80px);
+        object-fit: contain;
+        z-index: -1;
       }
 
-      .profile-avatar {
-        border-radius: 50%;
+      .bg2 {
+        position: fixed;
+        top: 53%;
+        left: 74%;
+        transform: translate(-50%, -50%);
+        max-width: calc(100% - 80px);
+        max-height: calc(105% - 80px);
+        object-fit: contain;
+        z-index: -1;
+      }
+
+      .t1,
+      .t2,
+      .t3,
+      .t4,
+      .t5,
+      .t6 {
+        cursor: pointer;
+        border: 8px solid transparent;
+        border-radius: 15px;
+        transition: border 0.3s ease;
+      }
+
+      .t1 {
+        position: fixed;
+        top: 31%;
+        left: 63%;
+        transform: translate(-50%, -50%);
+        max-width: calc(23% - 80px);
+        max-height: calc(100% - 80px);
+        object-fit: contain;
+        z-index: 0;
+      }
+
+      .t2,
+      .t3,
+      .t4,
+      .t5,
+      .t6 {
+        position: fixed;
+        max-width: calc(23% - 80px);
+        max-height: calc(100% - 80px);
+        object-fit: contain;
+        z-index: 0;
+      }
+
+      .t2 {
+        top: 54%;
+        left: 63%;
+        transform: translate(-50%, -50%);
+      }
+      .t3 {
+        top: 77%;
+        left: 63%;
+        transform: translate(-50%, -50%);
+      }
+      .t4 {
+        top: 31%;
+        left: 85%;
+        transform: translate(-50%, -50%);
+      }
+      .t5 {
+        top: 54%;
+        left: 85%;
+        transform: translate(-50%, -50%);
+      }
+      .t6 {
+        top: 77%;
+        left: 85%;
+        transform: translate(-50%, -50%);
+      }
+
+      .t1t,
+      .t2t,
+      .t3t,
+      .t4t,
+      .t5t,
+      .t6t {
+        position: absolute;
+        font-size: 30px;
+      }
+      .t1t {
+        top: 39.3%;
+        left: 53.6%;
+      }
+      .t2t {
+        top: 62%;
+        left: 57%;
+      }
+      .t3t {
+        top: 85%;
+        left: 57%;
+      }
+      .t4t {
+        top: 39.3%;
+        left: 76%;
+      }
+      .t5t {
+        top: 62%;
+        left: 78%;
+      }
+      .t6t {
+        top: 85%;
+        left: 80%;
+      }
+
+      .theme {
+        position: absolute;
+        top: 14%;
+        left: 53.5%;
+        font-size: 40px;
+      }
+
+      .active-theme {
+        border-color: rgb(245, 228, 130);
+      }
+
+      .levelb {
+        position: absolute;
+        top: 8.5%;
+        left: 46%;
+        font-size: 40px;
+        width: auto;
+        height: 8%;
+      }
+
+      .pfp {
+        position: absolute;
+        top: 7%;
+        left: 4%;
         width: 120px;
         height: 120px;
-        margin-bottom: 15px;
-        border: 3px solid #fff;
+        background-color: white;
+        border-radius: 50%;
+        overflow: hidden;
       }
 
-      .profile-username {
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-
-      .profile-stats {
-        text-align: left;
-        margin-top: 20px;
-      }
-
-      .profile-stats p {
-        margin: 5px 0;
-        font-size: 16px;
-      }
-
-      .loader {
+      .name {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 20px;
-        color: #fff;
+        top: 8%;
+        left: 11%;
+        font-size: 50px;
+      }
+
+      .level {
+        position: absolute;
+        top: 20%;
+        left: 4%;
+        font-size: 80px;
+      }
+
+      .synthct {
+        position: absolute;
+        top: 34%;
+        left: 4%;
+        font-size: 80px;
+      }
+
+      .synthcl {
+        position: absolute;
+        top: 45%;
+        left: 4%;
+        width: auto;
+        height: 8%;
+      }
+
+      .synthc {
+        position: absolute;
+        top: 43%;
+        left: 7%;
+        font-size: 76px;
+        font-family: NewMedia;
+      }
+
+      .battlew {
+        position: absolute;
+        top: 54%;
+        left: 4%;
+        font-size: 80px;
+      }
+
+      .battlewn {
+        position: absolute;
+        top: 63%;
+        left: 4%;
+        font-size: 76px;
+        font-family: NewMedia;
+      }
+
+      .battlel {
+        position: absolute;
+        top: 72%;
+        left: 4%;
+        font-size: 80px;
+      }
+
+      .battleln {
+        position: absolute;
+        top: 81%;
+        left: 4%;
+        font-size: 76px;
+        font-family: NewMedia;
+      }
+
+      .pb {
+        position: absolute;
+        top: 31.3%;
+        left: 4%;
+        width: 670px;
+        height: 30px;
+        background-color: white;
+        border-radius: 25px;
+        overflow: hidden;
       }
     </style>
   </head>
   <body>
-    <div id="loader" class="loader">Loading profile...</div>
-    <div id="profile" class="profile-container" style="display: none">
-      <img id="avatar" class="profile-avatar" src="" alt="Avatar" />
-      <div id="username" class="profile-username"></div>
-      <div class="profile-stats">
-        <p><strong>Level:</strong> <span id="level"></span></p>
-        <p><strong>XP:</strong> <span id="xp"></span></p>
-        <p><strong>Points:</strong> <span id="points"></span></p>
-        <p><strong>Battles Won:</strong> <span id="battlesWon"></span></p>
-        <p><strong>Battles Lost:</strong> <span id="battlesLost"></span></p>
-        <p><strong>Trades:</strong> <span id="trades"></span></p>
+    <div class="container-fluid p-0">
+      <img src="Profile/Rectangle_164.png" class="bg img-responsive" />
+      <img src="Profile/Rectangle_166.png" class="bg2 img-responsive" />
+
+      <div>
+        <h1 class="theme">THEME</h1>
+        <button
+          id="reset-theme"
+          class="btn btn-xs btn-default"
+          style="
+            position: absolute;
+            top: 16%;
+            left: 63.5%;
+            transform: translateX(-50%);
+          ">
+          RESET
+        </button>
+        <img
+          src="Menu/bg.png"
+          class="t1 img-responsive"
+          onclick="setTheme('t1')" />
+        <img
+          src="Profile/MIDNIGHT_BLUE.png"
+          class="t2 img-responsive"
+          onclick="setTheme('t2')" />
+        <img
+          src="Profile/TUNDRA_MANGO.png"
+          class="t3 img-responsive"
+          onclick="setTheme('t3')" />
+        <img
+          src="Profile/RADIANT_ROCKET_LOLLY.png"
+          class="t4 img-responsive"
+          onclick="setTheme('t4')" />
+        <img
+          src="Profile/CHERRIES__CREAM.png"
+          class="t5 img-responsive"
+          onclick="setTheme('t5')" />
+        <img
+          src="Profile/SIREN_PURPLE.png"
+          class="t6 img-responsive"
+          onclick="setTheme('t6')" />
+
+        <h1 class="t1t">SUMMER CYAN (DEFAULT)</h1>
+        <h1 class="t2t">MIDNIGHT BLUE</h1>
+        <h1 class="t3t">TUNDRA MANGO</h1>
+        <h1 class="t4t">RADIANT ROCKET LOLLY</h1>
+        <h1 class="t5t">CHERRIES & CREAM</h1>
+        <h1 class="t6t">SIREN PURPLE</h1>
       </div>
+
+      <img src="./Profile/C.png" class="levelb img-responsive" />
+      <div class="pfp"></div>
+      <h1 class="name">USERNAME</h1>
+      <h1 class="level">LEVEL: 000</h1>
+      <div class="pb"></div>
+      <h1 class="synthct">SYNTH CREDITS</h1>
+      <img src="./Profile/SynthCredits.png" class="synthcl img-responsive" />
+      <h1 class="synthc">00,000,000</h1>
+      <h1 class="battlew">BATTLES WON:</h1>
+      <h1 class="battlewn">00,000,000</h1>
+      <h1 class="battlel">BATTLES LOST:</h1>
+      <h1 class="battleln">00,000,000</h1>
     </div>
 
     <script>
-      // Get token from URL or localStorage
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get("token") || localStorage.getItem("token");
+      const themes = {
+        t1: "./Menu/bg.png",
+        t2: "./Profile/MIDNIGHT_BLUE.png",
+        t3: "./Profile/TUNDRA_MANGO.png",
+        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+        t5: "./Profile/CHERRIES__CREAM.png",
+        t6: "./Profile/SIREN_PURPLE.png",
+      };
 
-      if (token) {
-        localStorage.setItem("token", token); // Save token for future requests
-        fetch("/.netlify/functions/getUserData", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-          .then((res) => {
-            if (!res.ok) throw new Error("Failed to load user data");
-            return res.json();
-          })
-          .then((data) => {
-            document.getElementById("loader").style.display = "none";
-            document.getElementById("profile").style.display = "block";
+      let lastChange = 0;
 
-            document.getElementById("avatar").src = data.avatar;
-            document.getElementById("username").innerText = data.username;
-            document.getElementById("level").innerText = data.level;
-            document.getElementById("xp").innerText = data.xp;
-            document.getElementById("points").innerText = data.points;
-            document.getElementById("battlesWon").innerText = data.battlesWon;
-            document.getElementById("battlesLost").innerText = data.battlesLost;
-            document.getElementById("trades").innerText = data.trades;
-          })
-          .catch((err) => {
-            console.error(err);
-            document.getElementById("loader").innerText =
-              "Error loading profile.";
-          });
-      } else {
-        document.getElementById("loader").innerText = "Not logged in.";
+      function setTheme(key) {
+        const now = Date.now();
+        if (now - lastChange < 1000) return;
+        lastChange = now;
+
+        document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
+
+        document
+          .querySelectorAll(".t1, .t2, .t3, .t4, .t5, .t6")
+          .forEach((el) => el.classList.remove("active-theme"));
+        document.querySelector("." + key).classList.add("active-theme");
+
+        localStorage.setItem("selectedTheme", key);
       }
+
+      window.addEventListener("load", () => {
+        const saved = localStorage.getItem("selectedTheme") || "t1";
+        setTheme(saved);
+      });
+
+      document.getElementById("reset-theme").addEventListener("click", () => {
+        setTheme("t1");
+        localStorage.removeItem("selectedTheme");
+      });
     </script>
   </body>
 </html>
