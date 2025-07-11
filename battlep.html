@@ -308,7 +308,7 @@
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
       <div>
         <h1 class="text1">PLAYER ONE</h1>
-        <!-- NEW dropdown under PLAYER ONE -->
+        <!-- dropdown kept -->
         <select id="playerOneCards" class="form-control">
           <option value="">-- Your Cards --</option>
         </select>
@@ -347,14 +347,7 @@
         src="./Assets/ICONS/Settings.png"
         class="back"
         style="margin-left: 15px; position: relative; bottom: 45px" />
-      <a
-        href="https://discord.com/oauth2/authorize?client_id=1381732660115804232&response_type=code&redirect_uri=https%3A%2F%2Fvocadecks.com%2F.netlify%2Ffunctions%2Fauth-discord-callback&scope=identify"
-        id="discordLoginBtnWrapper">
-        <img
-          src="./Assets/ICONS/DC_LOGIN_BUTTON.png"
-          class="discord"
-          id="discordLoginBtn" />
-      </a>
+      <!-- Discord login button REMOVED -->
       <div id="discordUserInfo" style="display: none"></div>
     </div>
   </body>
@@ -375,166 +368,93 @@
 
       // Clean up the URL (remove ?token=...)
       if (window.history.replaceState) {
-        const newUrl = window.location.origin + window.location.pathname;
+        const newUrl =
+          window.location.protocol +
+          "//" +
+          window.location.host +
+          window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
       }
     }
 
-    function isTokenValid(token) {
+    function getToken() {
+      return localStorage.getItem("discordToken");
+    }
+
+    function decodeToken(token) {
       try {
-        const decoded = jwt_decode(token);
-        return decoded.exp * 1000 > Date.now();
+        return jwt_decode(token);
       } catch {
-        return false;
+        return null;
       }
     }
 
-    function renderLoggedIn(user) {
-      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
-      if (loginBtnWrapper) {
-        loginBtnWrapper.style.display = "none";
-      }
+    function redirectToIndex() {
+      window.location.href = "index.html";
+    }
 
+    function showDiscordUserInfo(user) {
       const infoDiv = document.getElementById("discordUserInfo");
-
+      if (!user) {
+        infoDiv.style.display = "none";
+        return;
+      }
       infoDiv.innerHTML = `
-    <div class="user-row" id="userRow">
-      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="User Avatar" />
-      <div class="username">${user.username}</div>
-    </div>
-    <div class="dropdown-content" id="dropdownContent" style="display:none;">
-      <div>ID: ${user.id}</div>
-      <button id="logoutBtn">Logout</button>
-    </div>
-  `;
+        <div class="user-row">
+          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" />
+          <span class="username">${user.username}#${user.discriminator}</span>
+        </div>
+        <div class="dropdown-content">
+          <button id="logoutBtn">Logout</button>
+        </div>
+      `;
       infoDiv.style.display = "block";
 
-      const userRow = document.getElementById("userRow");
-      const dropdownContent = document.getElementById("dropdownContent");
-
-      userRow.onclick = () => {
-        dropdownContent.style.display =
-          dropdownContent.style.display === "none" ? "block" : "none";
-      };
-
-      document.getElementById("logoutBtn").onclick = () => {
+      document.getElementById("logoutBtn").addEventListener("click", () => {
         localStorage.removeItem("discordToken");
         localStorage.removeItem("discordTokenSavedAt");
-        renderLoggedOut();
-        window.location.href = "index.html"; // redirect to index.html
-      };
-    }
-
-    function renderLoggedOut() {
-      const loginBtnWrapper = document.getElementById("discordLoginBtnWrapper");
-      if (loginBtnWrapper) {
-        loginBtnWrapper.style.display = "inline-block";
-      }
-      const infoDiv = document.getElementById("discordUserInfo");
-      infoDiv.style.display = "none";
-      infoDiv.innerHTML = "";
-    }
-
-    async function fetchUserCards(token) {
-      try {
-        const res = await fetch(
-          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
-        );
-        if (!res.ok) {
-          console.error("Failed to fetch cards", await res.json());
-          return [];
-        }
-        const data = await res.json();
-        return data.cards || [];
-      } catch (e) {
-        console.error("Network or other fetch error:", e);
-        return [];
-      }
-    }
-
-    function populateCardDropdown(cards) {
-      const sel = document.getElementById("playerOneCards");
-      sel.innerHTML = '<option value="">-- Your Cards --</option>';
-
-      const rarityMap = {
-        r1: "common",
-        r2: "extra",
-        r3: "rare",
-        r4: "legendary",
-        r5: "untouched",
-      };
-
-      cards.forEach((c) => {
-        const o = document.createElement("option");
-        const rarityMatch = c.match(/^r[1-5]/);
-        const rarityCode = rarityMatch ? rarityMatch[0] : null;
-        const rarityText = rarityCode ? rarityMap[rarityCode] : "unknown";
-
-        let cardName = c.replace(/^r[1-5]/, "");
-        cardName = cardName.replace(/\.[^/.]+$/, "");
-        cardName = cardName.trim();
-
-        o.value = c;
-        o.textContent = `${cardName} (${rarityText})`;
-        sel.appendChild(o);
+        redirectToIndex();
       });
     }
 
-    function displaySelectedCard(cardFileName) {
-      const container = document.getElementById("selectedCardContainer");
-      if (!container) return;
+    function init() {
+      let token = getToken();
 
-      // Remove any previous card image
-      const existingCardImg = document.getElementById("selectedCardImage");
-      if (existingCardImg) {
-        existingCardImg.remove();
+      if (!token) {
+        // No token found, check URL param
+        const urlToken = getQueryParam("token");
+        if (urlToken) {
+          saveToken(urlToken);
+          token = urlToken;
+        } else {
+          // No token in storage or URL => redirect
+          redirectToIndex();
+          return;
+        }
       }
 
-      if (cardFileName) {
-        const img = document.createElement("img");
-        img.id = "selectedCardImage";
-        img.src = `/cards/${cardFileName}`;
-        img.alt = "Selected Card";
-        img.style = `
-      max-width: 280px; /* fits nicely */
-      max-height: 370px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      transform: translate(0, 0) scale(0.9);
-      pointer-events: none;
-    `;
-        container.appendChild(img);
+      // Decode token
+      const decoded = decodeToken(token);
+      if (!decoded || !decoded.username || !decoded.id || !decoded.avatar) {
+        // Invalid token => clear and redirect
+        localStorage.removeItem("discordToken");
+        localStorage.removeItem("discordTokenSavedAt");
+        redirectToIndex();
+        return;
       }
+
+      // Show Discord user info
+      showDiscordUserInfo(decoded);
+
+      // Replace "PLAYER ONE" with username
+      const playerOneHeading = document.querySelector(".text1");
+      if (playerOneHeading) {
+        playerOneHeading.textContent = decoded.username.toUpperCase();
+      }
+
+      // TODO: Populate dropdown or other UI using token/user info if needed
     }
 
-    (function () {
-      let urlToken = getQueryParam("token");
-      if (urlToken) {
-        if (urlToken.startsWith("Bearer ")) {
-          urlToken = urlToken.slice(7);
-        }
-        saveToken(urlToken);
-      }
-
-      const token = localStorage.getItem("discordToken");
-      if (token && isTokenValid(token)) {
-        const user = jwt_decode(token);
-        renderLoggedIn(user);
-
-        fetchUserCards(token).then((cards) => {
-          populateCardDropdown(cards);
-
-          // Add change event to dropdown
-          const sel = document.getElementById("playerOneCards");
-          sel.addEventListener("change", function () {
-            const selectedCard = this.value;
-            displaySelectedCard(selectedCard);
-          });
-        });
-      } else {
-        renderLoggedOut();
-      }
-    })();
+    window.onload = init;
   </script>
 </html>
