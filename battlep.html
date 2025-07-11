@@ -418,12 +418,9 @@
       async function fetchUserCards(token) {
         try {
           const response = await fetch(
-            "https://vocadecks.netlify.app/.netlify/functions/getUserCards",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+            `https://vocadecks.netlify.app/.netlify/functions/getUserCards?token=${encodeURIComponent(
+              token
+            )}`
           );
           if (!response.ok) {
             throw new Error("Failed to fetch cards");
