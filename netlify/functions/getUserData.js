@@ -39,31 +39,27 @@ exports.handler = async function (event, context) {
     const db = client.db("test");
     const users = db.collection("users");
 
-    const userDoc = await users.findOne({ discordId: decoded.id });
+    // Match on userId now (not discordId)
+    const userDoc = await users.findOne({ userId: decoded.id });
 
     console.log("Mongo userDoc:", userDoc);
 
     if (!userDoc) {
-      console.log("No user found for Discord ID:", decoded.id);
+      console.log("No user found for userId:", decoded.id);
       return {
         statusCode: 404,
         body: JSON.stringify({ error: "User not found" }),
       };
     }
 
-    // Add missing battlesWon and battlesLost fields if necessary
+    // Add missing battlesWon and battlesLost if needed
     const updates = {};
-    if (userDoc.battlesWon === undefined) {
-      updates.battlesWon = 0;
-    }
-    if (userDoc.battlesLost === undefined) {
-      updates.battlesLost = 0;
-    }
+    if (userDoc.battlesWon === undefined) updates.battlesWon = 0;
+    if (userDoc.battlesLost === undefined) updates.battlesLost = 0;
 
     if (Object.keys(updates).length > 0) {
       console.log("Adding missing fields for user:", updates);
-      await users.updateOne({ discordId: decoded.id }, { $set: updates });
-      // Also update in memory to return correct data immediately
+      await users.updateOne({ userId: decoded.id }, { $set: updates });
       Object.assign(userDoc, updates);
     }
 
@@ -76,11 +72,11 @@ exports.handler = async function (event, context) {
       body: JSON.stringify({
         username: decoded.username,
         avatar: avatarURL,
-        level: userDoc.level || 1,
-        xp: userDoc.xp || 0,
-        points: userDoc.points || 0,
-        messageCount: userDoc.messageCount || 0,
-        trades: userDoc.trades || 0,
+        level: userDoc.level ?? 1,
+        xp: userDoc.xp ?? 0,
+        points: userDoc.points ?? 0,
+        messageCount: userDoc.messageCount ?? 0,
+        trades: userDoc.trades ?? 0,
         battlesWon: userDoc.battlesWon,
         battlesLost: userDoc.battlesLost,
         cards: userDoc.cards || [],
