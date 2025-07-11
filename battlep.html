@@ -358,11 +358,10 @@
       <div id="discordUserInfo" style="display: none"></div>
     </div>
   </body>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    function getQueryParam(param) {
+    async function getQueryParam(param) {
       return new URLSearchParams(window.location.search).get(param);
     }
 
@@ -373,11 +372,16 @@
       history.replaceState(null, "", window.location.pathname);
     }
 
-    function isTokenValid(token) {
+    async function fetchDiscordUser(token) {
       try {
-        return jwt_decode(token).exp * 1000 > Date.now();
-      } catch {
-        return false;
+        const res = await fetch("https://discord.com/api/users/@me", {
+          headers: { Authorization: "Bearer " + token },
+        });
+        if (!res.ok) throw new Error("Failed to fetch user");
+        return await res.json();
+      } catch (e) {
+        console.error(e);
+        return null;
       }
     }
 
@@ -391,6 +395,7 @@
         <div>ID: ${user.id}</div>
       </div>`;
       infoDiv.style.display = "block";
+
       const po = document.querySelector(".text1");
       if (po) po.textContent = user.username.toUpperCase();
     }
@@ -455,21 +460,25 @@
       }
     }
 
-    (function () {
-      let t = getQueryParam("token");
+    (async function () {
+      let t = await getQueryParam("token");
       if (t) saveToken(t);
       const stored = localStorage.getItem("discordToken");
-      if (isTokenValid(stored)) {
-        const user = jwt_decode(stored);
-        renderLoggedIn(user);
-        fetchUserCards(stored).then((cards) => {
+
+      if (stored) {
+        const user = await fetchDiscordUser(stored);
+        if (user) {
+          renderLoggedIn(user);
+          const cards = await fetchUserCards(stored);
           populateCardDropdown(cards);
           document
             .getElementById("playerOneCards")
             .addEventListener("change", (e) =>
               displaySelectedCard(e.target.value)
             );
-        });
+        } else {
+          renderLoggedOut();
+        }
       } else {
         renderLoggedOut();
       }
