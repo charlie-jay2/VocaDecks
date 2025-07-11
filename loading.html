@@ -22,6 +22,15 @@
       setTimeout(() => {
         window.location.href = "battlep.html";
       }, 2000);
+
+      // In menu.html script
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("token");
+      if (token) {
+        localStorage.setItem("token", token);
+        // optionally remove token from URL
+        history.replaceState(null, "", window.location.pathname);
+      }
     </script>
   </head>
   <body></body>

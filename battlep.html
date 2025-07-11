@@ -530,5 +530,14 @@
         renderLoggedOut();
       }
     })();
+
+    // In menu.html script
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    if (token) {
+      localStorage.setItem("token", token);
+      // optionally remove token from URL
+      history.replaceState(null, "", window.location.pathname);
+    }
   </script>
 </html>
