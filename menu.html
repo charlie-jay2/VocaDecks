@@ -16,6 +16,7 @@
         font-family: Panton, sans-serif;
         background: url(./Menu/bg.png) center/cover fixed no-repeat;
         overflow: hidden;
+        transition: background 0.8s ease; /* smooth fade */
       }
 
       /* Shared screens */
@@ -35,7 +36,7 @@
       }
       .trad {
         top: 65%;
-        left: 16%;
+        left: 17%;
         transform: translate(-50%, -50%);
         height: 70%;
         cursor: pointer;
@@ -184,6 +185,22 @@
     </div>
 
     <script>
+      const themes = {
+        t1: "./Menu/bg.png",
+        t2: "./Profile/MIDNIGHT_BLUE.png",
+        t3: "./Profile/TUNDRA_MANGO.png",
+        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+        t5: "./Profile/CHERRIES__CREAM.png",
+        t6: "./Profile/SIREN_PURPLE.png",
+      };
+      function applyStoredTheme() {
+        const key = localStorage.getItem("selectedTheme") || "t1";
+        document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
+      }
+
+      // apply stored theme on load
+      window.addEventListener("DOMContentLoaded", applyStoredTheme);
+
       const battle = document.querySelector(".battle");
       const trad = document.querySelector(".trad");
       const line = document.querySelector(".menu-line");
@@ -234,7 +251,7 @@
         }, 1000);
       });
 
-      // Redirect to loading.html when pvpse is clicked
+      // Redirect to loading.html when pvbse is clicked
       pvbse.addEventListener("click", () => {
         window.location.href = "loading.html";
       });
