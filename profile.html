@@ -372,17 +372,6 @@
         localStorage.setItem("selectedTheme", key);
       }
 
-      window.addEventListener("load", () => {
-        const saved = localStorage.getItem("selectedTheme") || "t1";
-        setTheme(saved);
-        loadUserData();
-      });
-
-      document.getElementById("reset-theme").addEventListener("click", () => {
-        setTheme("t1");
-        localStorage.removeItem("selectedTheme");
-      });
-
       function getXpForLevel(level) {
         return level * 50;
       }
@@ -430,9 +419,12 @@
         }
       }
 
-      // Call loadUserData immediately and then every 5 seconds
-      loadUserData();
-      setInterval(loadUserData, 5000);
+      window.addEventListener("load", () => {
+        const saved = localStorage.getItem("selectedTheme") || "t1";
+        setTheme(saved);
+        loadUserData();
+        setInterval(loadUserData, 5000);
+      });
     </script>
   </body>
 </html>
