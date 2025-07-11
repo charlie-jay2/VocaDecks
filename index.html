@@ -87,11 +87,10 @@
       }
     }
 
-    // Check if token is stored and valid; redirect if so
     (function () {
       const token = localStorage.getItem("discordToken");
       if (token && isTokenValid(token)) {
-        window.location.href = "menu.html";
+        return window.location.replace("menu.html");
       }
     })();
 
