@@ -397,7 +397,6 @@
     }
 
     function showDiscordUserInfo(user) {
-      // Only show username and avatar, NO logout button
       const container = document.getElementById("discordUserInfo");
       if (!container) return;
 
@@ -419,6 +418,7 @@
         return;
       }
 
+      // Case-insensitive check for rarity prefix "r1"
       const rarityMatch = cardName.match(/^r([1-5])/i);
       if (!rarityMatch) {
         container.innerHTML = "";
@@ -430,7 +430,7 @@
         return;
       }
 
-      // URL encode filename (handle spaces and special chars)
+      // URL encode filename to handle spaces and special characters
       const encodedName = encodeURIComponent(cardName);
 
       const imgSrc = `./Cards/${encodedName}`;
@@ -445,6 +445,7 @@
         cleanName += ".png";
       }
 
+      // Case-insensitive match for rarity prefix
       const rarityMatch = cleanName.match(/^r([1-5])/i);
       if (!rarityMatch) return cleanName;
 
@@ -457,6 +458,7 @@
         5: "UNTOUCHED",
       };
 
+      // Remove rarity prefix and extension, preserving casing for the base name
       const baseName = cleanName.replace(/^r[1-5]/i, "").replace(/\.png$/i, "");
 
       return `${baseName.trim()} (${rarityMap[rarityNum] || "UNKNOWN"})`;
@@ -498,7 +500,7 @@
         dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
 
         cards.forEach((card) => {
-          // Use exact filename casing and spaces from the data, do NOT lowercase
+          // Use original card filename as-is (with spaces and casing)
           let val = card.name || card.id || card;
 
           if (!val.toLowerCase().endsWith(".png")) {
