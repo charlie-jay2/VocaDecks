@@ -563,7 +563,7 @@
       currentUsername = username;
 
       // Connect to WebSocket server with JWT token as subprotocol
-      socket = new WebSocket(`ws://${window.location.host}`, token);
+      socket = new WebSocket(`wss://${window.location.host}`, token);
 
       socket.addEventListener("open", () => {
         console.log("WebSocket connected");
