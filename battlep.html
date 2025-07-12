@@ -430,9 +430,7 @@
         return;
       }
 
-      // URL encode filename to handle spaces and special characters
       const encodedName = encodeURIComponent(cardName);
-
       const imgSrc = `./Cards/${encodedName}`;
 
       container.innerHTML = `<img src="${imgSrc}" style="max-width:80%; max-height:200px; height:auto; user-select:none;" alt="Selected Card" />`;
@@ -500,11 +498,15 @@
         dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
 
         cards.forEach((card) => {
-          // Use original card filename as-is (with spaces and casing)
           let val = card.name || card.id || card;
 
           if (!val.toLowerCase().endsWith(".png")) {
             val += ".png";
+          }
+
+          // Include only cards starting with r1-r5 (case-insensitive)
+          if (!/^r[1-5]/i.test(val)) {
+            return; // skip cards not matching rarity prefix
           }
 
           const option = document.createElement("option");
