@@ -79,11 +79,17 @@
       }
 
       function connectWebSocket(rarity, token) {
-        ws = new WebSocket("wss://vdbe-0f2p.onrender.com/");
+        if (!token) {
+          alert("No Token found. Please login.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        ws = new WebSocket("wss://vdbe-0f2p.onrender.com/", token);
 
         ws.onopen = () => {
           console.log("WebSocket connected");
-          ws.send(JSON.stringify({ type: "join", rarity, token }));
+          ws.send(JSON.stringify({ type: "join", rarity }));
           t2.textContent = "Finding match...";
           startTimer();
         };
@@ -93,17 +99,18 @@
           try {
             msg = JSON.parse(event.data);
           } catch {
-            // If message is not JSON, just log it
             console.log("Received non-JSON message:", event.data);
             return;
           }
 
-          if (msg.type === "status") {
+          if (msg.type === "welcome") {
+            console.log(msg.message);
+          } else if (msg.type === "status") {
             t2.textContent = msg.message;
           } else if (msg.type === "matched") {
             stopTimer();
             t3.textContent = "Successfully found match";
-            t2.textContent = `Opponent found: ${msg.opponent}`;
+            t2.textContent = `Connected to ${msg.opponent}`;
 
             let t4 = document.querySelector(".t4");
             if (!t4) {
@@ -142,11 +149,6 @@
       window.addEventListener("DOMContentLoaded", () => {
         const rarity = localStorage.getItem("selectedRarity") || "Unknown";
         const token = localStorage.getItem("token");
-
-        if (!token) {
-          alert("No Token found. Please login.");
-          window.location.href = "index.html";
-        }
 
         rarityTextElem.textContent = rarity;
         connectWebSocket(rarity, token);
