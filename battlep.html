@@ -389,6 +389,7 @@
         );
         if (!response.ok) throw new Error("Failed to fetch user cards");
         const data = await response.json();
+        console.log("Fetched cards:", data.cards);
         return data.cards || [];
       } catch (error) {
         console.error(error);
@@ -418,20 +419,14 @@
         return;
       }
 
-      // Case-insensitive check for rarity prefix "r1"
-      const rarityMatch = cardName.match(/^r([1-5])/i);
-      if (!rarityMatch) {
-        container.innerHTML = "";
-        return;
-      }
-      const rarity = rarityMatch[1];
-      if (rarity !== "1") {
-        container.innerHTML = "";
-        return;
-      }
+      // Show image regardless of rarity prefix
 
-      const encodedName = encodeURIComponent(cardName);
-      const imgSrc = `./Cards/${encodedName}`;
+      // Encode spaces and special characters
+      const encodedFileName = encodeURIComponent(cardName);
+
+      const imgSrc = `./Cards/${encodedFileName}`;
+
+      console.log("Displaying image:", imgSrc);
 
       container.innerHTML = `<img src="${imgSrc}" style="max-width:80%; max-height:200px; height:auto; user-select:none;" alt="Selected Card" />`;
     }
@@ -443,7 +438,6 @@
         cleanName += ".png";
       }
 
-      // Case-insensitive match for rarity prefix
       const rarityMatch = cleanName.match(/^r([1-5])/i);
       if (!rarityMatch) return cleanName;
 
@@ -456,7 +450,6 @@
         5: "UNTOUCHED",
       };
 
-      // Remove rarity prefix and extension, preserving casing for the base name
       const baseName = cleanName.replace(/^r[1-5]/i, "").replace(/\.png$/i, "");
 
       return `${baseName.trim()} (${rarityMap[rarityNum] || "UNKNOWN"})`;
@@ -498,28 +491,26 @@
         dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
 
         cards.forEach((card) => {
-          let val = card.name || card.id || card;
+          let val = (card.name || card.id || card).trim();
 
           if (!val.toLowerCase().endsWith(".png")) {
             val += ".png";
           }
 
-          // Include only cards starting with r1-r5 (case-insensitive)
           if (!/^r[1-5]/i.test(val)) {
-            return; // skip cards not matching rarity prefix
+            console.log("Skipping card (no r1-r5 prefix):", val);
+            return;
           }
 
           const option = document.createElement("option");
           option.value = val;
-
           option.textContent = formatCardNameWithRarity(val);
 
           dropdown.appendChild(option);
         });
 
         dropdown.addEventListener("change", (e) => {
-          const selectedCardName = e.target.value;
-          displayCardImage(selectedCardName);
+          displayCardImage(e.target.value);
         });
       }
     }
