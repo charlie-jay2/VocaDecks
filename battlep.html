@@ -421,15 +421,15 @@
 
       container.style.display = "block";
       container.innerHTML = `
-          <div class="user-row">
-            <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-            <span class="username" title="${user.username}">${user.username}</span>
-          </div>
-        `;
+        <div class="user-row">
+          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+          <span class="username" title="${user.username}">${user.username}</span>
+        </div>
+      `;
     }
 
-    function displayCardImage(cardName) {
-      const container = document.getElementById("selectedCardContainer");
+    function displayCardImage(cardName, containerId = "selectedCardContainer") {
+      const container = document.getElementById(containerId);
       if (!container) return;
 
       if (!cardName) {
@@ -439,7 +439,7 @@
 
       const encodedFileName = encodeURIComponent(cardName);
       const imgSrc = `./Cards/${encodedFileName}`;
-      console.log("Displaying image:", imgSrc);
+      console.log(`Displaying image in #${containerId}:`, imgSrc);
 
       container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" />`;
     }
@@ -528,117 +528,98 @@
 
         dropdown.addEventListener("change", (e) => {
           displayCardImage(e.target.value);
+          sendCardSelection(e.target.value);
         });
       }
+
+      setupWebSocket(token, decoded.username);
     }
 
-    init();
-
-    const opponent = localStorage.getItem("matchedOpponent");
-    if (opponent) {
-      console.log("Matched opponent:", opponent);
-    }
-
-    function displayOpponentInfo() {
-      const opponentUsername =
-        localStorage.getItem("matchedOpponent") || "PLAYER TWO";
+    function displayOpponentInfo(opponentUsername, cardName) {
       const playerTwoUsername = document.getElementById("playerTwoUsername");
       const playerTwoCardContainer = document.getElementById(
         "playerTwoCardContainer"
       );
 
       if (playerTwoUsername) {
-        playerTwoUsername.textContent = opponentUsername.toUpperCase();
+        playerTwoUsername.textContent = (
+          opponentUsername || "PLAYER TWO"
+        ).toUpperCase();
       }
 
-      // For demo: show the same selected card as player one, or empty if none selected
-      const playerOneDropdown = document.getElementById("playerOneCards");
       if (!playerTwoCardContainer) return;
 
-      const selectedCard = playerOneDropdown ? playerOneDropdown.value : "";
-      if (selectedCard) {
-        const encodedFileName = encodeURIComponent(selectedCard);
-        playerTwoCardContainer.innerHTML = `<img src="./Cards/${encodedFileName}" alt="Opponent Selected Card" style="width: 100%;" />`;
+      if (cardName) {
+        displayCardImage(cardName, "playerTwoCardContainer");
       } else {
         playerTwoCardContainer.innerHTML = ""; // no card selected
       }
     }
 
-    // Call this once at init
-    displayOpponentInfo();
+    let socket;
+    let currentUsername;
 
-    // Also update opponent card image whenever player one selects a card
-    const playerOneDropdown = document.getElementById("playerOneCards");
-    if (playerOneDropdown) {
-      playerOneDropdown.addEventListener("change", () => {
-        displayOpponentInfo();
+    function setupWebSocket(token, username) {
+      currentUsername = username;
+
+      // Connect to WebSocket server with JWT token as subprotocol
+      socket = new WebSocket(`ws://${window.location.host}`, token);
+
+      socket.addEventListener("open", () => {
+        console.log("WebSocket connected");
+        // Join matchmaking or send initial data if needed
+        // For example, join rarity queue:
+        // socket.send(JSON.stringify({ type: "join", rarity: "COMMON" }));
       });
-    }
 
-    // Simulated WebSocket connection (replace with real WS in production)
-    let socket = {
-      events: {},
-      on(event, handler) {
-        this.events[event] = handler;
-      },
-      emit(event, data) {
-        // Simulate sending data to the other player with a slight delay
-        setTimeout(() => {
-          if (event === "cardSelected" && this.events["opponentCardUpdate"]) {
-            // Call opponent's handler with the data
-            this.events["opponentCardUpdate"](data);
-          }
-        }, 100);
-      },
-    };
+      socket.addEventListener("message", (event) => {
+        let data;
+        try {
+          data = JSON.parse(event.data);
+        } catch {
+          console.warn("Received non-JSON WS message:", event.data);
+          return;
+        }
 
-    // Current player's username from decoded token (already available in your init)
-    let currentUsername = null;
-    (async function setUsername() {
-      const token = getToken() || getQueryParam("token");
-      if (!token) return;
-      const decoded = decodeToken(token);
-      if (decoded && decoded.username) {
-        currentUsername = decoded.username;
-      }
-    })();
-
-    // Send selected card via socket when Player One changes selection
-    document
-      .getElementById("playerOneCards")
-      .addEventListener("change", (e) => {
-        const selectedCard = e.target.value;
-        if (selectedCard && socket && currentUsername) {
-          socket.emit("cardSelected", {
-            username: currentUsername,
-            cardId: selectedCard,
-          });
+        if (data.type === "welcome") {
+          console.log(data.message);
+        } else if (data.type === "matched") {
+          console.log(`Matched with opponent: ${data.opponent}`);
+          localStorage.setItem("matchedOpponent", data.opponent);
+          displayOpponentInfo(data.opponent, null);
+        } else if (data.type === "opponentSelection") {
+          console.log(
+            `Opponent ${data.username} selected card: ${data.cardName}`
+          );
+          displayOpponentInfo(data.username, data.cardName);
+        } else if (data.type === "status") {
+          console.log("Status:", data.message);
+        } else {
+          console.log("WS message:", data);
         }
       });
 
-    // Handle opponent's card update and update Player Two card display
-    socket.on("opponentCardUpdate", (data) => {
-      // Ignore updates from self
-      if (data.username === currentUsername) return;
+      socket.addEventListener("close", () => {
+        console.log("WebSocket disconnected");
+      });
 
-      const playerTwoCardContainer = document.getElementById(
-        "playerTwoCardContainer"
-      );
-      if (!playerTwoCardContainer) return;
+      socket.addEventListener("error", (error) => {
+        console.error("WebSocket error:", error);
+      });
+    }
 
-      if (!data.cardId) {
-        playerTwoCardContainer.innerHTML = "";
-        return;
+    function sendCardSelection(cardName) {
+      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
+        socket.send(
+          JSON.stringify({
+            type: "selection",
+            cardName: cardName,
+          })
+        );
       }
+    }
 
-      const encodedFileName = encodeURIComponent(data.cardId);
-      playerTwoCardContainer.innerHTML = `<img src="./Cards/${encodedFileName}" alt="Opponent Selected Card" style="width: 100%;" />`;
-
-      // Update player two username display too
-      const playerTwoUsername = document.getElementById("playerTwoUsername");
-      if (playerTwoUsername) {
-        playerTwoUsername.textContent = data.username.toUpperCase();
-      }
-    });
+    // Initialize on page load
+    init();
   </script>
 </html>
