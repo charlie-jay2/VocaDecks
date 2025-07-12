@@ -303,7 +303,25 @@
           <option value="">-- Your Cards --</option>
         </select>
 
-        <h1 class="text2">PLAYER TWO</h1>
+        <div
+          id="playerTwoInfo"
+          style="
+            position: relative;
+            left: 59%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            z-index: 11;
+          ">
+          <h1
+            id="playerTwoUsername"
+            style="font-size: 30px; margin-bottom: 5px">
+            PLAYER TWO
+          </h1>
+          <div
+            id="playerTwoCardContainer"
+            style="width: 13%; margin: 0 auto"></div>
+        </div>
       </div>
       <h1 class="blockstxt">BLOCKS</h1>
       <h1 class="blockspo">0</h1>
@@ -519,6 +537,42 @@
     const opponent = localStorage.getItem("matchedOpponent");
     if (opponent) {
       console.log("Matched opponent:", opponent);
+    }
+
+    function displayOpponentInfo() {
+      const opponentUsername =
+        localStorage.getItem("matchedOpponent") || "PLAYER TWO";
+      const playerTwoUsername = document.getElementById("playerTwoUsername");
+      const playerTwoCardContainer = document.getElementById(
+        "playerTwoCardContainer"
+      );
+
+      if (playerTwoUsername) {
+        playerTwoUsername.textContent = opponentUsername.toUpperCase();
+      }
+
+      // For demo: show the same selected card as player one, or empty if none selected
+      const playerOneDropdown = document.getElementById("playerOneCards");
+      if (!playerTwoCardContainer) return;
+
+      const selectedCard = playerOneDropdown ? playerOneDropdown.value : "";
+      if (selectedCard) {
+        const encodedFileName = encodeURIComponent(selectedCard);
+        playerTwoCardContainer.innerHTML = `<img src="./Cards/${encodedFileName}" alt="Opponent Selected Card" style="width: 100%;" />`;
+      } else {
+        playerTwoCardContainer.innerHTML = ""; // no card selected
+      }
+    }
+
+    // Call this once at init
+    displayOpponentInfo();
+
+    // Also update opponent card image whenever player one selects a card
+    const playerOneDropdown = document.getElementById("playerOneCards");
+    if (playerOneDropdown) {
+      playerOneDropdown.addEventListener("change", () => {
+        displayOpponentInfo();
+      });
     }
   </script>
 </html>
