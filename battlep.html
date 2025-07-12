@@ -497,13 +497,19 @@
             val += ".png";
           }
 
-          // **Show ALL cards regardless of prefix**
-          // Remove the previous prefix filter to include cards like "Cherry Mikudayo.png"
-          // No skipping here
-
           const option = document.createElement("option");
           option.value = val;
-          option.textContent = formatCardNameWithRarity(val);
+
+          // Special case for these two cards to remove ".png" from display text:
+          const lowerVal = val.toLowerCase();
+          if (
+            lowerVal === "cherry mikudayo.png" ||
+            lowerVal === "mikudayo.png"
+          ) {
+            option.textContent = val.replace(/\.png$/i, "");
+          } else {
+            option.textContent = formatCardNameWithRarity(val);
+          }
 
           dropdown.appendChild(option);
         });
