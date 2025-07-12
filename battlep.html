@@ -574,5 +574,71 @@
         displayOpponentInfo();
       });
     }
+
+    // Simulated WebSocket connection (replace with real WS in production)
+    let socket = {
+      events: {},
+      on(event, handler) {
+        this.events[event] = handler;
+      },
+      emit(event, data) {
+        // Simulate sending data to the other player with a slight delay
+        setTimeout(() => {
+          if (event === "cardSelected" && this.events["opponentCardUpdate"]) {
+            // Call opponent's handler with the data
+            this.events["opponentCardUpdate"](data);
+          }
+        }, 100);
+      },
+    };
+
+    // Current player's username from decoded token (already available in your init)
+    let currentUsername = null;
+    (async function setUsername() {
+      const token = getToken() || getQueryParam("token");
+      if (!token) return;
+      const decoded = decodeToken(token);
+      if (decoded && decoded.username) {
+        currentUsername = decoded.username;
+      }
+    })();
+
+    // Send selected card via socket when Player One changes selection
+    document
+      .getElementById("playerOneCards")
+      .addEventListener("change", (e) => {
+        const selectedCard = e.target.value;
+        if (selectedCard && socket && currentUsername) {
+          socket.emit("cardSelected", {
+            username: currentUsername,
+            cardId: selectedCard,
+          });
+        }
+      });
+
+    // Handle opponent's card update and update Player Two card display
+    socket.on("opponentCardUpdate", (data) => {
+      // Ignore updates from self
+      if (data.username === currentUsername) return;
+
+      const playerTwoCardContainer = document.getElementById(
+        "playerTwoCardContainer"
+      );
+      if (!playerTwoCardContainer) return;
+
+      if (!data.cardId) {
+        playerTwoCardContainer.innerHTML = "";
+        return;
+      }
+
+      const encodedFileName = encodeURIComponent(data.cardId);
+      playerTwoCardContainer.innerHTML = `<img src="./Cards/${encodedFileName}" alt="Opponent Selected Card" style="width: 100%;" />`;
+
+      // Update player two username display too
+      const playerTwoUsername = document.getElementById("playerTwoUsername");
+      if (playerTwoUsername) {
+        playerTwoUsername.textContent = data.username.toUpperCase();
+      }
+    });
   </script>
 </html>
