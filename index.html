@@ -88,9 +88,9 @@
     }
 
     (function () {
-      const token = localStorage.getItem("discordToken");
+      const token = localStorage.getItem("token"); // Note: key is "token", not "discordToken"
       if (token && isTokenValid(token)) {
-        return window.location.replace("menu.html");
+        window.location.replace("menu.html");
       }
     })();
 
