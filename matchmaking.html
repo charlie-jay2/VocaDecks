@@ -1,0 +1,156 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-display: swap;
+      }
+      body {
+        margin: 0;
+        font-family: Panton, sans-serif;
+        background: url(./Matchmake/MATCHMAKING_PAGE.png) center/cover fixed
+          no-repeat;
+        overflow: hidden;
+        transition: background 0.8s ease; /* smooth fade */
+        color: white;
+      }
+
+      .centered-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 50px; /* more vertical space */
+        text-align: center;
+        white-space: nowrap; /* prevent line breaks */
+      }
+
+      .t1 {
+        font-size: 60px;
+        margin: 0;
+      }
+      .t2,
+      .t3 {
+        font-size: 30px;
+        margin: 0;
+        white-space: normal; /* allow wrapping if needed */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="centered-container">
+      <h1 class="t1">Finding <span id="rarity-text"></span> Servers...</h1>
+      <h1 class="t2">CONNECTING STATUS</h1>
+      <h1 class="t3">00:00</h1>
+    </div>
+    <script>
+      const rarityTextElem = document.getElementById("rarity-text");
+      const t2 = document.querySelector(".t2");
+      const t3 = document.querySelector(".t3");
+
+      let secondsElapsed = 0;
+      let ws;
+      let timerInterval;
+
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60)
+          .toString()
+          .padStart(2, "0");
+        const secs = (seconds % 60).toString().padStart(2, "0");
+        return `${mins}:${secs}`;
+      }
+
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          secondsElapsed++;
+          t3.textContent = formatTime(secondsElapsed);
+        }, 1000);
+      }
+
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      function connectWebSocket(rarity, username) {
+        ws = new WebSocket("wss://vdbe-0f2p.onrender.com/");
+
+        ws.onopen = () => {
+          console.log("WebSocket connected");
+          // Send join message
+          ws.send(JSON.stringify({ type: "join", rarity, username }));
+          t2.textContent = "Finding match...";
+          startTimer();
+        };
+
+        ws.onmessage = (event) => {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "status") {
+            t2.textContent = msg.message; // e.g. "Finding match..."
+          } else if (msg.type === "matched") {
+            stopTimer();
+            t3.textContent = "Successfully found match";
+            t2.textContent = `Opponent found: ${msg.opponent}`;
+            // Update Player Two username on matchmaking page
+            // You can add a new element or reuse existing one
+            // Let's create a new <h1 class="t4"> to show Player Two:
+
+            let t4 = document.querySelector(".t4");
+            if (!t4) {
+              t4 = document.createElement("h1");
+              t4.classList.add("t4");
+              t4.style.fontSize = "40px";
+              t4.style.marginTop = "20px";
+              t4.style.color = "white";
+              document.querySelector(".centered-container").appendChild(t4);
+            }
+            t4.textContent = `Player Two: ${msg.opponent}`;
+
+            // Save opponent to localStorage for battlep.html usage
+            localStorage.setItem("matchedOpponent", msg.opponent);
+
+            // Optional: Redirect to battle page after delay
+            setTimeout(() => {
+              window.location.href = "battlep.html";
+            }, 3000);
+          }
+        };
+
+        ws.onclose = () => {
+          console.log("WebSocket closed");
+          if (!t3.textContent.includes("Successfully")) {
+            t2.textContent = "Disconnected. Please refresh.";
+            stopTimer();
+          }
+        };
+
+        ws.onerror = (err) => {
+          console.error("WebSocket error:", err);
+          t2.textContent = "Connection error.";
+          stopTimer();
+        };
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        const rarity = localStorage.getItem("selectedRarity") || "Unknown";
+
+        // For demonstration, use a fixed username or get from localStorage / login
+        const username =
+          localStorage.getItem("username") ||
+          `Guest${Math.floor(Math.random() * 1000)}`;
+
+        rarityTextElem.textContent = rarity;
+
+        connectWebSocket(rarity, username);
+      });
+    </script>
+  </body>
+</html>

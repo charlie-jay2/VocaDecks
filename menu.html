@@ -21,7 +21,8 @@
 
       /* Shared screens */
       .menu-screen,
-      .selection-screen {
+      .selection-screen,
+      .rarity-screen {
         position: absolute;
         top: 0;
         left: 0;
@@ -54,12 +55,14 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        transition: transform 0.8s ease, opacity 0.8s ease;
       }
       .menu-logo {
         top: 5%;
         left: 50%;
         transform: translate(-50%, -50%);
         height: 10%;
+        transition: transform 0.8s ease, opacity 0.8s ease;
       }
 
       /* SELECTION SCREEN (hidden) */
@@ -99,9 +102,8 @@
       .pvpse {
         position: absolute;
         opacity: 0;
-        transition: opacity 1s ease;
+        transition: opacity 1s ease, transform 0.8s ease;
         cursor: pointer;
-        transition: 0.3s ease-in-out;
       }
       .pvb {
         top: 40%;
@@ -128,7 +130,11 @@
         height: 8%;
       }
 
-      /* Hover animation for select-buttons */
+      .pvbse:hover,
+      .pvpse:hover {
+        animation: intricate-hover 0.8s ease-in-out forwards;
+      }
+
       @keyframes intricate-hover {
         0% {
           transform: translate(-50%, -50%) scale(1) rotate(0);
@@ -146,12 +152,48 @@
           transform: translate(-50%, -50%) scale(1) rotate(0);
         }
       }
-      .pvbse:hover,
-      .pvpse:hover {
-        animation: intricate-hover 0.8s ease-in-out forwards;
+
+      /* RARITY SCREEN (hidden) */
+      .rarity-screen {
+        transform: translateX(100vw);
+        transition: transform 0.8s ease;
+        pointer-events: none;
+      }
+      .rarity-screen.active {
+        transform: translateX(0);
+        pointer-events: all;
       }
 
-      /* Line/logo swipe targets */
+      .par {
+        width: auto;
+        height: 20%;
+        position: absolute;
+        left: 50%;
+        top: 15%;
+        transform: translate(-50%, -50%);
+      }
+      .rarity {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2vw;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .rarity img {
+        height: 80%;
+        max-height: 230px;
+        width: auto;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+      .rarity img:hover {
+        transform: scale(1.1);
+      }
+
+      /* Swipe targets */
       .swipe-line {
         top: 50%;
         left: 10%;
@@ -190,11 +232,52 @@
     <!-- SELECTION SCREEN -->
     <div class="selection-screen">
       <div class="fade-in-content">Welcome to the Selection Screen!</div>
-      <!-- PVB/PVP content -->
       <img src="/Menu/pvp.png" class="pvb" />
       <img src="/Menu/pvb.png" class="pvp" />
       <img src="/Menu/select.png" class="pvbse" />
       <img src="/Menu/select.png" class="pvpse" />
+    </div>
+
+    <!-- RARITY SCREEN -->
+    <div class="rarity-screen">
+      <img src="Battle/PICK_A_RARITY.png" class="par" />
+      <div class="rarity">
+        <img
+          src="Battle/COMMON_SELECTOR.png"
+          class="r1"
+          data-rarity="Common"
+          onclick="selectRarity(this)" />
+        <img
+          src="Battle/EXTRA_SELECTOR.png"
+          class="r2"
+          data-rarity="Extra"
+          onclick="selectRarity(this)" />
+        <img
+          src="Battle/RARE_SELECTOR.png"
+          class="r3"
+          data-rarity="Rare"
+          onclick="selectRarity(this)" />
+        <img
+          src="Battle/LEGENDARY_SELECTOR.png"
+          class="r4"
+          data-rarity="Legendary"
+          onclick="selectRarity(this)" />
+        <img
+          src="Battle/UNTOUCHED_SELECTOR.png"
+          class="r5"
+          data-rarity="Untouched"
+          onclick="selectRarity(this)" />
+      </div>
+
+      <script>
+        function selectRarity(img) {
+          const rarity = img.getAttribute("data-rarity");
+          if (rarity) {
+            localStorage.setItem("selectedRarity", rarity);
+            window.location.href = "matchmaking.html";
+          }
+        }
+      </script>
     </div>
 
     <script>
@@ -215,42 +298,34 @@
       window.addEventListener("DOMContentLoaded", () => {
         applyStoredTheme();
 
-        // Handle token in URL & localStorage
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get("token");
         if (token) {
           localStorage.setItem("token", token);
-          // optionally remove token from URL
           history.replaceState(null, "", window.location.pathname);
         }
 
-        // Show profile picture if token exists
         const storedToken = localStorage.getItem("token");
         const profilePic = document.getElementById("profile-pic");
 
         if (storedToken) {
           try {
-            // Decode JWT (assumes format header.payload.signature)
             const payloadBase64 = storedToken.split(".")[1];
-            // Decode base64 URL (replace URL-safe chars)
             const base64 = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
             const jsonPayload = decodeURIComponent(
               atob(base64)
                 .split("")
-                .map(function (c) {
-                  return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-                })
+                .map(
+                  (c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+                )
                 .join("")
             );
             const payload = JSON.parse(jsonPayload);
             if (payload && payload.avatar && payload.id) {
-              // Discord CDN URL for avatar
-              // avatar can be null, fallback to default avatar URL if needed
               let avatarUrl;
               if (payload.avatar) {
                 avatarUrl = `https://cdn.discordapp.com/avatars/${payload.id}/${payload.avatar}.png`;
               } else {
-                // Default avatar (discriminator modulo 5)
                 const discrim = payload.discriminator || "0";
                 const defaultAvatarNumber = parseInt(discrim) % 5;
                 avatarUrl = `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
@@ -260,12 +335,10 @@
               profilePic.title = payload.username || "Profile";
             }
           } catch (err) {
-            // Invalid token or parse error
             console.warn("Invalid token or unable to parse:", err);
           }
         }
 
-        // Clicking profile pic goes to profile.html
         profilePic.addEventListener("click", () => {
           window.location.href = "profile.html";
         });
@@ -281,8 +354,8 @@
       const pvp = document.querySelector(".pvp");
       const pvbse = document.querySelector(".pvbse");
       const pvpse = document.querySelector(".pvpse");
+      const rarityScreen = document.querySelector(".rarity-screen");
 
-      // Battle hover
       battle.addEventListener("mouseenter", () => {
         battle.style.transform = "translate(-60%,-60%) scale(1.1)";
       });
@@ -290,28 +363,17 @@
         battle.style.transform = "translate(-50%,-50%) scale(1)";
       });
 
-      // Click sequence for battle
       battle.addEventListener("click", () => {
-        // 1) Fade out trad & battle
         trad.style.opacity = "0";
         battle.style.opacity = "0";
-
-        // 2) Swipe line & logo
         line.classList.add("swipe-line");
         logo.classList.add("swipe-logo");
 
-        // 3) Show selection screen
         setTimeout(() => {
           selection.classList.add("active");
-
-          // 4) Fade in welcome text
           fadeIn.classList.add("visible");
-
-          // 5) After 1s showing, slide it up
           setTimeout(() => {
             fadeIn.classList.add("slide-up");
-
-            // 6) After slide-up (1s), fade in PVB/PVP
             setTimeout(() => {
               [pvb, pvp, pvbse, pvpse].forEach(
                 (el) => (el.style.opacity = "1")
@@ -321,9 +383,40 @@
         }, 1000);
       });
 
-      // Redirect to battlep.html when pvbse is clicked
+      // PVBSE click triggers swipe-out and rarity swipe-in
       pvbse.addEventListener("click", () => {
-        window.location.href = "battlep.html";
+        // Slide all elements fully off-screen
+        [pvb, pvp, pvbse, pvpse].forEach((el) => {
+          el.style.transform = "translateX(-150vw)"; // slide far left
+          el.style.opacity = "0"; // fade out
+        });
+
+        line.style.transform = "translateY(-150vh)"; // slide line up out of view
+        line.style.opacity = "0";
+
+        logo.style.transform = "translateY(-150vh)"; // slide logo up out of view
+        logo.style.opacity = "0";
+
+        fadeIn.style.transform = "translateY(-150vh)";
+        fadeIn.style.opacity = "0";
+
+        // Activate rarity screen after swipe-out animation
+        setTimeout(() => {
+          rarityScreen.classList.add("active");
+        }, 800); // matches transition time
+      });
+
+      // Select all rarity images
+      const rarityImages = document.querySelectorAll(".rarity img");
+
+      rarityImages.forEach((img) => {
+        img.addEventListener("click", () => {
+          const selectedRarity = img.dataset.rarity;
+          if (selectedRarity) {
+            localStorage.setItem("selectedRarity", selectedRarity);
+            window.location.href = "matchmaking.html"; // change if your file is named differently
+          }
+        });
       });
     </script>
   </body>

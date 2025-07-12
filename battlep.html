@@ -521,5 +521,11 @@
     }
 
     init();
+
+    const opponent = localStorage.getItem("matchedOpponent");
+    if (opponent) {
+      // Show opponent name in the UI as needed
+      console.log("Matched opponent:", opponent);
+    }
   </script>
 </html>
