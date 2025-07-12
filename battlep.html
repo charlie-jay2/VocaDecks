@@ -378,9 +378,9 @@
       }
     }
 
-    // function redirectToIndex() {
-    //   window.location.href = "index.html";
-    // }
+    function redirectToIndex() {
+      window.location.href = "index.html";
+    }
 
     async function fetchUserCards(token) {
       try {
@@ -403,11 +403,11 @@
 
       container.style.display = "block";
       container.innerHTML = `
-      <div class="user-row">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-        <span class="username" title="${user.username}">${user.username}</span>
-      </div>
-    `;
+          <div class="user-row">
+            <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+            <span class="username" title="${user.username}">${user.username}</span>
+          </div>
+        `;
     }
 
     function displayCardImage(cardName) {
@@ -419,16 +419,11 @@
         return;
       }
 
-      // Show image regardless of rarity prefix
-
-      // Encode spaces and special characters
       const encodedFileName = encodeURIComponent(cardName);
-
       const imgSrc = `./Cards/${encodedFileName}`;
-
       console.log("Displaying image:", imgSrc);
 
-      container.innerHTML = `<img src="${imgSrc}" style="max-width:80%; max-height:200px; height:auto; user-select:none;" alt="Selected Card" />`;
+      container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" />`;
     }
 
     function formatCardNameWithRarity(name) {
@@ -500,7 +495,6 @@
           const option = document.createElement("option");
           option.value = val;
 
-          // Special case for these two cards to remove ".png" from display text:
           const lowerVal = val.toLowerCase();
           if (
             lowerVal === "cherry mikudayo.png" ||
@@ -524,7 +518,6 @@
 
     const opponent = localStorage.getItem("matchedOpponent");
     if (opponent) {
-      // Show opponent name in the UI as needed
       console.log("Matched opponent:", opponent);
     }
   </script>

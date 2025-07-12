@@ -17,10 +17,9 @@
         background: url(./Matchmake/MATCHMAKING_PAGE.png) center/cover fixed
           no-repeat;
         overflow: hidden;
-        transition: background 0.8s ease; /* smooth fade */
+        transition: background 0.8s ease;
         color: white;
       }
-
       .centered-container {
         position: fixed;
         top: 50%;
@@ -29,11 +28,10 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 50px; /* more vertical space */
+        gap: 50px;
         text-align: center;
-        white-space: nowrap; /* prevent line breaks */
+        white-space: nowrap;
       }
-
       .t1 {
         font-size: 60px;
         margin: 0;
@@ -42,7 +40,7 @@
       .t3 {
         font-size: 30px;
         margin: 0;
-        white-space: normal; /* allow wrapping if needed */
+        white-space: normal;
       }
     </style>
   </head>
@@ -80,13 +78,12 @@
         clearInterval(timerInterval);
       }
 
-      function connectWebSocket(rarity, username) {
+      function connectWebSocket(rarity, token) {
         ws = new WebSocket("wss://vdbe-0f2p.onrender.com/");
 
         ws.onopen = () => {
           console.log("WebSocket connected");
-          // Send join message
-          ws.send(JSON.stringify({ type: "join", rarity, username }));
+          ws.send(JSON.stringify({ type: "join", rarity, token }));
           t2.textContent = "Finding match...";
           startTimer();
         };
@@ -94,14 +91,11 @@
         ws.onmessage = (event) => {
           const msg = JSON.parse(event.data);
           if (msg.type === "status") {
-            t2.textContent = msg.message; // e.g. "Finding match..."
+            t2.textContent = msg.message;
           } else if (msg.type === "matched") {
             stopTimer();
             t3.textContent = "Successfully found match";
             t2.textContent = `Opponent found: ${msg.opponent}`;
-            // Update Player Two username on matchmaking page
-            // You can add a new element or reuse existing one
-            // Let's create a new <h1 class="t4"> to show Player Two:
 
             let t4 = document.querySelector(".t4");
             if (!t4) {
@@ -114,10 +108,8 @@
             }
             t4.textContent = `Player Two: ${msg.opponent}`;
 
-            // Save opponent to localStorage for battlep.html usage
             localStorage.setItem("matchedOpponent", msg.opponent);
 
-            // Optional: Redirect to battle page after delay
             setTimeout(() => {
               window.location.href = "battlep.html";
             }, 3000);
@@ -141,15 +133,15 @@
 
       window.addEventListener("DOMContentLoaded", () => {
         const rarity = localStorage.getItem("selectedRarity") || "Unknown";
+        const token = localStorage.getItem("token");
 
-        // For demonstration, use a fixed username or get from localStorage / login
-        const username =
-          localStorage.getItem("username") ||
-          `Guest${Math.floor(Math.random() * 1000)}`;
+        if (!token) {
+          alert("No Token found. Please login.");
+          window.location.href = "index.html";
+        }
 
         rarityTextElem.textContent = rarity;
-
-        connectWebSocket(rarity, username);
+        connectWebSocket(rarity, token);
       });
     </script>
   </body>
