@@ -163,9 +163,26 @@
         transform: translate(-50%, -50%) rotate(-57.5deg);
         height: 8%;
       }
+
+      /* Profile picture in top right */
+      #profile-pic {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+        display: none;
+        z-index: 9999;
+      }
     </style>
   </head>
   <body>
+    <img id="profile-pic" alt="Profile Picture" />
+
     <!-- MENU SCREEN -->
     <div class="menu-screen">
       <img src="./Menu/traditional.png" class="trad" />
@@ -199,7 +216,64 @@
       }
 
       // apply stored theme on load
-      window.addEventListener("DOMContentLoaded", applyStoredTheme);
+      window.addEventListener("DOMContentLoaded", () => {
+        applyStoredTheme();
+
+        // Handle token in URL & localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get("token");
+        if (token) {
+          localStorage.setItem("token", token);
+          // optionally remove token from URL
+          history.replaceState(null, "", window.location.pathname);
+        }
+
+        // Show profile picture if token exists
+        const storedToken = localStorage.getItem("token");
+        const profilePic = document.getElementById("profile-pic");
+
+        if (storedToken) {
+          try {
+            // Decode JWT (assumes format header.payload.signature)
+            const payloadBase64 = storedToken.split(".")[1];
+            // Decode base64 URL (replace URL-safe chars)
+            const base64 = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+              atob(base64)
+                .split("")
+                .map(function (c) {
+                  return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                })
+                .join("")
+            );
+            const payload = JSON.parse(jsonPayload);
+            if (payload && payload.avatar && payload.id) {
+              // Discord CDN URL for avatar
+              // avatar can be null, fallback to default avatar URL if needed
+              let avatarUrl;
+              if (payload.avatar) {
+                avatarUrl = `https://cdn.discordapp.com/avatars/${payload.id}/${payload.avatar}.png`;
+              } else {
+                // Default avatar (discriminator modulo 5)
+                const discrim = payload.discriminator || "0";
+                const defaultAvatarNumber = parseInt(discrim) % 5;
+                avatarUrl = `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
+              }
+              profilePic.src = avatarUrl;
+              profilePic.style.display = "block";
+              profilePic.title = payload.username || "Profile";
+            }
+          } catch (err) {
+            // Invalid token or parse error
+            console.warn("Invalid token or unable to parse:", err);
+          }
+        }
+
+        // Clicking profile pic goes to profile.html
+        profilePic.addEventListener("click", () => {
+          window.location.href = "profile.html";
+        });
+      });
 
       const battle = document.querySelector(".battle");
       const trad = document.querySelector(".trad");
@@ -251,19 +325,10 @@
         }, 1000);
       });
 
-      // Redirect to loading.html when pvbse is clicked
+      // Redirect to battlep.html when pvbse is clicked
       pvbse.addEventListener("click", () => {
         window.location.href = "battlep.html";
       });
-
-      // In menu.html script
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get("token");
-      if (token) {
-        localStorage.setItem("token", token);
-        // optionally remove token from URL
-        history.replaceState(null, "", window.location.pathname);
-      }
     </script>
   </body>
 </html>
