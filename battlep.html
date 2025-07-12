@@ -497,10 +497,9 @@
             val += ".png";
           }
 
-          if (!/^r[1-5]/i.test(val)) {
-            console.log("Skipping card (no r1-r5 prefix):", val);
-            return;
-          }
+          // **Show ALL cards regardless of prefix**
+          // Remove the previous prefix filter to include cards like "Cherry Mikudayo.png"
+          // No skipping here
 
           const option = document.createElement("option");
           option.value = val;
