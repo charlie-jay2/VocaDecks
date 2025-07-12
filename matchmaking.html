@@ -79,19 +79,25 @@
       }
 
       function connectWebSocket(rarity, token) {
-        // Pass the token as the subprotocol to send it in sec-websocket-protocol header
-        ws = new WebSocket("wss://vdbe-0f2p.onrender.com/", token);
+        ws = new WebSocket("wss://vdbe-0f2p.onrender.com/");
 
         ws.onopen = () => {
           console.log("WebSocket connected");
-          // Send join message without token since it’s already sent on connection
-          ws.send(JSON.stringify({ type: "join", rarity }));
+          ws.send(JSON.stringify({ type: "join", rarity, token }));
           t2.textContent = "Finding match...";
           startTimer();
         };
 
         ws.onmessage = (event) => {
-          const msg = JSON.parse(event.data);
+          let msg;
+          try {
+            msg = JSON.parse(event.data);
+          } catch {
+            // If message is not JSON, just log it
+            console.log("Received non-JSON message:", event.data);
+            return;
+          }
+
           if (msg.type === "status") {
             t2.textContent = msg.message;
           } else if (msg.type === "matched") {
@@ -140,7 +146,6 @@
         if (!token) {
           alert("No Token found. Please login.");
           window.location.href = "index.html";
-          return;
         }
 
         rarityTextElem.textContent = rarity;
