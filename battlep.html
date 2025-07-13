@@ -265,6 +265,9 @@
       padding-top: 8px;
     }
 
+    /* Removed logout button styles because it's removed */
+
+    /* NEW: dropdown style */
     #playerOneCards {
       position: absolute;
       top: 52%;
@@ -291,10 +294,13 @@
           left: 26.5%;
           bottom: 15px;
           z-index: 1;
-        "></div>
+        ">
+        <!-- Card image will be inserted here -->
+      </div>
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
       <div>
         <h1 class="text1">PLAYER ONE</h1>
+        <!-- dropdown kept -->
         <select id="playerOneCards" class="form-control">
           <option value="">-- Your Cards --</option>
         </select>
@@ -311,7 +317,7 @@
           ">
           <h1
             id="playerTwoUsername"
-            style="font-size: 30px; position: absolute; left: 15%; bottom: 440">
+            style="font-size: 30px; position: absolute; left: 1%; bottom: 440">
             PLAYER TWO
           </h1>
           <div
@@ -323,7 +329,9 @@
               left: 43%;
               bottom: 15px;
               z-index: 1;
-            "></div>
+            ">
+            <!-- Card image will be inserted here -->
+          </div>
         </div>
       </div>
       <h1 class="blockstxt">BLOCKS</h1>
@@ -397,6 +405,10 @@
         return null;
       }
     }
+
+    // function redirectToIndex() {
+    //   window.location.href = "index.html";
+    // }
 
     async function fetchUserCards(token) {
       try {
@@ -484,6 +496,7 @@
           saveToken(urlToken);
           token = urlToken;
         } else {
+          // redirectToIndex();
           console.log("No token found, redirect or handle accordingly");
           return;
         }
@@ -493,6 +506,7 @@
       if (!decoded || !decoded.username || !decoded.id || !decoded.avatar) {
         localStorage.removeItem("token");
         localStorage.removeItem("tokenSavedAt");
+        // redirectToIndex();
         console.log("Invalid token, redirect or handle accordingly");
         return;
       }
@@ -550,17 +564,15 @@
 
     let socket;
     let currentUsername;
-    let reconnectAttempts = 0;
 
     function setupWebSocket(token, username) {
       currentUsername = username;
 
-      const wsUrl = "wss://vdbe-0f2p.onrender.com";
+      const wsUrl = "wss://vdbe-0f2p.onrender.com"; // your WebSocket URL
       socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(token)}`);
 
       socket.addEventListener("open", () => {
         console.log("🔗 WebSocket connected");
-        reconnectAttempts = 0;
       });
 
       socket.addEventListener("message", (event) => {
@@ -582,6 +594,7 @@
           );
 
           if (msg.username !== currentUsername) {
+            // Opponent’s card, show for Player TWO
             displayCardImage(msg.cardName, "playerTwoCardContainer");
           }
         } else if (msg.type === "matched") {
@@ -594,44 +607,27 @@
 
           const p2Name = document.getElementById("playerTwoUsername");
           if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
-        } else {
-          console.log("📦 Unknown WS message:", msg);
         }
       });
 
       socket.addEventListener("close", () => {
-        console.warn("🔌 WebSocket disconnected");
-        attemptReconnect(token, username);
+        console.log("❌ WebSocket disconnected");
       });
 
-      socket.addEventListener("error", (err) => {
-        console.error("💥 WebSocket error:", err);
-        socket.close();
+      socket.addEventListener("error", (error) => {
+        console.error("🚨 WebSocket error:", error);
       });
-    }
-
-    function attemptReconnect(token, username) {
-      const delay = Math.min(5000 * Math.pow(2, reconnectAttempts), 30000);
-      console.log(`🔄 Attempting reconnect in ${delay / 1000}s...`);
-      setTimeout(() => {
-        reconnectAttempts++;
-        setupWebSocket(token, username);
-      }, delay);
     }
 
     function sendCardSelection(cardName) {
-      if (!socket || socket.readyState !== WebSocket.OPEN) {
-        console.warn("⚠️ WebSocket not open; skipping send");
-        return;
+      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
+        const payload = {
+          type: "selection",
+          cardName: cardName,
+        };
+        console.log("📤 Sending card selection:", payload);
+        socket.send(JSON.stringify(payload));
       }
-
-      const msg = {
-        type: "cardSelection",
-        cardName: cardName,
-      };
-
-      console.log("📤 Sending card selection:", msg);
-      socket.send(JSON.stringify(msg));
     }
 
     init();
