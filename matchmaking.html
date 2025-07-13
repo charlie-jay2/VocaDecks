@@ -87,7 +87,7 @@
 
         token = localStorage.getItem("token");
         ws = new WebSocket(
-          `wss://vocadecks.com/?token=${encodeURIComponent(token)}`
+          `wss://vdbe-0f2p.onrender.com/?token=${encodeURIComponent(token)}`
         );
 
         ws.onopen = () => {
