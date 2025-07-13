@@ -420,11 +420,11 @@
 
       container.style.display = "block";
       container.innerHTML = `
-          <div class="user-row">
-            <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-            <span class="username" title="${user.username}">${user.username}</span>
-          </div>
-        `;
+      <div class="user-row">
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+        <span class="username" title="${user.username}">${user.username}</span>
+      </div>
+    `;
     }
 
     function displayCardImage(cardName, containerId = "selectedCardContainer") {
@@ -463,7 +463,6 @@
       };
 
       const baseName = cleanName.replace(/^r[1-5]/i, "").replace(/\.png$/i, "");
-
       return `${baseName.trim()} (${rarityMap[rarityNum] || "UNKNOWN"})`;
     }
 
@@ -496,6 +495,14 @@
         playerOneHeading.textContent = decoded.username.toUpperCase();
       }
 
+      // Display Player Two instantly from localStorage
+      const matchedOpponent =
+        localStorage.getItem("matchedOpponent") || "PLAYER TWO";
+      const playerTwoHeading = document.getElementById("playerTwoUsername");
+      if (playerTwoHeading) {
+        playerTwoHeading.textContent = matchedOpponent.toUpperCase();
+      }
+
       const cards = await fetchUserCards(token);
       const dropdown = document.getElementById("playerOneCards");
 
@@ -504,7 +511,6 @@
 
         cards.forEach((card) => {
           let val = (card.name || card.id || card).trim();
-
           if (!val.toLowerCase().endsWith(".png")) {
             val += ".png";
           }
@@ -534,36 +540,13 @@
       setupWebSocket(token, decoded.username);
     }
 
-    function displayOpponentInfo(opponentUsername, cardName) {
-      const playerTwoUsername = document.getElementById("playerTwoUsername");
-      const playerTwoCardContainer = document.getElementById(
-        "playerTwoCardContainer"
-      );
-
-      if (playerTwoUsername) {
-        playerTwoUsername.textContent = (
-          opponentUsername || "PLAYER TWO"
-        ).toUpperCase();
-      }
-
-      if (!playerTwoCardContainer) return;
-
-      if (cardName) {
-        displayCardImage(cardName, "playerTwoCardContainer");
-      } else {
-        playerTwoCardContainer.innerHTML = ""; // no card selected
-      }
-    }
-
     let socket;
     let currentUsername;
 
     function setupWebSocket(token, username) {
       currentUsername = username;
 
-      // Connect to WebSocket server with JWT token as query param
-      const wsUrl = "wss://vdbe-0f2p.onrender.com"; // <-- replace with your actual Render WebSocket URL
-
+      const wsUrl = "wss://vdbe-0f2p.onrender.com"; // replace with actual WebSocket URL
       socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(token)}`);
 
       socket.addEventListener("open", () => {
@@ -580,26 +563,24 @@
         }
 
         if (msg.type === "welcome") {
-          console.log(msg.message); // 👋 Welcome user
+          console.log(msg.message);
         } else if (msg.type === "status") {
           console.log("Status:", msg.message);
         } else if (msg.type === "opponentSelection") {
           console.log(
             `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
           );
-          // Update UI for opponent selection if needed
+          displayOpponentInfo(msg.username, msg.cardName);
         } else if (msg.type === "matched") {
           console.log(`✅ Connected to ${msg.opponent}`);
           console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
 
-          // Store info for use
           localStorage.setItem("matchedOpponent", msg.opponent);
           localStorage.setItem("yourName", msg.yourName);
           localStorage.setItem("yourRole", msg.role);
 
-          // Optionally update UI
-          const p2Name = document.getElementById("playerTwoName");
-          if (p2Name) p2Name.textContent = `Player Two: ${msg.opponent}`;
+          const p2Name = document.getElementById("playerTwoUsername");
+          if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
         }
       });
 
