@@ -438,7 +438,7 @@
 
       const encodedFileName = encodeURIComponent(cardName);
       const imgSrc = `./Cards/${encodedFileName}`;
-      console.log(`Displaying image in #${containerId}:`, imgSrc);
+      console.log(`📸 Displaying in #${containerId}:`, imgSrc);
 
       container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" />`;
     }
@@ -495,7 +495,6 @@
         playerOneHeading.textContent = decoded.username.toUpperCase();
       }
 
-      // Display Player Two instantly from localStorage
       const matchedOpponent =
         localStorage.getItem("matchedOpponent") || "PLAYER TWO";
       const playerTwoHeading = document.getElementById("playerTwoUsername");
@@ -532,7 +531,7 @@
         });
 
         dropdown.addEventListener("change", (e) => {
-          displayCardImage(e.target.value);
+          displayCardImage(e.target.value, "selectedCardContainer");
           sendCardSelection(e.target.value);
         });
       }
@@ -546,11 +545,11 @@
     function setupWebSocket(token, username) {
       currentUsername = username;
 
-      const wsUrl = "wss://vdbe-0f2p.onrender.com"; // replace with actual WebSocket URL
+      const wsUrl = "wss://vdbe-0f2p.onrender.com"; // your WebSocket URL
       socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(token)}`);
 
       socket.addEventListener("open", () => {
-        console.log("WebSocket connected");
+        console.log("🔗 WebSocket connected");
       });
 
       socket.addEventListener("message", (event) => {
@@ -558,7 +557,7 @@
         try {
           msg = JSON.parse(event.data);
         } catch {
-          console.warn("Received non-JSON WS message:", event.data);
+          console.warn("⚠️ Non-JSON WS message:", event.data);
           return;
         }
 
@@ -570,7 +569,11 @@
           console.log(
             `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
           );
-          displayOpponentInfo(msg.username, msg.cardName);
+
+          if (msg.username !== currentUsername) {
+            // Opponent’s card, show for Player TWO
+            displayCardImage(msg.cardName, "playerTwoCardContainer");
+          }
         } else if (msg.type === "matched") {
           console.log(`✅ Connected to ${msg.opponent}`);
           console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
@@ -585,22 +588,22 @@
       });
 
       socket.addEventListener("close", () => {
-        console.log("WebSocket disconnected");
+        console.log("❌ WebSocket disconnected");
       });
 
       socket.addEventListener("error", (error) => {
-        console.error("WebSocket error:", error);
+        console.error("🚨 WebSocket error:", error);
       });
     }
 
     function sendCardSelection(cardName) {
       if (socket && socket.readyState === WebSocket.OPEN && cardName) {
-        socket.send(
-          JSON.stringify({
-            type: "selection",
-            cardName: cardName,
-          })
-        );
+        const payload = {
+          type: "selection",
+          cardName: cardName,
+        };
+        console.log("📤 Sending card selection:", payload);
+        socket.send(JSON.stringify(payload));
       }
     }
 
