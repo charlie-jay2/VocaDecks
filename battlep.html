@@ -563,7 +563,10 @@
       currentUsername = username;
 
       // Connect to WebSocket server with JWT token as subprotocol
-      socket = new WebSocket(`wss://${window.location.host}`, token);
+      const wsUrl = "wss://vdbe-0f2p.onrender.com"; // <-- replace with your actual Render WebSocket URL
+
+      // Connect with token sent as a query param (safer than subprotocol)
+      socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(token)}`);
 
       socket.addEventListener("open", () => {
         console.log("WebSocket connected");
