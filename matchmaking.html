@@ -107,14 +107,23 @@
           }
 
           if (msg.type === "welcome") {
-            console.log(msg.message);
+            console.log(msg.message); // 👋 Welcome user
           } else if (msg.type === "status") {
             t2.textContent = msg.message;
           } else if (msg.type === "matched") {
             stopTimer();
             t3.textContent = "Successfully found match";
-            t2.textContent = `Connected to ${msg.opponent}`;
+            t2.textContent = `✅ Connected to ${msg.opponent}`;
 
+            console.log(`✅ Connected to ${msg.opponent}`);
+            console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
+
+            // Save opponent and self info for battlep.html
+            localStorage.setItem("matchedOpponent", msg.opponent);
+            localStorage.setItem("yourName", msg.yourName);
+            localStorage.setItem("yourRole", msg.role);
+
+            // Update UI to show Player Two
             let t4 = document.querySelector(".t4");
             if (!t4) {
               t4 = document.createElement("h1");
@@ -125,8 +134,6 @@
               document.querySelector(".centered-container").appendChild(t4);
             }
             t4.textContent = `Player Two: ${msg.opponent}`;
-
-            localStorage.setItem("matchedOpponent", msg.opponent);
 
             setTimeout(() => {
               window.location.href = "battlep.html";
