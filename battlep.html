@@ -288,13 +288,15 @@
       <div
         id="selectedCardContainer"
         style="
+          width: 15%;
+          height: auto;
           position: absolute;
-          top: 76%;
-          left: 34%;
-          transform: translate(-50%, -50%);
-          z-index: 11;
-          width: 13%;
-        "></div>
+          left: 26.5%;
+          bottom: 15px;
+          z-index: 1;
+        ">
+        <!-- Card image will be inserted here -->
+      </div>
       <img src="./Assets/ICONS/Rectangle_148.png" class="tbox" />
       <div>
         <h1 class="text1">PLAYER ONE</h1>
@@ -307,20 +309,29 @@
           id="playerTwoInfo"
           style="
             position: relative;
-            left: 59%;
-            transform: translateX(-50%);
+            left: 10%;
+            bottom: 30%;
             color: white;
             text-align: center;
             z-index: 11;
           ">
           <h1
             id="playerTwoUsername"
-            style="font-size: 30px; margin-bottom: 5px">
+            style="font-size: 30px; position: absolute; left: 45%; bottom: 440">
             PLAYER TWO
           </h1>
           <div
             id="playerTwoCardContainer"
-            style="width: 13%; margin: 0 auto"></div>
+            style="
+              width: 15%;
+              height: auto;
+              position: absolute;
+              left: 43%;
+              bottom: 15px;
+              z-index: 1;
+            ">
+            <!-- Card image will be inserted here -->
+          </div>
         </div>
       </div>
       <h1 class="blockstxt">BLOCKS</h1>
@@ -395,9 +406,9 @@
       }
     }
 
-    function redirectToIndex() {
-      window.location.href = "index.html";
-    }
+    // function redirectToIndex() {
+    //   window.location.href = "index.html";
+    // }
 
     async function fetchUserCards(token) {
       try {
@@ -440,7 +451,17 @@
       const imgSrc = `./Cards/${encodedFileName}`;
       console.log(`📸 Displaying in #${containerId}:`, imgSrc);
 
-      container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" />`;
+      container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" style="
+      width: 15%;
+      height: auto;
+      position: absolute;
+      ${
+        containerId === "playerTwoCardContainer"
+          ? "left: 43%; bottom: 15;"
+          : "left: 26.5%; bottom: 15;"
+      }
+      z-index: 1;
+    " />`;
     }
 
     function formatCardNameWithRarity(name) {
@@ -475,7 +496,8 @@
           saveToken(urlToken);
           token = urlToken;
         } else {
-          redirectToIndex();
+          // redirectToIndex();
+          console.log("No token found, redirect or handle accordingly");
           return;
         }
       }
@@ -484,7 +506,8 @@
       if (!decoded || !decoded.username || !decoded.id || !decoded.avatar) {
         localStorage.removeItem("token");
         localStorage.removeItem("tokenSavedAt");
-        redirectToIndex();
+        // redirectToIndex();
+        console.log("Invalid token, redirect or handle accordingly");
         return;
       }
 
