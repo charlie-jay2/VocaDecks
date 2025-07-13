@@ -85,7 +85,9 @@
           return;
         }
 
-        ws = new WebSocket("wss://vdbe-0f2p.onrender.com/", token);
+        ws = new WebSocket(
+          `wss://vdbe-0f2p.onrender.com/?token=${encodeURIComponent(token)}`
+        );
 
         ws.onopen = () => {
           console.log("WebSocket connected");
