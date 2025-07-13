@@ -571,29 +571,35 @@
       });
 
       socket.addEventListener("message", (event) => {
-        let data;
+        let msg;
         try {
-          data = JSON.parse(event.data);
+          msg = JSON.parse(event.data);
         } catch {
           console.warn("Received non-JSON WS message:", event.data);
           return;
         }
 
-        if (data.type === "welcome") {
-          console.log(`👋 Welcome ${currentUsername}`);
-        } else if (data.type === "matched") {
-          console.log(`✅ Connected to ${data.opponent}`);
-          localStorage.setItem("matchedOpponent", data.opponent);
-          displayOpponentInfo(data.opponent, null);
-        } else if (data.type === "opponentSelection") {
+        if (msg.type === "welcome") {
+          console.log(msg.message); // 👋 Welcome user
+        } else if (msg.type === "status") {
+          console.log("Status:", msg.message);
+        } else if (msg.type === "opponentSelection") {
           console.log(
-            `🎴 Opponent ${data.username} selected card: ${data.cardName}`
+            `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
           );
-          displayOpponentInfo(data.username, data.cardName);
-        } else if (data.type === "status") {
-          console.log("ℹ️ Status:", data.message);
-        } else {
-          console.log("📡 WS message:", data);
+          // Update UI for opponent selection if needed
+        } else if (msg.type === "matched") {
+          console.log(`✅ Connected to ${msg.opponent}`);
+          console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
+
+          // Store info for use
+          localStorage.setItem("matchedOpponent", msg.opponent);
+          localStorage.setItem("yourName", msg.yourName);
+          localStorage.setItem("yourRole", msg.role);
+
+          // Optionally update UI
+          const p2Name = document.getElementById("playerTwoName");
+          if (p2Name) p2Name.textContent = `Player Two: ${msg.opponent}`;
         }
       });
 
