@@ -355,7 +355,6 @@
         src="./Assets/ICONS/Settings.png"
         class="back"
         style="margin-left: 15px; position: relative; bottom: 45px" />
-      <!-- Keep discord user info div but empty initially -->
       <div id="discordUserInfo" style="display: none"></div>
     </div>
   </body>
@@ -581,20 +580,20 @@
         }
 
         if (data.type === "welcome") {
-          console.log(data.message);
+          console.log(`👋 Welcome ${currentUsername}`);
         } else if (data.type === "matched") {
-          console.log(`Matched with opponent: ${data.opponent}`);
+          console.log(`✅ Connected to ${data.opponent}`);
           localStorage.setItem("matchedOpponent", data.opponent);
           displayOpponentInfo(data.opponent, null);
         } else if (data.type === "opponentSelection") {
           console.log(
-            `Opponent ${data.username} selected card: ${data.cardName}`
+            `🎴 Opponent ${data.username} selected card: ${data.cardName}`
           );
           displayOpponentInfo(data.username, data.cardName);
         } else if (data.type === "status") {
-          console.log("Status:", data.message);
+          console.log("ℹ️ Status:", data.message);
         } else {
-          console.log("WS message:", data);
+          console.log("📡 WS message:", data);
         }
       });
 
@@ -618,7 +617,6 @@
       }
     }
 
-    // Initialize on page load
     init();
   </script>
 </html>
