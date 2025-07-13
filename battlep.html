@@ -420,11 +420,11 @@
 
       container.style.display = "block";
       container.innerHTML = `
-      <div class="user-row">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-        <span class="username" title="${user.username}">${user.username}</span>
-      </div>
-    `;
+          <div class="user-row">
+            <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+            <span class="username" title="${user.username}">${user.username}</span>
+          </div>
+        `;
     }
 
     function displayCardImage(cardName, containerId = "selectedCardContainer") {
