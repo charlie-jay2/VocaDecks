@@ -1,0 +1,155 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-display: swap;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden; /* Fully lock scrolling */
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-image: url(./Assets/background.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        font-family: Panton;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Fullscreen Loader Container */
+      .loader-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6); /* Slight dark overlay */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        z-index: 9999;
+        transition: opacity 0.8s ease-out;
+      }
+
+      .loader-container.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Floating Cards */
+      .card {
+        position: absolute;
+        top: calc(10% + 80% * var(--rand-y)); /* random vertical position */
+        width: 120px;
+        height: auto;
+        transform: translateX(100vw) rotate(var(--rand-rotate));
+        animation: floatLeft var(--rand-duration) linear forwards;
+        opacity: 0.9;
+      }
+
+      @keyframes floatLeft {
+        from {
+          transform: translateX(100vw) rotate(var(--rand-rotate));
+          opacity: 0.9;
+        }
+        to {
+          transform: translateX(-150px) rotate(calc(var(--rand-rotate) + 30deg));
+          opacity: 0.4;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loader -->
+    <div class="loader-container" id="loader"></div>
+
+    <script>
+      // Fetch card filenames from Netlify function
+      async function fetchCards() {
+        try {
+          const res = await fetch("/.netlify/functions/loadingScreen");
+          if (!res.ok) throw new Error("Failed to fetch cards");
+          const data = await res.json();
+          return data; // Array of card filenames like "r1KAITO C.png"
+        } catch (e) {
+          console.error("Error fetching cards:", e);
+          return [];
+        }
+      }
+
+      function randomCards(cards, count) {
+        const shuffled = [...cards].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+      }
+
+      function spawnFloatingCards(cards) {
+        const loader = document.getElementById("loader");
+        const selectedCards = randomCards(cards, 7); // Pick 6–7 random cards
+        selectedCards.forEach((filename) => {
+          const img = document.createElement("img");
+          img.src = `./Cards/${encodeURIComponent(filename)}`; // use filename from Netlify function
+          img.classList.add("card");
+          img.style.setProperty("--rand-y", Math.random());
+          img.style.setProperty(
+            "--rand-rotate",
+            `${Math.random() * 20 - 10}deg`
+          );
+          img.style.setProperty("--rand-duration", `${5 + Math.random() * 3}s`);
+          loader.appendChild(img);
+        });
+      }
+
+      function applyStoredTheme() {
+        const themes = {
+          t1: "./Menu/bg.png",
+          t2: "./Profile/MIDNIGHT_BLUE.png",
+          t3: "./Profile/TUNDRA_MANGO.png",
+          t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+          t5: "./Profile/CHERRIES__CREAM.png",
+          t6: "./Profile/SIREN_PURPLE.png",
+        };
+        const key = localStorage.getItem("selectedTheme") || "t1";
+        document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
+      }
+
+      window.addEventListener("DOMContentLoaded", async () => {
+        applyStoredTheme();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get("token");
+        if (token) {
+          localStorage.setItem("token", token);
+          history.replaceState(null, "", window.location.pathname);
+        }
+
+        const cards = await fetchCards();
+        if (cards.length === 0) {
+          console.warn("No cards fetched, showing no animation.");
+        } else {
+          spawnFloatingCards(cards);
+        }
+
+        // Hide loader after 3 seconds
+        const loader = document.getElementById("loader");
+        setTimeout(() => {
+          loader.classList.add("fade-out");
+        }, 3000);
+      });
+    </script>
+  </body>
+</html>
