@@ -479,6 +479,21 @@
       return `${baseName.trim()} (${rarityMap[rarityNum] || "UNKNOWN"})`;
     }
 
+    function getCardRarity(name) {
+      const rarityMatch = name.match(/^r([1-5])/i);
+      if (!rarityMatch) return "UNKNOWN";
+
+      const rarityMap = {
+        1: "COMMON",
+        2: "EXTRA",
+        3: "RARE",
+        4: "LEGENDARY",
+        5: "UNTOUCHED",
+      };
+
+      return rarityMap[rarityMatch[1]] || "UNKNOWN";
+    }
+
     async function init() {
       let token = getToken();
 
@@ -515,22 +530,14 @@
         playerTwoHeading.textContent = matchedOpponent.toUpperCase();
       }
 
+      const selectedRarity = localStorage.getItem("selectedRarity");
+      console.log("🎯 Selected Rarity:", selectedRarity);
+
       const cards = await fetchUserCards(token);
       const dropdown = document.getElementById("playerOneCards");
 
-      // Get current rarity from URL (e.g., ?rarity=RARE)
-      const rarityParam = getQueryParam("rarity");
-      const rarityMapReverse = {
-        COMMON: "1",
-        EXTRA: "2",
-        RARE: "3",
-        LEGENDARY: "4",
-        UNTOUCHED: "5",
-      };
-      const rarityCode = rarityMapReverse[rarityParam?.toUpperCase()] || null;
-
       if (dropdown) {
-        dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
+        dropdown.innerHTML = `<option value="">-- Your ${selectedRarity} Cards --</option>`;
 
         cards.forEach((card) => {
           let val = (card.name || card.id || card).trim();
@@ -538,25 +545,24 @@
             val += ".png";
           }
 
-          // Filter by rarity if rarityCode exists
-          if (rarityCode && !val.toLowerCase().startsWith("r" + rarityCode)) {
-            return; // Skip cards not matching current rarity
+          const cardRarity = getCardRarity(val);
+
+          if (cardRarity === selectedRarity) {
+            const option = document.createElement("option");
+            option.value = val;
+
+            const lowerVal = val.toLowerCase();
+            if (
+              lowerVal === "cherry mikudayo.png" ||
+              lowerVal === "mikudayo.png"
+            ) {
+              option.textContent = val.replace(/\.png$/i, "");
+            } else {
+              option.textContent = formatCardNameWithRarity(val);
+            }
+
+            dropdown.appendChild(option);
           }
-
-          const option = document.createElement("option");
-          option.value = val;
-
-          const lowerVal = val.toLowerCase();
-          if (
-            lowerVal === "cherry mikudayo.png" ||
-            lowerVal === "mikudayo.png"
-          ) {
-            option.textContent = val.replace(/\.png$/i, "");
-          } else {
-            option.textContent = formatCardNameWithRarity(val);
-          }
-
-          dropdown.appendChild(option);
         });
 
         dropdown.addEventListener("change", (e) => {
@@ -574,7 +580,7 @@
     function setupWebSocket(token, username) {
       currentUsername = username;
 
-      const wsUrl = "wss://vdbe-0f2p.onrender.com"; // your WebSocket URL
+      const wsUrl = "wss://vdbe-0f2p.onrender.com";
       socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(token)}`);
 
       socket.addEventListener("open", () => {
