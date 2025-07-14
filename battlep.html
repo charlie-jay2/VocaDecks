@@ -17,14 +17,23 @@
       font-style: normal;
       font-display: swap;
     }
+    html,
+    body {
+      height: 100%;
+      overflow: hidden; /* Prevent scrolling */
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       background-image: url(./Assets/background.png);
       background-repeat: no-repeat;
       background-size: cover;
       background-position: center;
       font-family: Panton;
-      overflow-y: hidden;
-      overflow-x: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
     }
 
     .logo {
@@ -349,10 +358,12 @@
     </div>
 
     <div id="buttons">
-      <img
-        src="./Assets/ICONS/back.png"
-        class="back"
-        style="margin-left: 15px; position: relative; bottom: 45px" />
+      <a href="./menu.html"
+        ><img
+          src="./Assets/ICONS/back.png"
+          class="back"
+          style="margin-left: 15px; position: relative; bottom: 45px"
+      /></a>
       <img
         src="./Assets/ICONS/Settings.png"
         class="back"
