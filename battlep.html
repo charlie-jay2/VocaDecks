@@ -362,6 +362,8 @@
   </body>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -397,10 +399,6 @@
       }
     }
 
-    // function redirectToIndex() {
-    //   window.location.href = "index.html";
-    // }
-
     async function fetchUserCards(token) {
       try {
         const response = await fetch(
@@ -409,11 +407,34 @@
         if (!response.ok) throw new Error("Failed to fetch user cards");
         const data = await response.json();
         console.log("Fetched cards:", data.cards);
-        return data.cards || [];
+
+        // Filter cards by rarity
+        return filterCardsByRarity(data.cards || []);
       } catch (error) {
         console.error(error);
         throw error;
       }
+    }
+
+    function filterCardsByRarity(cards) {
+      const rarityMap = {
+        COMMON: "r1",
+        EXTRA: "r2",
+        RARE: "r3",
+        LEGENDARY: "r4",
+        UNTOUCHED: "r5",
+      };
+
+      const matchedRarity = localStorage.getItem("matchedRarity"); // e.g., "COMMON", "RARE", etc.
+      const rarityPrefix = rarityMap[matchedRarity?.toUpperCase()] || "";
+
+      console.log(
+        `🎯 Filtering for rarity: ${matchedRarity} (${rarityPrefix})`
+      );
+
+      return cards.filter((card) =>
+        card.name?.toLowerCase().startsWith(rarityPrefix)
+      );
     }
 
     function showDiscordUserInfo(user) {
@@ -422,11 +443,11 @@
 
       container.style.display = "block";
       container.innerHTML = `
-      <div class="user-row">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-        <span class="username" title="${user.username}">${user.username}</span>
-      </div>
-    `;
+    <div class="user-row">
+      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+      <span class="username" title="${user.username}">${user.username}</span>
+    </div>
+  `;
     }
 
     function displayCardImage(cardName, containerId = "selectedCardContainer") {
@@ -443,17 +464,16 @@
       console.log(`📸 Displaying in #${containerId}:`, imgSrc);
 
       container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" style="
-      width: 90%;
-      height: auto;
-      position: absolute;
-      left: 20%;
-      ${
-        containerId === "playerTwoCardContainer"
-          ? "left: 43%; bottom: 15;"
-          : "left: 26.5%; bottom: 15;"
-      }
-      z-index: 1;
-    " />`;
+    width: 90%;
+    height: auto;
+    position: absolute;
+    ${
+      containerId === "playerTwoCardContainer"
+        ? "left: 43%; bottom: 15;"
+        : "left: 26.5%; bottom: 15;"
+    }
+    z-index: 1;
+  " />`;
     }
 
     function formatCardNameWithRarity(name) {
@@ -488,7 +508,6 @@
           saveToken(urlToken);
           token = urlToken;
         } else {
-          // redirectToIndex();
           console.log("No token found, redirect or handle accordingly");
           return;
         }
@@ -498,7 +517,6 @@
       if (!decoded || !decoded.username || !decoded.id || !decoded.avatar) {
         localStorage.removeItem("token");
         localStorage.removeItem("tokenSavedAt");
-        // redirectToIndex();
         console.log("Invalid token, redirect or handle accordingly");
         return;
       }
@@ -512,16 +530,18 @@
 
       const matchedOpponent =
         localStorage.getItem("matchedOpponent") || "PLAYER TWO";
+      const matchedRarity = localStorage.getItem("matchedRarity") || "COMMON"; // fallback if not set
       const playerTwoHeading = document.getElementById("playerTwoUsername");
       if (playerTwoHeading) {
         playerTwoHeading.textContent = matchedOpponent.toUpperCase();
       }
 
+      console.log(`🏷️ Matched rarity: ${matchedRarity}`);
       const cards = await fetchUserCards(token);
       const dropdown = document.getElementById("playerOneCards");
 
       if (dropdown) {
-        dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
+        dropdown.innerHTML = `<option value="">-- Your ${matchedRarity} Cards --</option>`;
 
         cards.forEach((card) => {
           let val = (card.name || card.id || card).trim();
@@ -586,7 +606,6 @@
           );
 
           if (msg.username !== currentUsername) {
-            // Opponent’s card, show for Player TWO
             displayCardImage(msg.cardName, "playerTwoCardContainer");
           }
         } else if (msg.type === "matched") {
@@ -596,6 +615,11 @@
           localStorage.setItem("matchedOpponent", msg.opponent);
           localStorage.setItem("yourName", msg.yourName);
           localStorage.setItem("yourRole", msg.role);
+
+          // Save matched rarity for filtering
+          if (msg.rarity) {
+            localStorage.setItem("matchedRarity", msg.rarity);
+          }
 
           const p2Name = document.getElementById("playerTwoUsername");
           if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
