@@ -446,7 +446,6 @@
       width: 90%;
       height: auto;
       position: absolute;
-      left: 20%;
       ${
         containerId === "playerTwoCardContainer"
           ? "left: 43%; bottom: 15;"
@@ -464,9 +463,8 @@
       }
 
       const rarityMatch = cleanName.match(/^r([1-5])/i);
-      if (!rarityMatch) return cleanName;
+      if (!rarityMatch) return cleanName.replace(/\.png$/i, "");
 
-      const rarityNum = rarityMatch[1];
       const rarityMap = {
         1: "COMMON",
         2: "EXTRA",
@@ -476,13 +474,12 @@
       };
 
       const baseName = cleanName.replace(/^r[1-5]/i, "").replace(/\.png$/i, "");
-      return `${baseName.trim()} (${rarityMap[rarityNum] || "UNKNOWN"})`;
+      return `${baseName.trim()} (${rarityMap[rarityMatch[1]] || "UNKNOWN"})`;
     }
 
     function getCardRarity(name) {
       const rarityMatch = name.match(/^r([1-5])/i);
-      if (!rarityMatch) return "UNKNOWN";
-
+      if (!rarityMatch) return null;
       const rarityMap = {
         1: "COMMON",
         2: "EXTRA",
@@ -490,8 +487,7 @@
         4: "LEGENDARY",
         5: "UNTOUCHED",
       };
-
-      return rarityMap[rarityMatch[1]] || "UNKNOWN";
+      return rarityMap[rarityMatch[1]] || null;
     }
 
     async function init() {
@@ -530,14 +526,15 @@
         playerTwoHeading.textContent = matchedOpponent.toUpperCase();
       }
 
-      const selectedRarity = localStorage.getItem("selectedRarity");
-      console.log("🎯 Selected Rarity:", selectedRarity);
+      const selectedRarity =
+        localStorage.getItem("selectedRarity")?.toLowerCase() || null;
+      console.log("🎯 Selected rarity filter:", selectedRarity);
 
       const cards = await fetchUserCards(token);
       const dropdown = document.getElementById("playerOneCards");
 
       if (dropdown) {
-        dropdown.innerHTML = `<option value="">-- Your ${selectedRarity} Cards --</option>`;
+        dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
 
         cards.forEach((card) => {
           let val = (card.name || card.id || card).trim();
@@ -545,22 +542,22 @@
             val += ".png";
           }
 
+          const lowerVal = val.toLowerCase();
           const cardRarity = getCardRarity(val);
 
-          if (cardRarity === selectedRarity) {
+          const isMikudayo =
+            lowerVal === "mikudayo.png" || lowerVal === "cherry mikudayo.png";
+
+          if (
+            isMikudayo || // Always show Mikudayo
+            !selectedRarity || // No rarity filter, show all
+            (cardRarity && cardRarity.toLowerCase() === selectedRarity)
+          ) {
             const option = document.createElement("option");
             option.value = val;
-
-            const lowerVal = val.toLowerCase();
-            if (
-              lowerVal === "cherry mikudayo.png" ||
-              lowerVal === "mikudayo.png"
-            ) {
-              option.textContent = val.replace(/\.png$/i, "");
-            } else {
-              option.textContent = formatCardNameWithRarity(val);
-            }
-
+            option.textContent = isMikudayo
+              ? val.replace(/\.png$/i, "")
+              : formatCardNameWithRarity(val);
             dropdown.appendChild(option);
           }
         });
