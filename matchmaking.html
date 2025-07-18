@@ -110,18 +110,22 @@
             console.log(msg.message); // 👋 Welcome user
           } else if (msg.type === "status") {
             t2.textContent = msg.message;
-          } else if (msg.type === "matched") {
+          } else if (msg.type === "match") {
             stopTimer();
             t3.textContent = "Successfully found match";
-            t2.textContent = `✅ Connected to ${msg.opponent}`;
+            t2.textContent = `✅ Connected to ${
+              msg.opponent || "Unknown Player"
+            }`;
 
             console.log(`✅ Connected to ${msg.opponent}`);
-            console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
+            console.log(
+              `🧑‍💻 You are: ${msg.yourName || "You"} (${msg.role || "Player"})`
+            );
 
             // Save opponent and self info for battlep.html
-            localStorage.setItem("matchedOpponent", msg.opponent);
-            localStorage.setItem("yourName", msg.yourName);
-            localStorage.setItem("yourRole", msg.role);
+            localStorage.setItem("matchedOpponent", msg.opponent || "Unknown");
+            localStorage.setItem("yourName", msg.yourName || "You");
+            localStorage.setItem("yourRole", msg.role || "Player");
 
             // Update UI to show Player Two
             let t4 = document.querySelector(".t4");
@@ -133,7 +137,7 @@
               t4.style.color = "white";
               document.querySelector(".centered-container").appendChild(t4);
             }
-            t4.textContent = `Player Two: ${msg.opponent}`;
+            t4.textContent = `Player Two: ${msg.opponent || "Unknown Player"}`;
 
             setTimeout(() => {
               window.location.href = "battlep.html";
