@@ -110,7 +110,7 @@
             console.log(msg.message); // 👋 Welcome user
           } else if (msg.type === "status") {
             t2.textContent = msg.message;
-          } else if (msg.type === "match") {
+          } else if (msg.type === "match" || msg.type === "matched") {
             stopTimer();
             t3.textContent = "Successfully found match";
             t2.textContent = `✅ Connected to ${
