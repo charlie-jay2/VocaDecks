@@ -356,77 +356,6 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    const cardsByRarity = {
-      COMMON: {
-        "Kagamine Rin": { SP: 20, VR: 15 },
-        "Kagamine Len": { SP: 20, VR: 20 },
-        Meiko: { SP: 14, VR: 20 },
-        Kaito: { SP: 10, VR: 20 },
-        "Magurine Luka": { SP: 18, VR: 20 },
-        "Yowane Haku": { SP: 18, VR: 20 },
-      },
-      EXTRA: {
-        "Hatsune Miku": { SP: 25, VR: 25 },
-        Gumi: { SP: 30, VR: 25 },
-        "Kagumine Rin": { SP: 34, VR: 15 },
-        Flower: { SP: 35, VR: 30 },
-        Tohoko: { SP: 30, VR: 40 },
-        Meiko: { SP: 24, VR: 20 },
-        "Kagurime Len": { SP: 35, VR: 20 },
-        "Magurine Luka": { SP: 27, VR: 20 },
-        Kaito: { SP: 30, VR: 20 },
-        "Anon & Kanon": { SP: 28, VR: 20 },
-      },
-      RARE: {
-        "Hatsune Miku": { SP: 40, VR: 25 },
-        Gumi: { SP: 45, VR: 25 },
-        Rana: { SP: 40, VR: 25 },
-        Tohoko: { SP: 42, VR: 40 },
-        "Macne Nana": { SP: 48, VR: 10 },
-        "Magurine Luka": { SP: 48, VR: 20 },
-        "Kasane Teto": { SP: 45, VR: 35 },
-        "Anon & Kanon": { SP: 38, VR: 20 },
-        "Akoi Lapis": { SP: 48, VR: 20 },
-        Mikudayo: { SP: 40, VR: 30 },
-        "Cherry Mikudayo": { SP: 50, VR: 30 },
-        Defoko: { SP: 45, VR: 20 },
-      },
-      LEGENDARY: {
-        Gumi: { SP: 64, VR: 25 },
-        Rana: { SP: 75, VR: 25 },
-        Galaco: { SP: 80, VR: 30 },
-        "Macne Nana": { SP: 78, VR: 10 },
-        "Akita Neru": { SP: 65, VR: 30 },
-        "Kaai Yuki": { SP: 80, VR: 20 },
-        "Kasane Teto": { SP: 78, VR: 35 },
-        Kokone: { SP: 80, VR: 45 },
-        Defoko: { SP: 70, VR: 20 },
-        Momone: { SP: 72, VR: 15 },
-      },
-      UNTOUCHED: {
-        Rana: { SP: 87, VR: 20 },
-        Galaco: { SP: 97, VR: 30 },
-        "Kasane Teto": { SP: 95, VR: 35 },
-        CaseO: { SP: 98, VR: 20 },
-        Kokone: { SP: 100, VR: 45 },
-      },
-    };
-
-    function parseCardFilename(fn) {
-      const m = fn.match(/^r([1-5])(.+)\.png$/i);
-      if (!m) return {};
-      const rarityMap = {
-        1: "COMMON",
-        2: "EXTRA",
-        3: "RARE",
-        4: "LEGENDARY",
-        5: "UNTOUCHED",
-      };
-      const rarityKey = rarityMap[m[1]];
-      const baseName = m[2].trim();
-      return { rarityKey, baseName };
-    }
-
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
@@ -486,11 +415,11 @@
 
       container.style.display = "block";
       container.innerHTML = `
-    <div class="user-row">
-      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-      <span class="username" title="${user.username}">${user.username}</span>
-    </div>
-  `;
+      <div class="user-row">
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+        <span class="username" title="${user.username}">${user.username}</span>
+      </div>
+    `;
     }
 
     function displayCardImage(cardName, containerId = "selectedCardContainer") {
@@ -507,16 +436,51 @@
       console.log(`📸 Displaying in #${containerId}:`, imgSrc);
 
       container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" style="
-    width: 90%;
-    height: auto;
-    position: absolute;
-    ${
-      containerId === "playerTwoCardContainer"
-        ? "left: 43%; bottom: 15;"
-        : "left: 26.5%; bottom: 15;"
+      width: 90%;
+      height: auto;
+      position: absolute;
+      ${
+        containerId === "playerTwoCardContainer"
+          ? "left: 43%; bottom: 15;"
+          : "left: 26.5%; bottom: 15;"
+      }
+      z-index: 1;
+    " />`;
     }
-    z-index: 1;
-  " />`;
+
+    function formatCardNameWithRarity(name) {
+      let cleanName = name;
+
+      if (!cleanName.toLowerCase().endsWith(".png")) {
+        cleanName += ".png";
+      }
+
+      const rarityMatch = cleanName.match(/^r([1-5])/i);
+      if (!rarityMatch) return cleanName.replace(/\.png$/i, "");
+
+      const rarityMap = {
+        1: "COMMON",
+        2: "EXTRA",
+        3: "RARE",
+        4: "LEGENDARY",
+        5: "UNTOUCHED",
+      };
+
+      const baseName = cleanName.replace(/^r[1-5]/i, "").replace(/\.png$/i, "");
+      return `${baseName.trim()} (${rarityMap[rarityMatch[1]] || "UNKNOWN"})`;
+    }
+
+    function getCardRarity(name) {
+      const rarityMatch = name.match(/^r([1-5])/i);
+      if (!rarityMatch) return null;
+      const rarityMap = {
+        1: "COMMON",
+        2: "EXTRA",
+        3: "RARE",
+        4: "LEGENDARY",
+        5: "UNTOUCHED",
+      };
+      return rarityMap[rarityMatch[1]] || null;
     }
 
     async function init() {
@@ -555,6 +519,10 @@
         playerTwoHeading.textContent = matchedOpponent.toUpperCase();
       }
 
+      const selectedRarity =
+        localStorage.getItem("selectedRarity")?.toLowerCase() || null;
+      console.log("🎯 Selected rarity filter:", selectedRarity);
+
       const cards = await fetchUserCards(token);
       const dropdown = document.getElementById("playerOneCards");
 
@@ -562,22 +530,29 @@
         dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
 
         cards.forEach((card) => {
-          let fn = (card.name || card.id || card).trim();
-          if (!fn.toLowerCase().endsWith(".png")) fn += ".png";
-          const { rarityKey, baseName } = parseCardFilename(fn);
-          let label = fn.replace(/\.png$/i, "");
-          if (
-            rarityKey &&
-            cardsByRarity[rarityKey] &&
-            cardsByRarity[rarityKey][baseName]
-          ) {
-            const { SP, VR } = cardsByRarity[rarityKey][baseName];
-            label = `${baseName} [SP:${SP} VR:${VR}]`;
+          let val = (card.name || card.id || card).trim();
+          if (!val.toLowerCase().endsWith(".png")) {
+            val += ".png";
           }
-          const opt = document.createElement("option");
-          opt.value = fn;
-          opt.textContent = label;
-          dropdown.appendChild(opt);
+
+          const lowerVal = val.toLowerCase();
+          const cardRarity = getCardRarity(val);
+
+          const isMikudayo =
+            lowerVal === "mikudayo.png" || lowerVal === "cherry mikudayo.png";
+
+          if (
+            isMikudayo || // Always show Mikudayo
+            !selectedRarity || // No rarity filter, show all
+            (cardRarity && cardRarity.toLowerCase() === selectedRarity)
+          ) {
+            const option = document.createElement("option");
+            option.value = val;
+            option.textContent = isMikudayo
+              ? val.replace(/\.png$/i, "")
+              : formatCardNameWithRarity(val);
+            dropdown.appendChild(option);
+          }
         });
 
         dropdown.addEventListener("change", (e) => {
