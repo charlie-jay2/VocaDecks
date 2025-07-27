@@ -356,18 +356,67 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    let cardsData = null;
+    async function loadCards() {
+      const response = await fetch("./cards.json");
+      return await response.json();
+    }
 
-    async function loadCardsJson() {
-      if (cardsData) return cardsData; // Cache
-      try {
-        const response = await fetch("./cards.json");
-        if (!response.ok) throw new Error("Failed to load cards.json");
-        cardsData = await response.json();
-        return cardsData;
-      } catch (error) {
-        console.error("Error loading cards.json:", error);
-        return null;
+    function getRarityGroup(rarityPrefix) {
+      switch (rarityPrefix) {
+        case "r1":
+          return "common";
+        case "r2":
+          return "extra";
+        case "r3":
+          return "rare";
+        case "r4":
+          return "legendary";
+        case "r5":
+          return "untouched";
+        default:
+          return null;
+      }
+    }
+
+    function findCard(cardsData, cardName) {
+      const rarityPrefix = cardName.slice(0, 2);
+      const group = getRarityGroup(rarityPrefix);
+      if (!group || !cardsData[group]) return null;
+      return cardsData[group].find((card) => card.name === cardName);
+    }
+
+    // Separate update functions for player 1 and player 2 stats
+    function updatePlayer1Stats(stats) {
+      document.querySelector(".healthpo").textContent = stats.Health;
+      document.querySelector(".damagelpo").textContent = stats["Damage Limit"];
+    }
+
+    function updatePlayer2Stats(stats) {
+      document.querySelector(".healthpt").textContent = stats.Health;
+      document.querySelector(".damagelpt").textContent = stats["Damage Limit"];
+    }
+
+    // Update stats individually for player 1 and player 2
+    async function setPlayersCards(player1CardName, player2CardName) {
+      const cardsData = await loadCards();
+
+      const card1 = player1CardName
+        ? findCard(cardsData, player1CardName)
+        : null;
+      const card2 = player2CardName
+        ? findCard(cardsData, player2CardName)
+        : null;
+
+      if (card1) updatePlayer1Stats(card1.stats);
+      else {
+        // Reset or clear player 1 stats if no card
+        updatePlayer1Stats({ Health: "-", "Damage Limit": "-" });
+      }
+
+      if (card2) updatePlayer2Stats(card2.stats);
+      else {
+        // Reset or clear player 2 stats if no card
+        updatePlayer2Stats({ Health: "-", "Damage Limit": "-" });
       }
     }
 
@@ -405,10 +454,6 @@
       }
     }
 
-    function redirectToIndex() {
-      window.location.href = "index.html";
-    }
-
     async function fetchUserCards(token) {
       try {
         const response = await fetch(
@@ -422,72 +467,6 @@
         console.error(error);
         throw error;
       }
-    }
-
-    async function fetchCardStats(cardName) {
-      if (!cardName) return null;
-      try {
-        // Instead of fetching a server endpoint, we load from cards.json locally
-        const cardsJson = await loadCardsJson();
-        if (!cardsJson) return null;
-
-        // Normalize cardName to compare with stored names
-        const normalizedName = cardName
-          .toLowerCase()
-          .replace(/\.png$/, "")
-          .trim();
-
-        // Search all rarity categories for the matching card
-        for (const rarity of Object.keys(cardsJson)) {
-          for (const card of cardsJson[rarity]) {
-            const cardNameNormalized = card.name
-              .toLowerCase()
-              .replace(/\.png$/, "")
-              .trim();
-            if (cardNameNormalized === normalizedName) {
-              console.log("Card stats found:", card.stats);
-              return {
-                playerOneHealth: card.stats.Health,
-                playerTwoHealth: card.stats.Health,
-                playerOneDamage: card.stats["Damage Limit"],
-                playerTwoDamage: card.stats["Damage Limit"],
-              };
-            }
-          }
-        }
-
-        console.warn("Card not found in cards.json:", cardName);
-        return null;
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
-    }
-
-    function updateStatsDisplay(stats) {
-      if (!stats) {
-        // Clear display if no stats
-        const healthpo = document.querySelector(".healthpo");
-        const healthpt = document.querySelector(".healthpt");
-        const damagelpo = document.querySelector(".damagelpo");
-        const damagelpt = document.querySelector(".damagelpt");
-
-        if (healthpo) healthpo.textContent = "0";
-        if (healthpt) healthpt.textContent = "0";
-        if (damagelpo) damagelpo.textContent = "0";
-        if (damagelpt) damagelpt.textContent = "0";
-        return;
-      }
-
-      const healthpo = document.querySelector(".healthpo");
-      const healthpt = document.querySelector(".healthpt");
-      const damagelpo = document.querySelector(".damagelpo");
-      const damagelpt = document.querySelector(".damagelpt");
-
-      if (healthpo) healthpo.textContent = stats.playerOneHealth ?? "0";
-      if (healthpt) healthpt.textContent = stats.playerTwoHealth ?? "0";
-      if (damagelpo) damagelpo.textContent = stats.playerOneDamage ?? "0";
-      if (damagelpt) damagelpt.textContent = stats.playerTwoDamage ?? "0";
     }
 
     function showDiscordUserInfo(user) {
@@ -509,7 +488,6 @@
 
       if (!cardName) {
         container.innerHTML = "";
-        updateStatsDisplay(null); // Clear stats display when no card
         return;
       }
 
@@ -528,25 +506,10 @@
       }
       z-index: 1;
     " />`;
-
-      // Fetch and update stats only for player one card selection
-      if (containerId === "selectedCardContainer") {
-        fetchCardStats(cardName).then(updateStatsDisplay);
-      } else if (containerId === "playerTwoCardContainer") {
-        // For opponent card, fetch stats and update only opponent stats on screen
-        fetchCardStats(cardName).then((stats) => {
-          if (!stats) return;
-          const healthpt = document.querySelector(".healthpt");
-          const damagelpt = document.querySelector(".damagelpt");
-          if (healthpt) healthpt.textContent = stats.playerTwoHealth ?? "0";
-          if (damagelpt) damagelpt.textContent = stats.playerTwoDamage ?? "0";
-        });
-      }
     }
 
     function formatCardNameWithRarity(name) {
       let cleanName = name;
-
       if (!cleanName.toLowerCase().endsWith(".png")) {
         cleanName += ".png";
       }
@@ -651,49 +614,111 @@
           }
         });
 
-        dropdown.addEventListener("change", (e) => {
-          displayCardImage(e.target.value, "selectedCardContainer");
+        // Set default selection and update stats on load
+        if (dropdown.options.length > 1) {
+          const firstCardName = dropdown.options[1].value;
+          dropdown.value = firstCardName;
+          displayCardImage(firstCardName, "selectedCardContainer");
+          await setPlayersCards(firstCardName, ""); // No opponent card yet
+        }
+
+        dropdown.addEventListener("change", async (e) => {
+          const player1Card = e.target.value;
+          displayCardImage(player1Card, "selectedCardContainer");
+          sendCardSelection(player1Card);
+
+          // Get the currently displayed Player 2 card (or empty if none)
+          const player2CardContainer = document.getElementById(
+            "playerTwoCardContainer"
+          );
+          const player2Img = player2CardContainer?.querySelector("img");
+          let player2Card = "";
+          if (player2Img) {
+            player2Card = decodeURIComponent(player2Img.src.split("/").pop());
+          }
+
+          await setPlayersCards(player1Card, player2Card);
         });
       }
 
-      // Opponent cards dropdown setup
-      const playerTwoDropdown = document.getElementById("playerTwoCards");
-      if (playerTwoDropdown) {
-        playerTwoDropdown.innerHTML = `<option value="">-- Opponent Cards --</option>`;
+      setupWebSocket(token, decoded.username);
+    }
 
-        // For demonstration, use the same cards list (or fetch opponent cards if you have)
-        cards.forEach((card) => {
-          let val = (card.name || card.id || card).trim();
-          if (!val.toLowerCase().endsWith(".png")) {
-            val += ".png";
+    let socket;
+    let currentUsername;
+
+    function setupWebSocket(token, username) {
+      currentUsername = username;
+
+      const wsUrl = "wss://vdbe-0f2p.onrender.com";
+      socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(token)}`);
+
+      socket.addEventListener("open", () => {
+        console.log("🔗 WebSocket connected");
+      });
+
+      socket.addEventListener("message", async (event) => {
+        let msg;
+        try {
+          msg = JSON.parse(event.data);
+        } catch {
+          console.warn("⚠️ Non-JSON WS message:", event.data);
+          return;
+        }
+
+        if (msg.type === "welcome") {
+          console.log(msg.message);
+        } else if (msg.type === "status") {
+          console.log("Status:", msg.message);
+        } else if (msg.type === "opponentSelection") {
+          console.log(
+            `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
+          );
+
+          if (msg.username !== currentUsername) {
+            // Display opponent's card image in playerTwoCardContainer
+            displayCardImage(msg.cardName, "playerTwoCardContainer");
+
+            // Get player 1's selected card from dropdown
+            const player1Dropdown = document.getElementById("playerOneCards");
+            const player1Card = player1Dropdown ? player1Dropdown.value : "";
+
+            // Update stats separately for player 1 and 2
+            await setPlayersCards(player1Card, msg.cardName);
           }
+        } else if (msg.type === "matched") {
+          console.log(`✅ Connected to ${msg.opponent}`);
+          console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
 
-          const lowerVal = val.toLowerCase();
-          const cardRarity = getCardRarity(val);
+          localStorage.setItem("matchedOpponent", msg.opponent);
+          localStorage.setItem("yourName", msg.yourName);
+          localStorage.setItem("yourRole", msg.role);
 
-          const isMikudayo =
-            lowerVal === "mikudayo.png" || lowerVal === "cherry mikudayo.png";
+          const p2Name = document.getElementById("playerTwoUsername");
+          if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
+        }
+      });
 
-          if (
-            isMikudayo ||
-            !selectedRarity ||
-            (cardRarity && cardRarity.toLowerCase() === selectedRarity)
-          ) {
-            const option = document.createElement("option");
-            option.value = val;
-            option.textContent = isMikudayo
-              ? val.replace(/\.png$/i, "")
-              : formatCardNameWithRarity(val);
-            playerTwoDropdown.appendChild(option);
-          }
-        });
+      socket.addEventListener("close", () => {
+        console.log("❌ WebSocket disconnected");
+      });
 
-        playerTwoDropdown.addEventListener("change", (e) => {
-          displayCardImage(e.target.value, "playerTwoCardContainer");
-        });
+      socket.addEventListener("error", (error) => {
+        console.error("🚨 WebSocket error:", error);
+      });
+    }
+
+    function sendCardSelection(cardName) {
+      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
+        const payload = {
+          type: "selection",
+          cardName,
+        };
+        console.log("📤 Sending card selection:", payload);
+        socket.send(JSON.stringify(payload));
       }
     }
 
-    window.addEventListener("DOMContentLoaded", init);
+    init();
   </script>
 </html>
