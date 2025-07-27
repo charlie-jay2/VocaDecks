@@ -357,49 +357,49 @@
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
     async function fetchCardStats(cardName) {
-      if (!cardName) return null;
-
       try {
-        const response = await fetch("/cards.json");
-        if (!response.ok) throw new Error("Failed to load cards.json");
+        const encodedName = encodeURIComponent(cardName);
+        const response = await fetch(
+          `/.netlify/functions/getCardStats?cardName=${encodedName}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch card stats");
+        }
+
         const data = await response.json();
 
-        // Flatten all cards from all rarity tiers
-        const allCards = Object.values(data).flat();
+        if (data.error) {
+          console.error("Card stats error:", data.error);
+          return null;
+        }
 
-        // Find the card by exact name match
-        const matchedCard = allCards.find((card) => card.name === cardName);
-        return matchedCard ? matchedCard.stats : null;
-      } catch (error) {
-        console.error("Error loading card stats:", error);
+        return data.stats;
+      } catch (err) {
+        console.error("Error fetching card stats:", err);
         return null;
       }
     }
 
-    async function displayCardStats(cardName, player = "playerOne") {
+    // player = "p1" or "p2"
+    async function applyCardStats(cardName, player) {
       const stats = await fetchCardStats(cardName);
-      if (!stats) {
-        if (player === "playerOne") {
-          document.querySelector(".damagelpo").textContent = "0";
-          document.querySelector(".healthpo").textContent = "0";
-        } else {
-          document.querySelector(".damagelpt").textContent = "0";
-          document.querySelector(".healthpt").textContent = "0";
-        }
-        return;
-      }
+      if (!stats) return;
 
-      const health = stats["Health"] ?? 0;
-      const damage = stats["Damage Limit"] ?? 0;
-
-      if (player === "playerOne") {
-        document.querySelector(".damagelpo").textContent = damage;
-        document.querySelector(".healthpo").textContent = health;
-      } else {
-        document.querySelector(".damagelpt").textContent = damage;
-        document.querySelector(".healthpt").textContent = health;
+      if (player === "p1") {
+        document.querySelector(".healthpo").textContent = stats["Health"];
+        document.querySelector(".damagelpo").textContent =
+          stats["Damage Limit"];
+      } else if (player === "p2") {
+        document.querySelector(".healthpt").textContent = stats["Health"];
+        document.querySelector(".damagelpt").textContent =
+          stats["Damage Limit"];
       }
     }
+
+    // Example usage:
+    // applyCardStats("r3Luka R", "p1");
+    // applyCardStats("r4Galaco L", "p2");
   </script>
 
   <script>
