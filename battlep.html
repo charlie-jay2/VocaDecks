@@ -602,28 +602,26 @@
     }
 
     function findCard(cardsData, cardName) {
+      if (!cardName) return null;
       const rarityPrefix = cardName.slice(0, 2);
       const group = getRarityGroup(rarityPrefix);
       if (!group || !cardsData[group]) return null;
       return cardsData[group].find((card) => card.name === cardName);
     }
 
-    // Separate update functions for player 1 and player 2 stats
     function updatePlayer1Stats(stats) {
-      document.querySelector(".healthpo").textContent = stats.Health ?? "-";
-      document.querySelector(".damagelpo").textContent =
-        stats["Damage Limit"] ?? "-";
+      document.querySelector(".healthpo").textContent = stats.Health;
+      document.querySelector(".damagelpo").textContent = stats["Damage Limit"];
     }
 
     function updatePlayer2Stats(stats) {
-      document.querySelector(".healthpt").textContent = stats.Health ?? "-";
-      document.querySelector(".damagelpt").textContent =
-        stats["Damage Limit"] ?? "-";
+      document.querySelector(".healthpt").textContent = stats.Health;
+      document.querySelector(".damagelpt").textContent = stats["Damage Limit"];
     }
 
-    // Update stats individually for player 1 and player 2
     async function setPlayersCards(player1CardName, player2CardName) {
-      // Use the embedded cardsData variable directly (no loadCards call)
+      const cardsData = await loadCards();
+
       const card1 = player1CardName
         ? findCard(cardsData, player1CardName)
         : null;
@@ -632,16 +630,10 @@
         : null;
 
       if (card1) updatePlayer1Stats(card1.stats);
-      else {
-        // Reset or clear player 1 stats if no card
-        updatePlayer1Stats({ Health: "-", "Damage Limit": "-" });
-      }
+      else updatePlayer1Stats({ Health: "-", "Damage Limit": "-" });
 
       if (card2) updatePlayer2Stats(card2.stats);
-      else {
-        // Reset or clear player 2 stats if no card
-        updatePlayer2Stats({ Health: "-", "Damage Limit": "-" });
-      }
+      else updatePlayer2Stats({ Health: "-", "Damage Limit": "-" });
     }
 
     function getQueryParam(param) {
@@ -754,6 +746,7 @@
     }
 
     function getCardRarity(name) {
+      if (!name) return null;
       const rarityMatch = name.match(/^r([1-5])/i);
       if (!rarityMatch) return null;
       const rarityMap = {
@@ -893,71 +886,61 @@
         if (msg.type === "welcome") {
           console.log(msg.message);
         } else if (msg.type === "status") {
-          const status = msg.status.toLowerCase();
-          if (status === "matched") {
-            localStorage.setItem("matchedOpponent", msg.opponentUsername || "");
-            localStorage.setItem("selectedRarity", msg.selectedRarity || "");
+          console.log("Status:", msg.message);
+        } else if (msg.type === "opponentSelection") {
+          // Defensive check to avoid errors:
+          if (msg.username && msg.cardName) {
+            console.log(
+              `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
+            );
 
-            const opponentNameElem =
-              document.getElementById("playerTwoUsername");
-            if (opponentNameElem) {
-              opponentNameElem.textContent = (
-                msg.opponentUsername || "PLAYER TWO"
-              ).toUpperCase();
-            }
-
-            if (msg.opponentCard) {
-              displayCardImage(msg.opponentCard, "playerTwoCardContainer");
-            } else {
-              displayCardImage("", "playerTwoCardContainer");
-            }
-
-            // Update stats with current selections
-            const player1Dropdown = document.getElementById("playerOneCards");
-            const player1Card = player1Dropdown ? player1Dropdown.value : "";
-            await setPlayersCards(player1Card, msg.opponentCard || "");
-          }
-        } else if (msg.type === "cardSelection") {
-          if (msg.sender !== currentUsername) {
-            if (msg.selectedCard) {
-              displayCardImage(msg.selectedCard, "playerTwoCardContainer");
+            if (msg.username !== currentUsername) {
+              displayCardImage(msg.cardName, "playerTwoCardContainer");
 
               const player1Dropdown = document.getElementById("playerOneCards");
               const player1Card = player1Dropdown ? player1Dropdown.value : "";
-              await setPlayersCards(player1Card, msg.selectedCard);
-            } else {
-              displayCardImage("", "playerTwoCardContainer");
-              const player1Dropdown = document.getElementById("playerOneCards");
-              const player1Card = player1Dropdown ? player1Dropdown.value : "";
-              await setPlayersCards(player1Card, "");
+
+              await setPlayersCards(player1Card, msg.cardName);
             }
+          } else {
+            console.warn(
+              "Received opponentSelection with missing username or cardName",
+              msg
+            );
           }
+        } else if (msg.type === "matched") {
+          console.log(`✅ Connected to ${msg.opponent}`);
+          console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
+
+          localStorage.setItem("matchedOpponent", msg.opponent);
+          localStorage.setItem("yourName", msg.yourName);
+          localStorage.setItem("yourRole", msg.role);
+
+          const p2Name = document.getElementById("playerTwoUsername");
+          if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
         }
       });
 
       socket.addEventListener("close", () => {
-        console.log("🔌 WebSocket disconnected");
+        console.log("❌ WebSocket disconnected");
       });
 
-      socket.addEventListener("error", (err) => {
-        console.error("WebSocket error:", err);
+      socket.addEventListener("error", (error) => {
+        console.error("🚨 WebSocket error:", error);
       });
     }
 
     function sendCardSelection(cardName) {
-      if (!socket || socket.readyState !== WebSocket.OPEN) return;
-
-      const msg = {
-        type: "cardSelection",
-        selectedCard: cardName,
-        sender: currentUsername,
-      };
-
-      socket.send(JSON.stringify(msg));
+      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
+        const payload = {
+          type: "selection",
+          cardName,
+        };
+        console.log("📤 Sending card selection:", payload);
+        socket.send(JSON.stringify(payload));
+      }
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
-      init();
-    });
+    init();
   </script>
 </html>
