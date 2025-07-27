@@ -358,22 +358,12 @@
   <script>
     async function fetchCardStats(cardName) {
       try {
-        const encodedName = encodeURIComponent(cardName);
-        const response = await fetch(
-          `/.netlify/functions/getCardStats?cardName=${encodedName}`
+        const encoded = encodeURIComponent(cardName);
+        const res = await fetch(
+          `/.netlify/functions/getCardStats?cardName=${encoded}`
         );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch card stats");
-        }
-
-        const data = await response.json();
-
-        if (data.error) {
-          console.error("Card stats error:", data.error);
-          return null;
-        }
-
+        if (!res.ok) throw new Error("Failed to fetch card stats");
+        const data = await res.json();
         return data.stats;
       } catch (err) {
         console.error("Error fetching card stats:", err);
@@ -381,7 +371,6 @@
       }
     }
 
-    // player = "p1" or "p2"
     async function applyCardStats(cardName, player) {
       const stats = await fetchCardStats(cardName);
       if (!stats) return;
@@ -397,11 +386,10 @@
       }
     }
 
-    // Example usage:
-    // applyCardStats("r3Luka R", "p1");
-    // applyCardStats("r4Galaco L", "p2");
+    // Example: call these when a player selects a card
+    // applyCardStats("r4Kokone L", "p1"); // Player 1 selects Kokone L
+    // applyCardStats("r5Momone L", "p2"); // Player 2 selects Momone L
   </script>
-
   <script>
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);

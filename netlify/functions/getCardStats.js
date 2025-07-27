@@ -1,11 +1,8 @@
-// netlify/functions/getCardStats.js
-
 const fs = require("fs");
 const path = require("path");
 
 exports.handler = async function (event, context) {
   try {
-    // Parse card name from query string
     const { cardName } = event.queryStringParameters || {};
     if (!cardName) {
       return {
@@ -14,15 +11,12 @@ exports.handler = async function (event, context) {
       };
     }
 
-    // Read cards.json relative to this function
-    const cardsPath = path.resolve(__dirname, "../../public/cards.json");
+    // Use path relative to this file, pointing to netlify/data/cards.json
+    const cardsPath = path.resolve(__dirname, "../data/cards.json");
     const data = fs.readFileSync(cardsPath, "utf-8");
     const cards = JSON.parse(data);
 
-    // Flatten all card arrays into a single list
     const allCards = [].concat(...Object.values(cards));
-
-    // Find the card by name (case-sensitive match)
     const card = allCards.find((c) => c.name === cardName);
 
     if (!card) {
@@ -32,7 +26,6 @@ exports.handler = async function (event, context) {
       };
     }
 
-    // Return card stats
     return {
       statusCode: 200,
       body: JSON.stringify({ stats: card.stats }),
