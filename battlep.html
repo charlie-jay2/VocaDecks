@@ -356,6 +356,21 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
+    let cardsData = null;
+
+    async function loadCardsJson() {
+      if (cardsData) return cardsData; // Cache
+      try {
+        const response = await fetch("./public/cards.json");
+        if (!response.ok) throw new Error("Failed to load cards.json");
+        cardsData = await response.json();
+        return cardsData;
+      } catch (error) {
+        console.error("Error loading cards.json:", error);
+        return null;
+      }
+    }
+
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
@@ -412,15 +427,37 @@
     async function fetchCardStats(cardName) {
       if (!cardName) return null;
       try {
-        const response = await fetch(
-          `/.netlify/functions/getCardStats?card=${encodeURIComponent(
-            cardName
-          )}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch card stats");
-        const data = await response.json();
-        console.log("Card stats:", data);
-        return data;
+        // Instead of fetching a server endpoint, we load from cards.json locally
+        const cardsJson = await loadCardsJson();
+        if (!cardsJson) return null;
+
+        // Normalize cardName to compare with stored names
+        const normalizedName = cardName
+          .toLowerCase()
+          .replace(/\.png$/, "")
+          .trim();
+
+        // Search all rarity categories for the matching card
+        for (const rarity of Object.keys(cardsJson)) {
+          for (const card of cardsJson[rarity]) {
+            const cardNameNormalized = card.name
+              .toLowerCase()
+              .replace(/\.png$/, "")
+              .trim();
+            if (cardNameNormalized === normalizedName) {
+              console.log("Card stats found:", card.stats);
+              return {
+                playerOneHealth: card.stats.Health,
+                playerTwoHealth: card.stats.Health,
+                playerOneDamage: card.stats["Damage Limit"],
+                playerTwoDamage: card.stats["Damage Limit"],
+              };
+            }
+          }
+        }
+
+        console.warn("Card not found in cards.json:", cardName);
+        return null;
       } catch (error) {
         console.error(error);
         return null;
@@ -428,9 +465,19 @@
     }
 
     function updateStatsDisplay(stats) {
-      // Assuming stats object has properties:
-      // playerOneHealth, playerTwoHealth, playerOneDamage, playerTwoDamage
-      if (!stats) return;
+      if (!stats) {
+        // Clear display if no stats
+        const healthpo = document.querySelector(".healthpo");
+        const healthpt = document.querySelector(".healthpt");
+        const damagelpo = document.querySelector(".damagelpo");
+        const damagelpt = document.querySelector(".damagelpt");
+
+        if (healthpo) healthpo.textContent = "0";
+        if (healthpt) healthpt.textContent = "0";
+        if (damagelpo) damagelpo.textContent = "0";
+        if (damagelpt) damagelpt.textContent = "0";
+        return;
+      }
 
       const healthpo = document.querySelector(".healthpo");
       const healthpt = document.querySelector(".healthpt");
@@ -449,11 +496,11 @@
 
       container.style.display = "block";
       container.innerHTML = `
-    <div class="user-row">
-      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-      <span class="username" title="${user.username}">${user.username}</span>
-    </div>
-  `;
+      <div class="user-row">
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+        <span class="username" title="${user.username}">${user.username}</span>
+      </div>
+    `;
     }
 
     function displayCardImage(cardName, containerId = "selectedCardContainer") {
@@ -471,20 +518,29 @@
       console.log(`📸 Displaying in #${containerId}:`, imgSrc);
 
       container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" style="
-    width: 90%;
-    height: auto;
-    position: absolute;
-    ${
-      containerId === "playerTwoCardContainer"
-        ? "left: 43%; bottom: 15;"
-        : "left: 26.5%; bottom: 15;"
-    }
-    z-index: 1;
-  " />`;
+      width: 90%;
+      height: auto;
+      position: absolute;
+      ${
+        containerId === "playerTwoCardContainer"
+          ? "left: 43%; bottom: 15;"
+          : "left: 26.5%; bottom: 15;"
+      }
+      z-index: 1;
+    " />`;
 
       // Fetch and update stats only for player one card selection
       if (containerId === "selectedCardContainer") {
         fetchCardStats(cardName).then(updateStatsDisplay);
+      } else if (containerId === "playerTwoCardContainer") {
+        // For opponent card, fetch stats and update only opponent stats on screen
+        fetchCardStats(cardName).then((stats) => {
+          if (!stats) return;
+          const healthpt = document.querySelector(".healthpt");
+          const damagelpt = document.querySelector(".damagelpt");
+          if (healthpt) healthpt.textContent = stats.playerTwoHealth ?? "0";
+          if (damagelpt) damagelpt.textContent = stats.playerTwoDamage ?? "0";
+        });
       }
     }
 
@@ -597,80 +653,47 @@
 
         dropdown.addEventListener("change", (e) => {
           displayCardImage(e.target.value, "selectedCardContainer");
-          sendCardSelection(e.target.value);
         });
       }
 
-      setupWebSocket(token, decoded.username);
-    }
+      // Opponent cards dropdown setup
+      const playerTwoDropdown = document.getElementById("playerTwoCards");
+      if (playerTwoDropdown) {
+        playerTwoDropdown.innerHTML = `<option value="">-- Opponent Cards --</option>`;
 
-    let socket;
-    let currentUsername;
-
-    function setupWebSocket(token, username) {
-      currentUsername = username;
-
-      const wsUrl = "wss://vdbe-0f2p.onrender.com";
-      socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(token)}`);
-
-      socket.addEventListener("open", () => {
-        console.log("🔗 WebSocket connected");
-      });
-
-      socket.addEventListener("message", (event) => {
-        let msg;
-        try {
-          msg = JSON.parse(event.data);
-        } catch {
-          console.warn("⚠️ Non-JSON WS message:", event.data);
-          return;
-        }
-
-        if (msg.type === "welcome") {
-          console.log(msg.message);
-        } else if (msg.type === "status") {
-          console.log("Status:", msg.message);
-        } else if (msg.type === "opponentSelection") {
-          console.log(
-            `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
-          );
-
-          if (msg.username !== currentUsername) {
-            displayCardImage(msg.cardName, "playerTwoCardContainer");
+        // For demonstration, use the same cards list (or fetch opponent cards if you have)
+        cards.forEach((card) => {
+          let val = (card.name || card.id || card).trim();
+          if (!val.toLowerCase().endsWith(".png")) {
+            val += ".png";
           }
-        } else if (msg.type === "matched") {
-          console.log(`✅ Connected to ${msg.opponent}`);
-          console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
 
-          localStorage.setItem("matchedOpponent", msg.opponent);
-          localStorage.setItem("yourName", msg.yourName);
-          localStorage.setItem("yourRole", msg.role);
+          const lowerVal = val.toLowerCase();
+          const cardRarity = getCardRarity(val);
 
-          const p2Name = document.getElementById("playerTwoUsername");
-          if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
-        }
-      });
+          const isMikudayo =
+            lowerVal === "mikudayo.png" || lowerVal === "cherry mikudayo.png";
 
-      socket.addEventListener("close", () => {
-        console.log("❌ WebSocket disconnected");
-      });
+          if (
+            isMikudayo ||
+            !selectedRarity ||
+            (cardRarity && cardRarity.toLowerCase() === selectedRarity)
+          ) {
+            const option = document.createElement("option");
+            option.value = val;
+            option.textContent = isMikudayo
+              ? val.replace(/\.png$/i, "")
+              : formatCardNameWithRarity(val);
+            playerTwoDropdown.appendChild(option);
+          }
+        });
 
-      socket.addEventListener("error", (error) => {
-        console.error("🚨 WebSocket error:", error);
-      });
-    }
-
-    function sendCardSelection(cardName) {
-      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
-        const payload = {
-          type: "selection",
-          cardName: cardName,
-        };
-        console.log("📤 Sending card selection:", payload);
-        socket.send(JSON.stringify(payload));
+        playerTwoDropdown.addEventListener("change", (e) => {
+          displayCardImage(e.target.value, "playerTwoCardContainer");
+        });
       }
     }
 
-    init();
+    window.addEventListener("DOMContentLoaded", init);
   </script>
 </html>
