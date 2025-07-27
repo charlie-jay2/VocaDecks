@@ -599,13 +599,13 @@
       }
       const src = `./Cards/${encodeURIComponent(cardName)}`;
       el.innerHTML = `<img src="${src}" style="
-      width:90%; height:auto; position:absolute;
-      ${
-        containerId === "playerTwoCardContainer"
-          ? "left:43%;bottom:15;"
-          : "left:26.5%;bottom:15;"
-      }
-      z-index:1;" />`;
+    width:90%; height:auto; position:absolute;
+    ${
+      containerId === "playerTwoCardContainer"
+        ? "left:43%;bottom:15;"
+        : "left:26.5%;bottom:15;"
+    }
+    z-index:1;" />`;
     }
 
     function getQueryParam(param) {
@@ -643,10 +643,10 @@
       if (!c) return;
       c.style.display = "block";
       c.innerHTML = `
-      <div class="user-row">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar"/>
-        <span class="username" title="${user.username}">${user.username}</span>
-      </div>`;
+    <div class="user-row">
+      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar"/>
+      <span class="username" title="${user.username}">${user.username}</span>
+    </div>`;
     }
 
     function sendCardSelection(name) {
@@ -671,74 +671,81 @@
         } catch {
           return;
         }
-        if (
-          msg.type === "opponentSelection" &&
-          msg.username !== currentUsername
-        ) {
-          displayCardImage(msg.cardName, "playerTwoCardContainer");
-          const p1 = document.getElementById("playerOneCards")?.value || "";
-          await setPlayersCards(p1, msg.cardName);
-        } else if (msg.type === "matched") {
-          localStorage.setItem("matchedOpponent", msg.opponent);
-          const p2NameEl = document.getElementById("playerTwoUsername");
-          if (p2NameEl) p2NameEl.textContent = msg.opponent.toUpperCase();
+        if (msg.type === "user-info") {
+          // Display player two's name
+          const nameElement = document.getElementById("playerTwoName");
+          if (nameElement) {
+            nameElement.textContent = msg.username || "-";
+          }
+          await setPlayersCards(null, null); // Reset cards? Optional
+        } else if (msg.type === "selection") {
+          // Update Player Two card and stats
+          const cardName = msg.cardName || "";
+          displayCardImage(cardName, "playerTwoCardContainer");
+          const cardData = findCard(cardName);
+          updatePlayer2Stats(cardData?.stats);
         }
       });
-      socket.addEventListener("close", () => console.log("❌ WS closed"));
-      socket.addEventListener("error", (e) => console.error("🚨 WS error:", e));
+      socket.addEventListener("close", () => console.log("❌ WS disconnected"));
+      socket.addEventListener("error", (e) =>
+        console.error("WS error:", e.message)
+      );
     }
 
-    async function init() {
-      let token = getToken();
+    async function initialize() {
+      let token = getQueryParam("token") || getToken();
       if (!token) {
-        const u = getQueryParam("token");
-        if (u) {
-          saveToken(u);
-          token = u;
-        } else return;
-      }
-
-      const decoded = decodeToken(token);
-      if (!decoded || !decoded.username || !decoded.id || !decoded.avatar) {
-        localStorage.clear();
+        // Not logged in or no token, show login prompt
+        document.getElementById("login").style.display = "block";
         return;
       }
-
-      showDiscordUserInfo(decoded);
-      const h1 = document.querySelector(".text1");
-      if (h1) h1.textContent = decoded.username.toUpperCase();
-
-      setupWebSocket(token, decoded.username);
-
-      const cards = await fetchUserCards(token);
-      const dropdown = document.getElementById("playerOneCards");
-      dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
-      cards.forEach((c) => {
-        let val = (c.name || c.id || c).trim();
-        if (!val.toLowerCase().endsWith(".png")) val += ".png";
-        dropdown.insertAdjacentHTML(
-          "beforeend",
-          `<option value="${val}">${val.replace(/\.png$/, "")}</option>`
-        );
-      });
-
-      dropdown.addEventListener("change", async (e) => {
-        const p1 = e.target.value;
-        displayCardImage(p1, "selectedCardContainer");
-        sendCardSelection(p1);
-        const p2img = document.querySelector("#playerTwoCardContainer img");
-        const p2 = p2img ? decodeURIComponent(p2img.src.split("/").pop()) : "";
-        await setPlayersCards(p1, p2);
-      });
-
-      if (dropdown.options.length > 1) {
-        const first = dropdown.options[1].value;
-        dropdown.value = first;
-        displayCardImage(first, "selectedCardContainer");
-        await setPlayersCards(first, "");
+      saveToken(token);
+      const decoded = decodeToken(token);
+      if (!decoded) {
+        alert("Invalid token");
+        return;
       }
+      currentUsername = decoded.username || "";
+      document.getElementById("playerOneName").textContent = currentUsername;
+      showDiscordUserInfo(decoded);
+
+      // Fetch user cards for dropdown
+      try {
+        const cards = await fetchUserCards(token);
+        const select = document.getElementById("cardSelect");
+        select.innerHTML = "";
+        cards.forEach(({ name }) => {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          select.appendChild(option);
+        });
+        select.disabled = false;
+
+        // Update Player One card on selection change
+        select.addEventListener("change", (e) => {
+          const val = e.target.value;
+          displayCardImage(val, "selectedCardContainer");
+          const card = findCard(val);
+          updatePlayer1Stats(card?.stats);
+          sendCardSelection(val);
+        });
+
+        // Select first card by default if available
+        if (cards.length > 0) {
+          select.value = cards[0].name;
+          displayCardImage(cards[0].name, "selectedCardContainer");
+          const card = findCard(cards[0].name);
+          updatePlayer1Stats(card?.stats);
+          sendCardSelection(cards[0].name);
+        }
+      } catch (e) {
+        console.error("Failed to load user cards:", e);
+      }
+
+      setupWebSocket(token, currentUsername);
     }
 
-    document.addEventListener("DOMContentLoaded", init);
+    window.onload = initialize;
   </script>
 </html>
