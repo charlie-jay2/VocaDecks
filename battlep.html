@@ -359,37 +359,55 @@
     async function fetchCardStats(cardName) {
       try {
         const encoded = encodeURIComponent(cardName);
+        console.log(
+          `📤 Fetching stats for card: "${cardName}" (encoded: ${encoded})`
+        );
+
         const res = await fetch(
           `/.netlify/functions/getCardStats?cardName=${encoded}`
         );
-        if (!res.ok) throw new Error("Failed to fetch card stats");
+        if (!res.ok)
+          throw new Error(`Failed to fetch card stats (${res.status})`);
+
         const data = await res.json();
+        console.log("📥 Stats fetched:", data.stats);
         return data.stats;
       } catch (err) {
-        console.error("Error fetching card stats:", err);
+        console.error("❌ Error fetching card stats:", err);
         return null;
       }
     }
 
     async function applyCardStats(cardName, player) {
+      console.log(
+        `🎮 Applying stats for player: ${player}, card: "${cardName}"`
+      );
       const stats = await fetchCardStats(cardName);
-      if (!stats) return;
+      if (!stats) {
+        console.warn(`⚠️ No stats returned for ${cardName}`);
+        return;
+      }
 
       if (player === "p1") {
         document.querySelector(".healthpo").textContent = stats["Health"];
         document.querySelector(".damagelpo").textContent =
           stats["Damage Limit"];
+        console.log("✅ Player 1 stats applied:", stats);
       } else if (player === "p2") {
         document.querySelector(".healthpt").textContent = stats["Health"];
         document.querySelector(".damagelpt").textContent =
           stats["Damage Limit"];
+        console.log("✅ Player 2 stats applied:", stats);
+      } else {
+        console.warn("⚠️ Unknown player identifier:", player);
       }
     }
 
-    // Example: call these when a player selects a card
-    // applyCardStats("r4Kokone L", "p1"); // Player 1 selects Kokone L
-    // applyCardStats("r5Momone L", "p2"); // Player 2 selects Momone L
+    // Example:
+    // applyCardStats("r4Kokone L.png", "p1");
+    // applyCardStats("r5Momone L.png", "p2");
   </script>
+
   <script>
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
