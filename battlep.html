@@ -356,6 +356,47 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
+    async function fetchCardStats(cardName) {
+      if (!cardName) return null;
+
+      const encodedName = encodeURIComponent(cardName);
+      try {
+        const response = await fetch(
+          `/.netlify/functions/getCardStats?card=${encodedName}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch card stats");
+        const data = await response.json();
+        return data.stats || null;
+      } catch (error) {
+        console.error("Error fetching card stats:", error);
+        return null;
+      }
+    }
+
+    async function displayCardStats(cardName, player = "playerOne") {
+      const stats = await fetchCardStats(cardName);
+      if (!stats) {
+        // Clear stats if none
+        if (player === "playerOne") {
+          document.querySelector(".damagelpo").textContent = "0";
+          document.querySelector(".healthpo").textContent = "0";
+        } else {
+          document.querySelector(".damagelpt").textContent = "0";
+          document.querySelector(".healthpt").textContent = "0";
+        }
+        return;
+      }
+
+      if (player === "playerOne") {
+        document.querySelector(".damagelpo").textContent = stats.attack ?? "0";
+        document.querySelector(".healthpo").textContent = stats.health ?? "0";
+      } else {
+        document.querySelector(".damagelpt").textContent = stats.attack ?? "0";
+        document.querySelector(".healthpt").textContent = stats.health ?? "0";
+      }
+    }
+  </script>
+  <script>
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
