@@ -356,56 +356,60 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    async function fetchCardStats(cardName) {
-      try {
-        const encoded = encodeURIComponent(cardName);
-        console.log(
-          `📤 Fetching stats for card: "${cardName}" (encoded: ${encoded})`
-        );
+    async function loadCards() {
+      const response = await fetch("./cards.json");
+      return await response.json();
+    }
 
-        const res = await fetch(
-          `/.netlify/functions/getCardStats?cardName=${encoded}`
-        );
-        if (!res.ok)
-          throw new Error(`Failed to fetch card stats (${res.status})`);
-
-        const data = await res.json();
-        console.log("📥 Stats fetched:", data.stats);
-        return data.stats;
-      } catch (err) {
-        console.error("❌ Error fetching card stats:", err);
-        return null;
+    function getRarityGroup(rarityPrefix) {
+      switch (rarityPrefix) {
+        case "r1":
+          return "common";
+        case "r2":
+          return "extra";
+        case "r3":
+          return "rare";
+        case "r4":
+          return "legendary";
+        case "r5":
+          return "untouched";
+        default:
+          return null;
       }
     }
 
-    async function applyCardStats(cardName, player) {
-      console.log(
-        `🎮 Applying stats for player: ${player}, card: "${cardName}"`
-      );
-      const stats = await fetchCardStats(cardName);
-      if (!stats) {
-        console.warn(`⚠️ No stats returned for ${cardName}`);
-        return;
-      }
+    function findCard(cardsData, cardName) {
+      // Extract rarity prefix, e.g. "r1" from "r1KAITO C"
+      const rarityPrefix = cardName.slice(0, 2);
+      const group = getRarityGroup(rarityPrefix);
+      if (!group || !cardsData[group]) return null;
 
-      if (player === "p1") {
-        document.querySelector(".healthpo").textContent = stats["Health"];
+      return cardsData[group].find((card) => card.name === cardName);
+    }
+
+    function updatePlayerStats(playerNum, stats) {
+      if (playerNum === 1) {
+        document.querySelector(".healthpo").textContent = stats.Health;
         document.querySelector(".damagelpo").textContent =
           stats["Damage Limit"];
-        console.log("✅ Player 1 stats applied:", stats);
-      } else if (player === "p2") {
-        document.querySelector(".healthpt").textContent = stats["Health"];
+      } else if (playerNum === 2) {
+        document.querySelector(".healthpt").textContent = stats.Health;
         document.querySelector(".damagelpt").textContent =
           stats["Damage Limit"];
-        console.log("✅ Player 2 stats applied:", stats);
-      } else {
-        console.warn("⚠️ Unknown player identifier:", player);
       }
     }
 
-    // Example:
-    // applyCardStats("r4Kokone L.png", "p1");
-    // applyCardStats("r5Momone L.png", "p2");
+    // Usage: Suppose player 1 picks "r1KAITO C", player 2 picks "r1Luka C"
+
+    async function setPlayersCards(player1CardName, player2CardName) {
+      const cardsData = await loadCards();
+
+      const card1 = findCard(cardsData, player1CardName);
+      const card2 = findCard(cardsData, player2CardName);
+
+      if (card1) updatePlayerStats(1, card1.stats);
+      if (card2) updatePlayerStats(2, card2.stats);
+    }
   </script>
 
   <script>
