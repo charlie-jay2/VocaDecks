@@ -667,12 +667,11 @@
         return;
       }
 
-      // Improved display with better formatting and added tooltip for rarity
       container.innerHTML = `
       <div><strong>Attack:</strong> ${stats.attack ?? "N/A"}</div>
       <div><strong>Defense:</strong> ${stats.defense ?? "N/A"}</div>
       <div><strong>Speed:</strong> ${stats.speed ?? "N/A"}</div>
-      <div title="Rarity level">${stats.rarity ?? "N/A"}</div>
+      <div><strong>Rarity:</strong> ${stats.rarity ?? "N/A"}</div>
     `;
     }
 
