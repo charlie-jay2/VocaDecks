@@ -610,19 +610,20 @@
 
     // Separate update functions for player 1 and player 2 stats
     function updatePlayer1Stats(stats) {
-      document.querySelector(".healthpo").textContent = stats.Health;
-      document.querySelector(".damagelpo").textContent = stats["Damage Limit"];
+      document.querySelector(".healthpo").textContent = stats.Health ?? "-";
+      document.querySelector(".damagelpo").textContent =
+        stats["Damage Limit"] ?? "-";
     }
 
     function updatePlayer2Stats(stats) {
-      document.querySelector(".healthpt").textContent = stats.Health;
-      document.querySelector(".damagelpt").textContent = stats["Damage Limit"];
+      document.querySelector(".healthpt").textContent = stats.Health ?? "-";
+      document.querySelector(".damagelpt").textContent =
+        stats["Damage Limit"] ?? "-";
     }
 
     // Update stats individually for player 1 and player 2
     async function setPlayersCards(player1CardName, player2CardName) {
-      const cardsData = await loadCards();
-
+      // Use the embedded cardsData variable directly (no loadCards call)
       const card1 = player1CardName
         ? findCard(cardsData, player1CardName)
         : null;
@@ -892,56 +893,71 @@
         if (msg.type === "welcome") {
           console.log(msg.message);
         } else if (msg.type === "status") {
-          console.log("Status:", msg.message);
-        } else if (msg.type === "opponentSelection") {
-          console.log(
-            `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
-          );
+          const status = msg.status.toLowerCase();
+          if (status === "matched") {
+            localStorage.setItem("matchedOpponent", msg.opponentUsername || "");
+            localStorage.setItem("selectedRarity", msg.selectedRarity || "");
 
-          if (msg.username !== currentUsername) {
-            // Display opponent's card image in playerTwoCardContainer
-            displayCardImage(msg.cardName, "playerTwoCardContainer");
+            const opponentNameElem =
+              document.getElementById("playerTwoUsername");
+            if (opponentNameElem) {
+              opponentNameElem.textContent = (
+                msg.opponentUsername || "PLAYER TWO"
+              ).toUpperCase();
+            }
 
-            // Get player 1's selected card from dropdown
+            if (msg.opponentCard) {
+              displayCardImage(msg.opponentCard, "playerTwoCardContainer");
+            } else {
+              displayCardImage("", "playerTwoCardContainer");
+            }
+
+            // Update stats with current selections
             const player1Dropdown = document.getElementById("playerOneCards");
             const player1Card = player1Dropdown ? player1Dropdown.value : "";
-
-            // Update stats separately for player 1 and 2
-            await setPlayersCards(player1Card, msg.cardName);
+            await setPlayersCards(player1Card, msg.opponentCard || "");
           }
-        } else if (msg.type === "matched") {
-          console.log(`✅ Connected to ${msg.opponent}`);
-          console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
+        } else if (msg.type === "cardSelection") {
+          if (msg.sender !== currentUsername) {
+            if (msg.selectedCard) {
+              displayCardImage(msg.selectedCard, "playerTwoCardContainer");
 
-          localStorage.setItem("matchedOpponent", msg.opponent);
-          localStorage.setItem("yourName", msg.yourName);
-          localStorage.setItem("yourRole", msg.role);
-
-          const p2Name = document.getElementById("playerTwoUsername");
-          if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
+              const player1Dropdown = document.getElementById("playerOneCards");
+              const player1Card = player1Dropdown ? player1Dropdown.value : "";
+              await setPlayersCards(player1Card, msg.selectedCard);
+            } else {
+              displayCardImage("", "playerTwoCardContainer");
+              const player1Dropdown = document.getElementById("playerOneCards");
+              const player1Card = player1Dropdown ? player1Dropdown.value : "";
+              await setPlayersCards(player1Card, "");
+            }
+          }
         }
       });
 
       socket.addEventListener("close", () => {
-        console.log("❌ WebSocket disconnected");
+        console.log("🔌 WebSocket disconnected");
       });
 
-      socket.addEventListener("error", (error) => {
-        console.error("🚨 WebSocket error:", error);
+      socket.addEventListener("error", (err) => {
+        console.error("WebSocket error:", err);
       });
     }
 
     function sendCardSelection(cardName) {
-      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
-        const payload = {
-          type: "selection",
-          cardName,
-        };
-        console.log("📤 Sending card selection:", payload);
-        socket.send(JSON.stringify(payload));
-      }
+      if (!socket || socket.readyState !== WebSocket.OPEN) return;
+
+      const msg = {
+        type: "cardSelection",
+        selectedCard: cardName,
+        sender: currentUsername,
+      };
+
+      socket.send(JSON.stringify(msg));
     }
 
-    init();
+    window.addEventListener("DOMContentLoaded", () => {
+      init();
+    });
   </script>
 </html>
