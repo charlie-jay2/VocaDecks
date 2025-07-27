@@ -602,13 +602,13 @@
     }
 
     function findCard(cardsData, cardName) {
-      if (!cardName) return null;
       const rarityPrefix = cardName.slice(0, 2);
       const group = getRarityGroup(rarityPrefix);
       if (!group || !cardsData[group]) return null;
       return cardsData[group].find((card) => card.name === cardName);
     }
 
+    // Separate update functions for player 1 and player 2 stats
     function updatePlayer1Stats(stats) {
       document.querySelector(".healthpo").textContent = stats.Health;
       document.querySelector(".damagelpo").textContent = stats["Damage Limit"];
@@ -619,6 +619,7 @@
       document.querySelector(".damagelpt").textContent = stats["Damage Limit"];
     }
 
+    // Update stats individually for player 1 and player 2
     async function setPlayersCards(player1CardName, player2CardName) {
       const cardsData = await loadCards();
 
@@ -630,10 +631,16 @@
         : null;
 
       if (card1) updatePlayer1Stats(card1.stats);
-      else updatePlayer1Stats({ Health: "-", "Damage Limit": "-" });
+      else {
+        // Reset or clear player 1 stats if no card
+        updatePlayer1Stats({ Health: "-", "Damage Limit": "-" });
+      }
 
       if (card2) updatePlayer2Stats(card2.stats);
-      else updatePlayer2Stats({ Health: "-", "Damage Limit": "-" });
+      else {
+        // Reset or clear player 2 stats if no card
+        updatePlayer2Stats({ Health: "-", "Damage Limit": "-" });
+      }
     }
 
     function getQueryParam(param) {
@@ -746,7 +753,6 @@
     }
 
     function getCardRarity(name) {
-      if (!name) return null;
       const rarityMatch = name.match(/^r([1-5])/i);
       if (!rarityMatch) return null;
       const rarityMap = {
@@ -888,25 +894,20 @@
         } else if (msg.type === "status") {
           console.log("Status:", msg.message);
         } else if (msg.type === "opponentSelection") {
-          // Defensive check to avoid errors:
-          if (msg.username && msg.cardName) {
-            console.log(
-              `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
-            );
+          console.log(
+            `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
+          );
 
-            if (msg.username !== currentUsername) {
-              displayCardImage(msg.cardName, "playerTwoCardContainer");
+          if (msg.username !== currentUsername) {
+            // Display opponent's card image in playerTwoCardContainer
+            displayCardImage(msg.cardName, "playerTwoCardContainer");
 
-              const player1Dropdown = document.getElementById("playerOneCards");
-              const player1Card = player1Dropdown ? player1Dropdown.value : "";
+            // Get player 1's selected card from dropdown
+            const player1Dropdown = document.getElementById("playerOneCards");
+            const player1Card = player1Dropdown ? player1Dropdown.value : "";
 
-              await setPlayersCards(player1Card, msg.cardName);
-            }
-          } else {
-            console.warn(
-              "Received opponentSelection with missing username or cardName",
-              msg
-            );
+            // Update stats separately for player 1 and 2
+            await setPlayersCards(player1Card, msg.cardName);
           }
         } else if (msg.type === "matched") {
           console.log(`✅ Connected to ${msg.opponent}`);
