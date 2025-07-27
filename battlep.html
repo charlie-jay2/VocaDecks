@@ -359,16 +359,19 @@
     async function fetchCardStats(cardName) {
       if (!cardName) return null;
 
-      const encodedName = encodeURIComponent(cardName);
       try {
-        const response = await fetch(
-          `/.netlify/functions/getCardStats?card=${encodedName}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch card stats");
+        const response = await fetch("/cards.json");
+        if (!response.ok) throw new Error("Failed to load cards.json");
         const data = await response.json();
-        return data.stats || null;
+
+        // Flatten all cards from all rarity tiers
+        const allCards = Object.values(data).flat();
+
+        // Find the card by exact name match
+        const matchedCard = allCards.find((card) => card.name === cardName);
+        return matchedCard ? matchedCard.stats : null;
       } catch (error) {
-        console.error("Error fetching card stats:", error);
+        console.error("Error loading card stats:", error);
         return null;
       }
     }
@@ -376,7 +379,6 @@
     async function displayCardStats(cardName, player = "playerOne") {
       const stats = await fetchCardStats(cardName);
       if (!stats) {
-        // Clear stats if none
         if (player === "playerOne") {
           document.querySelector(".damagelpo").textContent = "0";
           document.querySelector(".healthpo").textContent = "0";
@@ -387,15 +389,19 @@
         return;
       }
 
+      const health = stats["Health"] ?? 0;
+      const damage = stats["Damage Limit"] ?? 0;
+
       if (player === "playerOne") {
-        document.querySelector(".damagelpo").textContent = stats.attack ?? "0";
-        document.querySelector(".healthpo").textContent = stats.health ?? "0";
+        document.querySelector(".damagelpo").textContent = damage;
+        document.querySelector(".healthpo").textContent = health;
       } else {
-        document.querySelector(".damagelpt").textContent = stats.attack ?? "0";
-        document.querySelector(".healthpt").textContent = stats.health ?? "0";
+        document.querySelector(".damagelpt").textContent = damage;
+        document.querySelector(".healthpt").textContent = health;
       }
     }
   </script>
+
   <script>
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
