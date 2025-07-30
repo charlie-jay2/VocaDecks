@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const splashImagePath = "./Assets/STARTING_SCREEN.jpg";
   const buttonImagePath = "./Assets/FULLSCREEN_BUTtON.png";
   const fontURL = "./Fonts/Panton.otf";
+  const videoPath = "./Assets/video.mp4";
 
   // --- LOAD FONT ---
   const fontFace = new FontFace("Panton", `url(${fontURL})`);
@@ -26,6 +27,24 @@ document.addEventListener("DOMContentLoaded", () => {
   ss.style.zIndex = "999";
   ss.style.display = "none";
   document.body.appendChild(ss);
+
+  // --- CREATE VIDEO ELEMENT ---
+  const videoElement = document.createElement("video");
+  videoElement.src = videoPath;
+  videoElement.style.position = "fixed";
+  videoElement.style.top = "0";
+  videoElement.style.left = "0";
+  videoElement.style.width = "100vw";
+  videoElement.style.height = "100vh";
+  videoElement.style.objectFit = "cover";
+  videoElement.style.zIndex = "1003";
+  videoElement.style.display = "none";
+  videoElement.style.pointerEvents = "none";
+  videoElement.style.opacity = "1";
+  videoElement.style.transition = "opacity 1s ease";
+  videoElement.setAttribute("playsinline", "");
+  videoElement.setAttribute("webkit-playsinline", "");
+  document.body.appendChild(videoElement);
 
   // --- CREATE FULLSCREEN BUTTON ---
   const fullscreenBtn = document.createElement("button");
@@ -98,10 +117,10 @@ document.addEventListener("DOMContentLoaded", () => {
   progressBar.style.height = "100%";
   progressBar.style.width = "0%";
   progressBar.style.background = "linear-gradient(to right, #55d9cb, #feef3c)";
-  progressBar.style.transition = "width 0.3s ease";
+  progressBar.style.transition = "width 0.8s ease-in-out";
   progressBarContainer.appendChild(progressBar);
 
-  // --- CREATE BLUR OVERLAY for after first load when fullscreen exited ---
+  // --- CREATE BLUR OVERLAY ---
   const blurOverlay = document.createElement("div");
   blurOverlay.style.position = "fixed";
   blurOverlay.style.top = "0";
@@ -113,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
   blurOverlay.style.backdropFilter = "blur(8px)";
   blurOverlay.style.zIndex = "9998";
   blurOverlay.style.display = "none";
-  blurOverlay.style.pointerEvents = "none"; // disable clicks through the overlay
+  blurOverlay.style.pointerEvents = "none";
   document.body.appendChild(blurOverlay);
 
   // --- VARIABLES ---
@@ -127,14 +146,13 @@ document.addEventListener("DOMContentLoaded", () => {
     "Diagnostics complete. Preparing interface...",
   ];
 
-  // Check localStorage if diagnostic has run before
   const diagnosticKey = "fullscreenDiagnosticDone";
   let diagnosticDone = localStorage.getItem(diagnosticKey) === "true";
 
   function typeMessage(text, delay = 50) {
     return new Promise((resolve) => {
       let i = 0;
-      diagnostics.textContent = ""; // clear for each message typing
+      diagnostics.textContent = "";
       const interval = setInterval(() => {
         if (i < text.length) {
           diagnostics.textContent += text.charAt(i);
@@ -154,10 +172,14 @@ document.addEventListener("DOMContentLoaded", () => {
     progressBar.style.width = "0%";
 
     const totalMessages = messages.length;
+    let progress = 0;
 
     for (let i = 0; i < totalMessages; i++) {
       await typeMessage(messages[i], 50);
-      progressBar.style.width = `${((i + 1) / totalMessages) * 100}%`;
+      const increment = Math.floor(Math.random() * 15) + 10;
+      progress += increment;
+      if (progress > 100 || i === totalMessages - 1) progress = 100;
+      progressBar.style.width = `${progress}%`;
       await new Promise((r) => setTimeout(r, 1000));
     }
 
@@ -165,12 +187,23 @@ document.addEventListener("DOMContentLoaded", () => {
       diagnostics.style.display = "none";
       progressBarContainer.style.display = "none";
       progressBar.style.width = "0%";
-      ss.style.display = "none";
-    }, 1000);
+      videoElement.style.display = "block";
+      videoElement.play();
+      ss.style.display = "none"; // ✅ HIDE SPLASH IMAGE IMMEDIATELY WHEN VIDEO STARTS
 
-    // Mark diagnostic as done
-    diagnosticDone = true;
-    localStorage.setItem(diagnosticKey, "true");
+      setTimeout(() => {
+        // Fade out video
+        videoElement.style.opacity = "0";
+
+        setTimeout(() => {
+          videoElement.style.display = "none";
+          videoElement.style.opacity = "1";
+
+          diagnosticDone = true;
+          localStorage.setItem(diagnosticKey, "true");
+        }, 1000);
+      }, 5500);
+    }, 1000);
   }
 
   function isFullScreen() {
@@ -186,12 +219,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (interactable) {
       blurOverlay.style.display = "none";
       blurOverlay.style.pointerEvents = "none";
-      // Make sure body filter reset
       document.body.style.filter = "none";
     } else {
       blurOverlay.style.display = "block";
       blurOverlay.style.pointerEvents = "auto";
-      // Keep fullscreen button unblurred and clickable by resetting filter on body but overlay handles blur
       document.body.style.filter = "none";
     }
   }
@@ -204,11 +235,9 @@ document.addEventListener("DOMContentLoaded", () => {
       progressBar.style.width = "0%";
 
       if (diagnosticDone) {
-        // Already done diagnostic once before: show blur overlay behind button and show splash image
         setInteractable(false);
-        ss.style.display = "block";
+        ss.style.display = "none";
       } else {
-        // Not done yet, normal splash + button visible, no blur overlay
         setInteractable(true);
         ss.style.display = "block";
       }
@@ -245,6 +274,5 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("mozfullscreenchange", checkFullscreenStatus);
   document.addEventListener("MSFullscreenChange", checkFullscreenStatus);
 
-  // Initial setup
   checkFullscreenStatus();
 });
