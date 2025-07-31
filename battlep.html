@@ -394,39 +394,6 @@
       window.location.href = "index.html";
     }
 
-    async function fetchUserCards(token) {
-      try {
-        const response = await fetch(
-          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch user cards");
-        const data = await response.json();
-        console.log("Fetched cards:", data.cards);
-        return data.cards || [];
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    }
-
-    async function fetchCardStats(cardName) {
-      if (!cardName) return null;
-      try {
-        const response = await fetch(
-          `/.netlify/functions/getCardStats?card=${encodeURIComponent(
-            cardName
-          )}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch card stats");
-        const data = await response.json();
-        console.log("Card stats:", data);
-        return data;
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
-    }
-
     function updateStatsDisplay(stats) {
       if (!stats) return;
 
@@ -447,11 +414,11 @@
 
       container.style.display = "block";
       container.innerHTML = `
-    <div class="user-row">
-      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-      <span class="username" title="${user.username}">${user.username}</span>
-    </div>
-  `;
+      <div class="user-row">
+        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+        <span class="username" title="${user.username}">${user.username}</span>
+      </div>
+    `;
     }
 
     function displayCardImage(cardName, containerId = "selectedCardContainer") {
@@ -479,38 +446,17 @@
       }
       z-index: 1;
     " />`;
-
-      if (containerId === "selectedCardContainer") {
-        fetchCardStats(cardName).then((stats) => {
-          if (stats) {
-            updateStatsDisplay({
-              playerOneHealth: stats.Health,
-              playerOneDamage: stats["Damage Limit"],
-              playerTwoHealth:
-                parseInt(document.querySelector(".healthpt").textContent) || 0,
-              playerTwoDamage:
-                parseInt(document.querySelector(".damagelpt").textContent) || 0,
-            });
-          } else {
-            updateStatsDisplay(null);
-          }
-        });
-      }
     }
 
     function updatePlayerTwoStats(cardName) {
-      fetchCardStats(cardName).then((stats) => {
-        if (stats) {
-          updateStatsDisplay({
-            playerOneHealth:
-              parseInt(document.querySelector(".healthpo").textContent) || 0,
-            playerOneDamage:
-              parseInt(document.querySelector(".damagelpo").textContent) || 0,
-            playerTwoHealth: stats.Health,
-            playerTwoDamage: stats["Damage Limit"],
-          });
-        }
-      });
+      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
+        const statsRequest = {
+          type: "getCardStats",
+          cardName: cardName,
+        };
+        console.log("📤 Requesting player two card stats:", statsRequest);
+        socket.send(JSON.stringify(statsRequest));
+      }
     }
 
     function formatCardNameWithRarity(name) {
@@ -629,6 +575,21 @@
       setupWebSocket(token, decoded.username);
     }
 
+    async function fetchUserCards(token) {
+      try {
+        const response = await fetch(
+          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch user cards");
+        const data = await response.json();
+        console.log("Fetched cards:", data.cards);
+        return data.cards || [];
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    }
+
     let socket;
     let currentUsername;
 
@@ -674,6 +635,48 @@
 
           const p2Name = document.getElementById("playerTwoUsername");
           if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
+        } else if (msg.type === "cardStats") {
+          // This is the response with card stats
+          console.log("📥 Received card stats via WS:", msg);
+
+          if (msg.cardName && msg.stats) {
+            // Update UI based on which card's stats these are
+            const selectedCardValue =
+              document.getElementById("playerOneCards").value;
+            if (selectedCardValue === msg.cardName) {
+              // This is player one's selected card
+              updateStatsDisplay({
+                playerOneHealth: msg.stats.Health,
+                playerOneDamage: msg.stats["Damage Limit"],
+                playerTwoHealth:
+                  parseInt(document.querySelector(".healthpt").textContent) ||
+                  0,
+                playerTwoDamage:
+                  parseInt(document.querySelector(".damagelpt").textContent) ||
+                  0,
+              });
+            }
+
+            // Also check if this is player two's card and update accordingly
+            const playerTwoCardContainer = document.getElementById(
+              "playerTwoCardContainer"
+            );
+            if (
+              playerTwoCardContainer &&
+              playerTwoCardContainer.innerHTML.includes(msg.cardName)
+            ) {
+              updateStatsDisplay({
+                playerOneHealth:
+                  parseInt(document.querySelector(".healthpo").textContent) ||
+                  0,
+                playerOneDamage:
+                  parseInt(document.querySelector(".damagelpo").textContent) ||
+                  0,
+                playerTwoHealth: msg.stats.Health,
+                playerTwoDamage: msg.stats["Damage Limit"],
+              });
+            }
+          }
         }
       });
 
@@ -694,6 +697,14 @@
         };
         console.log("📤 Sending card selection:", payload);
         socket.send(JSON.stringify(payload));
+
+        // Also request card stats via WS
+        const statsRequest = {
+          type: "getCardStats",
+          cardName: cardName,
+        };
+        console.log("📤 Requesting card stats:", statsRequest);
+        socket.send(JSON.stringify(statsRequest));
       }
     }
 
