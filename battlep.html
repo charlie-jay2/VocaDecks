@@ -8,7 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="scripts/loading2.js"></script>
   </head>
   <style>
     @font-face {
@@ -357,286 +356,6 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    // ───────── Card Data (embedded) ─────────
-    const cardsData = {
-      common: [
-        {
-          name: "r1Rin C.png",
-          stats: { Health: 20, "Damage Limit": 20, "Vocal Range": 15 },
-        },
-        {
-          name: "r1Len C.png",
-          stats: { Health: 20, "Damage Limit": 20, "Vocal Range": 20 },
-        },
-        {
-          name: "r1MEIKO C.png",
-          stats: { Health: 14, "Damage Limit": 14, "Vocal Range": 20 },
-        },
-        {
-          name: "r1KAITO C.png",
-          stats: { Health: 10, "Damage Limit": 10, "Vocal Range": 20 },
-        },
-        {
-          name: "r1Luka C.png",
-          stats: { Health: 18, "Damage Limit": 18, "Vocal Range": 20 },
-        },
-        {
-          name: "r1Yowane Haku C.png",
-          stats: { Health: 18, "Damage Limit": 18, "Vocal Range": 20 },
-        },
-      ],
-      extra: [
-        {
-          name: "r2Hatsune Miku E.png",
-          stats: { Health: 25, "Damage Limit": 25, "Vocal Range": 25 },
-        },
-        {
-          name: "r2Gumi E.png",
-          stats: { Health: 30, "Damage Limit": 30, "Vocal Range": 25 },
-        },
-        {
-          name: "r2Rin E.png",
-          stats: { Health: 34, "Damage Limit": 34, "Vocal Range": 15 },
-        },
-        {
-          name: "r2Flower E.png",
-          stats: { Health: 35, "Damage Limit": 35, "Vocal Range": 30 },
-        },
-        {
-          name: "r2Tohoko E.png",
-          stats: { Health: 30, "Damage Limit": 30, "Vocal Range": 40 },
-        },
-        {
-          name: "r2MEIKO E.png",
-          stats: { Health: 24, "Damage Limit": 24, "Vocal Range": 20 },
-        },
-        {
-          name: "r2Len E.png",
-          stats: { Health: 35, "Damage Limit": 35, "Vocal Range": 20 },
-        },
-        {
-          name: "r2Luka E.png",
-          stats: { Health: 27, "Damage Limit": 27, "Vocal Range": 20 },
-        },
-        {
-          name: "r2KAITO E.png",
-          stats: { Health: 30, "Damage Limit": 30, "Vocal Range": 20 },
-        },
-        {
-          name: "r2Anon & Kanon E.png",
-          stats: { Health: 28, "Damage Limit": 28, "Vocal Range": 20 },
-        },
-      ],
-      rare: [
-        {
-          name: "r3Hatsune Miku R.png",
-          stats: { Health: 40, "Damage Limit": 40, "Vocal Range": 25 },
-        },
-        {
-          name: "r3Gumi R.png",
-          stats: { Health: 45, "Damage Limit": 45, "Vocal Range": 25 },
-        },
-        {
-          name: "r3Rana R.png",
-          stats: { Health: 40, "Damage Limit": 40, "Vocal Range": 25 },
-        },
-        {
-          name: "r3Tohoko R.png",
-          stats: { Health: 42, "Damage Limit": 42, "Vocal Range": 40 },
-        },
-        {
-          name: "r3Macne Nana R.png",
-          stats: { Health: 48, "Damage Limit": 48, "Vocal Range": 10 },
-        },
-        {
-          name: "r3Luka R.png",
-          stats: { Health: 48, "Damage Limit": 48, "Vocal Range": 20 },
-        },
-        {
-          name: "r3Teto R.png",
-          stats: { Health: 45, "Damage Limit": 45, "Vocal Range": 35 },
-        },
-        {
-          name: "r3Anon & Kanon R.png",
-          stats: { Health: 38, "Damage Limit": 38, "Vocal Range": 20 },
-        },
-        {
-          name: "r3Akoi Lapis R.png",
-          stats: { Health: 48, "Damage Limit": 48, "Vocal Range": 20 },
-        },
-        {
-          name: "r3Mikudayo.png",
-          stats: { Health: 40, "Damage Limit": 40, "Vocal Range": 30 },
-        },
-        {
-          name: "r3Cherry Mikudayo.png",
-          stats: { Health: 50, "Damage Limit": 50, "Vocal Range": 30 },
-        },
-        {
-          name: "r5Defoko.png",
-          stats: { Health: 45, "Damage Limit": 45, "Vocal Range": 20 },
-        },
-      ],
-      legendary: [
-        {
-          name: "r4Gumi L.png",
-          stats: { Health: 64, "Damage Limit": 64, "Vocal Range": 25 },
-        },
-        {
-          name: "r4Rana L.png",
-          stats: { Health: 75, "Damage Limit": 75, "Vocal Range": 25 },
-        },
-        {
-          name: "r4Galaco L.png",
-          stats: { Health: 80, "Damage Limit": 80, "Vocal Range": 30 },
-        },
-        {
-          name: "r4Macne Nana L.png",
-          stats: { Health: 78, "Damage Limit": 78, "Vocal Range": 10 },
-        },
-        {
-          name: "r4Akita Neru L.png",
-          stats: { Health: 65, "Damage Limit": 65, "Vocal Range": 30 },
-        },
-        {
-          name: "r4KAAI YUKI L.png",
-          stats: { Health: 80, "Damage Limit": 80, "Vocal Range": 20 },
-        },
-        {
-          name: "r4Teto L.png",
-          stats: { Health: 78, "Damage Limit": 78, "Vocal Range": 35 },
-        },
-        {
-          name: "r4Kokone L.png",
-          stats: { Health: 80, "Damage Limit": 80, "Vocal Range": 45 },
-        },
-        {
-          name: "r5Defoko L.png",
-          stats: { Health: 70, "Damage Limit": 70, "Vocal Range": 20 },
-        },
-        {
-          name: "r5Momone L.png",
-          stats: { Health: 72, "Damage Limit": 72, "Vocal Range": 15 },
-        },
-      ],
-      untouched: [
-        {
-          name: "r5Rana U.png",
-          stats: { Health: 87, "Damage Limit": 87, "Vocal Range": 20 },
-        },
-        {
-          name: "r5Galaco U.png",
-          stats: { Health: 97, "Damage Limit": 97, "Vocal Range": 30 },
-        },
-        {
-          name: "r5Teto U.png",
-          stats: { Health: 95, "Damage Limit": 95, "Vocal Range": 35 },
-        },
-        {
-          name: "r5CaseO U.png",
-          stats: { Health: 98, "Damage Limit": 98, "Vocal Range": 20 },
-        },
-        {
-          name: "r5Kokone U.png",
-          stats: { Health: 100, "Damage Limit": 100, "Vocal Range": 45 },
-        },
-        {
-          name: "r5Momone U.png",
-          stats: { Health: 94, "Damage Limit": 94, "Vocal Range": 15 },
-        },
-      ],
-    };
-
-    function getRarityGroup(prefix) {
-      switch (prefix) {
-        case "r1":
-          return "common";
-        case "r2":
-          return "extra";
-        case "r3":
-          return "rare";
-        case "r4":
-          return "legendary";
-        case "r5":
-          return "untouched";
-        default:
-          return null;
-      }
-    }
-
-    function findCard(cardName) {
-      const name = (cardName || "").trim();
-      const prefix = name.slice(0, 2);
-      const group = getRarityGroup(prefix);
-      return group && cardsData[group]
-        ? cardsData[group].find((c) => c.name === name) || null
-        : null;
-    }
-
-    function updatePlayer1Stats(stats) {
-      document.querySelector(".healthpo").textContent = stats?.Health ?? "-";
-      document.querySelector(".damagelpo").textContent =
-        stats?.["Damage Limit"] ?? "-";
-    }
-    function updatePlayer2Stats(stats) {
-      document.querySelector(".healthpt").textContent = stats?.Health ?? "-";
-      document.querySelector(".damagelpt").textContent =
-        stats?.["Damage Limit"] ?? "-";
-    }
-  </script>
-  <script>
-    function getRarityGroup(rarityPrefix) {
-      switch (rarityPrefix) {
-        case "r1":
-          return "common";
-        case "r2":
-          return "extra";
-        case "r3":
-          return "rare";
-        case "r4":
-          return "legendary";
-        case "r5":
-          return "untouched";
-        default:
-          return null;
-      }
-    }
-
-    function findCard(cardsData, cardName) {
-      if (!cardName) return null;
-      const rarityPrefix = cardName.slice(0, 2);
-      const group = getRarityGroup(rarityPrefix);
-      if (!group || !cardsData[group]) return null;
-      return cardsData[group].find((card) => card.name === cardName);
-    }
-
-    function updatePlayer1Stats(stats) {
-      document.querySelector(".healthpo").textContent = stats.Health;
-      document.querySelector(".damagelpo").textContent = stats["Damage Limit"];
-    }
-
-    function updatePlayer2Stats(stats) {
-      document.querySelector(".healthpt").textContent = stats.Health;
-      document.querySelector(".damagelpt").textContent = stats["Damage Limit"];
-    }
-
-    async function setPlayersCards(player1CardName, player2CardName) {
-      const cardsData = await loadCards();
-
-      const card1 = player1CardName
-        ? findCard(cardsData, player1CardName)
-        : null;
-      const card2 = player2CardName
-        ? findCard(cardsData, player2CardName)
-        : null;
-
-      if (card1) updatePlayer1Stats(card1.stats);
-      else updatePlayer1Stats({ Health: "-", "Damage Limit": "-" });
-
-      if (card2) updatePlayer2Stats(card2.stats);
-      else updatePlayer2Stats({ Health: "-", "Damage Limit": "-" });
-    }
-
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
@@ -671,6 +390,10 @@
       }
     }
 
+    function redirectToIndex() {
+      window.location.href = "index.html";
+    }
+
     async function fetchUserCards(token) {
       try {
         const response = await fetch(
@@ -686,17 +409,51 @@
       }
     }
 
+    async function fetchCardStats(cardName) {
+      if (!cardName) return null;
+      try {
+        const response = await fetch(
+          `/.netlify/functions/getCardStats?card=${encodeURIComponent(
+            cardName
+          )}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch card stats");
+        const data = await response.json();
+        console.log("Card stats:", data);
+        return data;
+      } catch (error) {
+        console.error(error);
+        return null;
+      }
+    }
+
+    function updateStatsDisplay(stats) {
+      // Assuming stats object has properties:
+      // playerOneHealth, playerTwoHealth, playerOneDamage, playerTwoDamage
+      if (!stats) return;
+
+      const healthpo = document.querySelector(".healthpo");
+      const healthpt = document.querySelector(".healthpt");
+      const damagelpo = document.querySelector(".damagelpo");
+      const damagelpt = document.querySelector(".damagelpt");
+
+      if (healthpo) healthpo.textContent = stats.playerOneHealth ?? "0";
+      if (healthpt) healthpt.textContent = stats.playerTwoHealth ?? "0";
+      if (damagelpo) damagelpo.textContent = stats.playerOneDamage ?? "0";
+      if (damagelpt) damagelpt.textContent = stats.playerTwoDamage ?? "0";
+    }
+
     function showDiscordUserInfo(user) {
       const container = document.getElementById("discordUserInfo");
       if (!container) return;
 
       container.style.display = "block";
       container.innerHTML = `
-      <div class="user-row">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-        <span class="username" title="${user.username}">${user.username}</span>
-      </div>
-    `;
+    <div class="user-row">
+      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+      <span class="username" title="${user.username}">${user.username}</span>
+    </div>
+  `;
     }
 
     function displayCardImage(cardName, containerId = "selectedCardContainer") {
@@ -705,6 +462,7 @@
 
       if (!cardName) {
         container.innerHTML = "";
+        updateStatsDisplay(null); // Clear stats display when no card
         return;
       }
 
@@ -713,20 +471,26 @@
       console.log(`📸 Displaying in #${containerId}:`, imgSrc);
 
       container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" style="
-      width: 90%;
-      height: auto;
-      position: absolute;
-      ${
-        containerId === "playerTwoCardContainer"
-          ? "left: 43%; bottom: 15;"
-          : "left: 26.5%; bottom: 15;"
+    width: 90%;
+    height: auto;
+    position: absolute;
+    ${
+      containerId === "playerTwoCardContainer"
+        ? "left: 43%; bottom: 15;"
+        : "left: 26.5%; bottom: 15;"
+    }
+    z-index: 1;
+  " />`;
+
+      // Fetch and update stats only for player one card selection
+      if (containerId === "selectedCardContainer") {
+        fetchCardStats(cardName).then(updateStatsDisplay);
       }
-      z-index: 1;
-    " />`;
     }
 
     function formatCardNameWithRarity(name) {
       let cleanName = name;
+
       if (!cleanName.toLowerCase().endsWith(".png")) {
         cleanName += ".png";
       }
@@ -747,7 +511,6 @@
     }
 
     function getCardRarity(name) {
-      if (!name) return null;
       const rarityMatch = name.match(/^r([1-5])/i);
       if (!rarityMatch) return null;
       const rarityMap = {
@@ -832,30 +595,9 @@
           }
         });
 
-        // Set default selection and update stats on load
-        if (dropdown.options.length > 1) {
-          const firstCardName = dropdown.options[1].value;
-          dropdown.value = firstCardName;
-          displayCardImage(firstCardName, "selectedCardContainer");
-          await setPlayersCards(firstCardName, ""); // No opponent card yet
-        }
-
-        dropdown.addEventListener("change", async (e) => {
-          const player1Card = e.target.value;
-          displayCardImage(player1Card, "selectedCardContainer");
-          sendCardSelection(player1Card);
-
-          // Get the currently displayed Player 2 card (or empty if none)
-          const player2CardContainer = document.getElementById(
-            "playerTwoCardContainer"
-          );
-          const player2Img = player2CardContainer?.querySelector("img");
-          let player2Card = "";
-          if (player2Img) {
-            player2Card = decodeURIComponent(player2Img.src.split("/").pop());
-          }
-
-          await setPlayersCards(player1Card, player2Card);
+        dropdown.addEventListener("change", (e) => {
+          displayCardImage(e.target.value, "selectedCardContainer");
+          sendCardSelection(e.target.value);
         });
       }
 
@@ -875,7 +617,7 @@
         console.log("🔗 WebSocket connected");
       });
 
-      socket.addEventListener("message", async (event) => {
+      socket.addEventListener("message", (event) => {
         let msg;
         try {
           msg = JSON.parse(event.data);
@@ -889,25 +631,12 @@
         } else if (msg.type === "status") {
           console.log("Status:", msg.message);
         } else if (msg.type === "opponentSelection") {
-          // Defensive check to avoid errors:
-          if (msg.username && msg.cardName) {
-            console.log(
-              `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
-            );
+          console.log(
+            `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
+          );
 
-            if (msg.username !== currentUsername) {
-              displayCardImage(msg.cardName, "playerTwoCardContainer");
-
-              const player1Dropdown = document.getElementById("playerOneCards");
-              const player1Card = player1Dropdown ? player1Dropdown.value : "";
-
-              await setPlayersCards(player1Card, msg.cardName);
-            }
-          } else {
-            console.warn(
-              "Received opponentSelection with missing username or cardName",
-              msg
-            );
+          if (msg.username !== currentUsername) {
+            displayCardImage(msg.cardName, "playerTwoCardContainer");
           }
         } else if (msg.type === "matched") {
           console.log(`✅ Connected to ${msg.opponent}`);
@@ -935,7 +664,7 @@
       if (socket && socket.readyState === WebSocket.OPEN && cardName) {
         const payload = {
           type: "selection",
-          cardName,
+          cardName: cardName,
         };
         console.log("📤 Sending card selection:", payload);
         socket.send(JSON.stringify(payload));
