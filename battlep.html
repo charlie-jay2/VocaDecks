@@ -356,13 +356,11 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    // Helper to get URL query parameter
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
     }
 
-    // Save token (remove Bearer if present) and clear query string
     function saveToken(token) {
       if (typeof token === "string" && token.startsWith("Bearer ")) {
         token = token.slice(7);
@@ -380,12 +378,10 @@
       }
     }
 
-    // Retrieve saved token
     function getToken() {
       return localStorage.getItem("token");
     }
 
-    // Decode JWT token safely
     function decodeToken(token) {
       try {
         return jwt_decode(token);
@@ -394,7 +390,25 @@
       }
     }
 
-    // Update UI stats display for health and damage
+    function redirectToIndex() {
+      window.location.href = "index.html";
+    }
+
+    async function fetchUserCards(token) {
+      try {
+        const response = await fetch(
+          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch user cards");
+        const data = await response.json();
+        console.log("Fetched cards:", data.cards);
+        return data.cards || [];
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    }
+
     function updateStatsDisplay(stats) {
       if (!stats) return;
 
@@ -403,31 +417,25 @@
       const damagelpo = document.querySelector(".damagelpo");
       const damagelpt = document.querySelector(".damagelpt");
 
-      if (healthpo && stats.playerOneHealth !== undefined)
-        healthpo.textContent = stats.playerOneHealth;
-      if (healthpt && stats.playerTwoHealth !== undefined)
-        healthpt.textContent = stats.playerTwoHealth;
-      if (damagelpo && stats.playerOneDamage !== undefined)
-        damagelpo.textContent = stats.playerOneDamage;
-      if (damagelpt && stats.playerTwoDamage !== undefined)
-        damagelpt.textContent = stats.playerTwoDamage;
+      if (healthpo) healthpo.textContent = stats.playerOneHealth ?? "0";
+      if (healthpt) healthpt.textContent = stats.playerTwoHealth ?? "0";
+      if (damagelpo) damagelpo.textContent = stats.playerOneDamage ?? "0";
+      if (damagelpt) damagelpt.textContent = stats.playerTwoDamage ?? "0";
     }
 
-    // Show Discord user info in the corner
     function showDiscordUserInfo(user) {
       const container = document.getElementById("discordUserInfo");
       if (!container) return;
 
       container.style.display = "block";
       container.innerHTML = `
-      <div class="user-row">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-        <span class="username" title="${user.username}">${user.username}</span>
-      </div>
-    `;
+    <div class="user-row">
+      <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
+      <span class="username" title="${user.username}">${user.username}</span>
+    </div>
+  `;
     }
 
-    // Display card image inside a container (selected or opponent)
     function displayCardImage(cardName, containerId = "selectedCardContainer") {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -443,19 +451,18 @@
       console.log(`📸 Displaying in #${containerId}:`, imgSrc);
 
       container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" style="
-      width: 90%;
-      height: auto;
-      position: absolute;
-      ${
-        containerId === "playerTwoCardContainer"
-          ? "left: 43%; bottom: 15px;"
-          : "left: 26.5%; bottom: 15px;"
-      }
-      z-index: 1;
-    " />`;
+    width: 90%;
+    height: auto;
+    position: absolute;
+    ${
+      containerId === "playerTwoCardContainer"
+        ? "left: 43%; bottom: 15;"
+        : "left: 26.5%; bottom: 15;"
+    }
+    z-index: 1;
+  " />`;
     }
 
-    // Format card name with rarity label for dropdown display
     function formatCardNameWithRarity(name) {
       let cleanName = name;
 
@@ -478,7 +485,6 @@
       return `${baseName.trim()} (${rarityMap[rarityMatch[1]] || "UNKNOWN"})`;
     }
 
-    // Get card rarity from filename prefix
     function getCardRarity(name) {
       const rarityMatch = name.match(/^r([1-5])/i);
       if (!rarityMatch) return null;
@@ -492,23 +498,6 @@
       return rarityMap[rarityMatch[1]] || null;
     }
 
-    // Fetch cards for user from backend
-    async function fetchUserCards(token) {
-      try {
-        const response = await fetch(
-          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch user cards");
-        const data = await response.json();
-        console.log("Fetched cards:", data.cards);
-        return data.cards || [];
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    }
-
-    // Initialize the page logic and WebSocket connection
     async function init() {
       let token = getToken();
 
@@ -582,12 +571,16 @@
         });
 
         dropdown.addEventListener("change", (e) => {
-          const selectedCard = e.target.value;
-          displayCardImage(selectedCard, "selectedCardContainer");
-          sendCardSelection(selectedCard);
+          displayCardImage(e.target.value, "selectedCardContainer");
+          sendCardSelection(e.target.value);
 
-          if (socket && socket.readyState === WebSocket.OPEN && selectedCard) {
-            const payload = { type: "getCardStats", cardName: selectedCard };
+          // NEW: request own card stats on selection
+          if (
+            socket &&
+            socket.readyState === WebSocket.OPEN &&
+            e.target.value
+          ) {
+            const payload = { type: "getCardStats", cardName: e.target.value };
             socket.send(JSON.stringify(payload));
           }
         });
@@ -600,7 +593,6 @@
     let currentUsername;
     let currentRole = null;
 
-    // Setup WebSocket for live communication
     function setupWebSocket(token, username) {
       currentUsername = username;
 
@@ -630,9 +622,10 @@
           );
 
           if (msg.username !== currentUsername) {
+            // Show opponent's card image
             displayCardImage(msg.cardName, "playerTwoCardContainer");
 
-            // Request opponent card stats immediately
+            // Request opponent's card stats
             requestCardStats(msg.cardName);
           }
         } else if (msg.type === "matched") {
@@ -647,11 +640,15 @@
           const p2Name = document.getElementById("playerTwoUsername");
           if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
         } else if (msg.type === "cardStats") {
+          // msg.cardName, msg.SP, msg.VR (from server.js you send SP and VR, but your updateStatsDisplay expects Health and Damage keys)
+          // Let's adapt to your cardStats structure in server.js (SP=HealthPO, VR=DamagelPO)
+
           if (msg.cardName) {
+            // Check if this card is player's own selected card
             const selectedCard =
               document.getElementById("playerOneCards").value;
 
-            // If stats for own selected card and user is Player One
+            // If own card stats
             if (selectedCard === msg.cardName && currentRole === "Player One") {
               updateStatsDisplay({
                 playerOneHealth: msg.SP,
@@ -663,27 +660,27 @@
                   parseInt(document.querySelector(".damagelpt").textContent) ||
                   0,
               });
-            } else {
-              // If stats are for opponent's card displayed in playerTwoCardContainer
-              const playerTwoCardContainer = document.getElementById(
-                "playerTwoCardContainer"
-              );
-              if (
-                playerTwoCardContainer &&
-                playerTwoCardContainer.innerHTML.includes(msg.cardName)
-              ) {
-                updateStatsDisplay({
-                  playerOneHealth:
-                    parseInt(document.querySelector(".healthpo").textContent) ||
-                    0,
-                  playerOneDamage:
-                    parseInt(
-                      document.querySelector(".damagelpo").textContent
-                    ) || 0,
-                  playerTwoHealth: msg.SP,
-                  playerTwoDamage: msg.VR,
-                });
-              }
+            }
+
+            // If this is opponent's card (shown in playerTwoCardContainer)
+            const playerTwoCardContainer = document.getElementById(
+              "playerTwoCardContainer"
+            );
+
+            if (
+              playerTwoCardContainer &&
+              playerTwoCardContainer.innerHTML.includes(msg.cardName)
+            ) {
+              updateStatsDisplay({
+                playerOneHealth:
+                  parseInt(document.querySelector(".healthpo").textContent) ||
+                  0,
+                playerOneDamage:
+                  parseInt(document.querySelector(".damagelpo").textContent) ||
+                  0,
+                playerTwoHealth: msg.SP,
+                playerTwoDamage: msg.VR,
+              });
             }
           }
         }
@@ -698,7 +695,6 @@
       });
     }
 
-    // Send card selection to server via WebSocket
     function sendCardSelection(cardName) {
       if (socket && socket.readyState === WebSocket.OPEN && cardName) {
         const payload = {
@@ -710,7 +706,6 @@
       }
     }
 
-    // Request card stats from server via WebSocket
     function requestCardStats(cardName) {
       if (socket && socket.readyState === WebSocket.OPEN && cardName) {
         const payload = {
@@ -722,7 +717,6 @@
       }
     }
 
-    // Start everything
     init();
   </script>
 </html>
