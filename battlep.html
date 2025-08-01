@@ -573,6 +573,16 @@
         dropdown.addEventListener("change", (e) => {
           displayCardImage(e.target.value, "selectedCardContainer");
           sendCardSelection(e.target.value);
+
+          // NEW: request own card stats on selection
+          if (
+            socket &&
+            socket.readyState === WebSocket.OPEN &&
+            e.target.value
+          ) {
+            const payload = { type: "getCardStats", cardName: e.target.value };
+            socket.send(JSON.stringify(payload));
+          }
         });
       }
 
