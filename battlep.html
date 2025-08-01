@@ -591,6 +591,7 @@
 
     let socket;
     let currentUsername;
+    let currentRole = null;
 
     function setupWebSocket(token, username) {
       currentUsername = username;
@@ -621,8 +622,11 @@
           );
 
           if (msg.username !== currentUsername) {
+            // Show opponent's card image
             displayCardImage(msg.cardName, "playerTwoCardContainer");
-            updatePlayerTwoStats(msg.cardName);
+
+            // Request opponent's card stats
+            requestCardStats(msg.cardName);
           }
         } else if (msg.type === "matched") {
           console.log(`✅ Connected to ${msg.opponent}`);
@@ -631,20 +635,24 @@
           localStorage.setItem("matchedOpponent", msg.opponent);
           localStorage.setItem("yourName", msg.yourName);
           localStorage.setItem("yourRole", msg.role);
+          currentRole = msg.role;
 
           const p2Name = document.getElementById("playerTwoUsername");
           if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
         } else if (msg.type === "cardStats") {
-          // msg.cardName, msg.stats: { Health, "Damage Limit" }
-          if (msg.cardName && msg.stats) {
+          // msg.cardName, msg.SP, msg.VR (from server.js you send SP and VR, but your updateStatsDisplay expects Health and Damage keys)
+          // Let's adapt to your cardStats structure in server.js (SP=HealthPO, VR=DamagelPO)
+
+          if (msg.cardName) {
+            // Check if this card is player's own selected card
             const selectedCard =
               document.getElementById("playerOneCards").value;
 
-            if (selectedCard === msg.cardName) {
-              // Update player one's stats (po)
+            // If own card stats
+            if (selectedCard === msg.cardName && currentRole === "Player One") {
               updateStatsDisplay({
-                playerOneHealth: msg.stats.Health,
-                playerOneDamage: msg.stats["Damage Limit"],
+                playerOneHealth: msg.SP,
+                playerOneDamage: msg.VR,
                 playerTwoHealth:
                   parseInt(document.querySelector(".healthpt").textContent) ||
                   0,
@@ -654,14 +662,15 @@
               });
             }
 
+            // If this is opponent's card (shown in playerTwoCardContainer)
             const playerTwoCardContainer = document.getElementById(
               "playerTwoCardContainer"
             );
+
             if (
               playerTwoCardContainer &&
               playerTwoCardContainer.innerHTML.includes(msg.cardName)
             ) {
-              // Update player two's stats (pt)
               updateStatsDisplay({
                 playerOneHealth:
                   parseInt(document.querySelector(".healthpo").textContent) ||
@@ -669,8 +678,8 @@
                 playerOneDamage:
                   parseInt(document.querySelector(".damagelpo").textContent) ||
                   0,
-                playerTwoHealth: msg.stats.Health,
-                playerTwoDamage: msg.stats["Damage Limit"],
+                playerTwoHealth: msg.SP,
+                playerTwoDamage: msg.VR,
               });
             }
           }
@@ -697,14 +706,13 @@
       }
     }
 
-    function updatePlayerTwoStats(cardName) {
-      // Send a request to get card stats for player two
+    function requestCardStats(cardName) {
       if (socket && socket.readyState === WebSocket.OPEN && cardName) {
         const payload = {
           type: "getCardStats",
           cardName: cardName,
         };
-        console.log("📤 Requesting card stats for player two:", payload);
+        console.log("📤 Requesting card stats:", payload);
         socket.send(JSON.stringify(payload));
       }
     }
