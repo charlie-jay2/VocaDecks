@@ -394,6 +394,21 @@
       window.location.href = "index.html";
     }
 
+    async function fetchUserCards(token) {
+      try {
+        const response = await fetch(
+          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch user cards");
+        const data = await response.json();
+        console.log("Fetched cards:", data.cards);
+        return data.cards || [];
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    }
+
     function updateStatsDisplay(stats) {
       if (!stats) return;
 
@@ -446,17 +461,6 @@
       }
       z-index: 1;
     " />`;
-    }
-
-    function updatePlayerTwoStats(cardName) {
-      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
-        const statsRequest = {
-          type: "getCardStats",
-          cardName: cardName,
-        };
-        console.log("📤 Requesting player two card stats:", statsRequest);
-        socket.send(JSON.stringify(statsRequest));
-      }
     }
 
     function formatCardNameWithRarity(name) {
@@ -575,21 +579,6 @@
       setupWebSocket(token, decoded.username);
     }
 
-    async function fetchUserCards(token) {
-      try {
-        const response = await fetch(
-          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch user cards");
-        const data = await response.json();
-        console.log("Fetched cards:", data.cards);
-        return data.cards || [];
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    }
-
     let socket;
     let currentUsername;
 
@@ -636,15 +625,13 @@
           const p2Name = document.getElementById("playerTwoUsername");
           if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
         } else if (msg.type === "cardStats") {
-          // This is the response with card stats
-          console.log("📥 Received card stats via WS:", msg);
-
+          // msg.cardName, msg.stats: { Health, "Damage Limit" }
           if (msg.cardName && msg.stats) {
-            // Update UI based on which card's stats these are
-            const selectedCardValue =
+            const selectedCard =
               document.getElementById("playerOneCards").value;
-            if (selectedCardValue === msg.cardName) {
-              // This is player one's selected card
+
+            if (selectedCard === msg.cardName) {
+              // Update player one's stats (po)
               updateStatsDisplay({
                 playerOneHealth: msg.stats.Health,
                 playerOneDamage: msg.stats["Damage Limit"],
@@ -657,7 +644,6 @@
               });
             }
 
-            // Also check if this is player two's card and update accordingly
             const playerTwoCardContainer = document.getElementById(
               "playerTwoCardContainer"
             );
@@ -665,6 +651,7 @@
               playerTwoCardContainer &&
               playerTwoCardContainer.innerHTML.includes(msg.cardName)
             ) {
+              // Update player two's stats (pt)
               updateStatsDisplay({
                 playerOneHealth:
                   parseInt(document.querySelector(".healthpo").textContent) ||
@@ -697,14 +684,18 @@
         };
         console.log("📤 Sending card selection:", payload);
         socket.send(JSON.stringify(payload));
+      }
+    }
 
-        // Also request card stats via WS
-        const statsRequest = {
+    function updatePlayerTwoStats(cardName) {
+      // Send a request to get card stats for player two
+      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
+        const payload = {
           type: "getCardStats",
           cardName: cardName,
         };
-        console.log("📤 Requesting card stats:", statsRequest);
-        socket.send(JSON.stringify(statsRequest));
+        console.log("📤 Requesting card stats for player two:", payload);
+        socket.send(JSON.stringify(payload));
       }
     }
 
