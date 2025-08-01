@@ -417,10 +417,35 @@
       const damagelpo = document.querySelector(".damagelpo");
       const damagelpt = document.querySelector(".damagelpt");
 
-      if (healthpo) healthpo.textContent = stats.playerOneHealth ?? "0";
-      if (healthpt) healthpt.textContent = stats.playerTwoHealth ?? "0";
-      if (damagelpo) damagelpo.textContent = stats.playerOneDamage ?? "0";
-      if (damagelpt) damagelpt.textContent = stats.playerTwoDamage ?? "0";
+      console.log("Updating stats display:", stats);
+
+      if (healthpo) {
+        healthpo.textContent =
+          stats.playerOneHealth != null ? stats.playerOneHealth : "0";
+      } else {
+        console.warn("Element .healthpo not found");
+      }
+
+      if (healthpt) {
+        healthpt.textContent =
+          stats.playerTwoHealth != null ? stats.playerTwoHealth : "0";
+      } else {
+        console.warn("Element .healthpt not found");
+      }
+
+      if (damagelpo) {
+        damagelpo.textContent =
+          stats.playerOneDamage != null ? stats.playerOneDamage : "0";
+      } else {
+        console.warn("Element .damagelpo not found");
+      }
+
+      if (damagelpt) {
+        damagelpt.textContent =
+          stats.playerTwoDamage != null ? stats.playerTwoDamage : "0";
+      } else {
+        console.warn("Element .damagelpt not found");
+      }
     }
 
     function showDiscordUserInfo(user) {
