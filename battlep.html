@@ -647,10 +647,7 @@
           );
 
           if (msg.username !== currentUsername) {
-            // Show opponent's card image
             displayCardImage(msg.cardName, "playerTwoCardContainer");
-
-            // Request opponent's card stats
             requestCardStats(msg.cardName);
           }
         } else if (msg.type === "matched") {
@@ -665,15 +662,27 @@
           const p2Name = document.getElementById("playerTwoUsername");
           if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
         } else if (msg.type === "cardStats") {
+          console.log("📊 Received cardStats message:", msg);
+
           if (msg.cardName) {
             const selectedCard =
               document.getElementById("playerOneCards").value;
+            const playerTwoCardContainer = document.getElementById(
+              "playerTwoCardContainer"
+            );
+
+            console.log("Checking cardStats for display:", {
+              selectedCard,
+              playerTwoCardHTML: playerTwoCardContainer?.innerHTML,
+              msgCardName: msg.cardName,
+              currentRole,
+            });
 
             // Update Player One stats if this is their selected card and they are Player One
             if (selectedCard === msg.cardName && currentRole === "Player One") {
               updateStatsDisplay({
-                playerOneHealth: msg.SP, // SP → Health Player One
-                playerOneDamage: msg.VR, // VR → Damage Player One
+                playerOneHealth: msg.SP,
+                playerOneDamage: msg.VR,
                 playerTwoHealth:
                   parseInt(document.querySelector(".healthpt")?.textContent) ||
                   0,
@@ -684,10 +693,6 @@
             }
 
             // Update Player Two stats if this card is shown in the playerTwoCardContainer
-            const playerTwoCardContainer = document.getElementById(
-              "playerTwoCardContainer"
-            );
-
             if (
               playerTwoCardContainer &&
               playerTwoCardContainer.innerHTML
@@ -701,8 +706,8 @@
                 playerOneDamage:
                   parseInt(document.querySelector(".damagelpo")?.textContent) ||
                   0,
-                playerTwoHealth: msg.SP, // SP → Health Player Two
-                playerTwoDamage: msg.VR, // VR → Damage Player Two
+                playerTwoHealth: msg.SP,
+                playerTwoDamage: msg.VR,
               });
             }
           }
