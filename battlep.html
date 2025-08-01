@@ -563,6 +563,10 @@
         localStorage.getItem("selectedRarity")?.toLowerCase() || null;
       console.log("🎯 Selected rarity filter:", selectedRarity);
 
+      // Restore currentRole from storage for reconnects/reloads
+      currentRole = localStorage.getItem("yourRole");
+      console.log("Restored currentRole from storage:", currentRole);
+
       const cards = await fetchUserCards(token);
       const dropdown = document.getElementById("playerOneCards");
 
@@ -662,6 +666,7 @@
           localStorage.setItem("yourRole", msg.role);
 
           currentRole = msg.role;
+          console.log("Set currentRole to:", currentRole);
 
           const p2Name = document.getElementById("playerTwoUsername");
           if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
@@ -674,92 +679,53 @@
             const playerTwoCardContainer = document.getElementById(
               "playerTwoCardContainer"
             );
+            const playerTwoCardHTML = playerTwoCardContainer
+              ? playerTwoCardContainer.innerHTML.toLowerCase()
+              : "";
 
             console.log("Checking cardStats for display:", {
               selectedCard,
-              playerTwoCardHTML: playerTwoCardContainer?.innerHTML,
+              playerTwoCardHTML,
               msgCardName: msg.cardName,
               currentRole,
             });
 
-            if (currentRole === "Player One") {
-              // Player One selected card updates Player One stats
-              if (selectedCard === msg.cardName) {
-                updateStatsDisplay({
-                  playerOneHealth: msg.SP,
-                  playerOneDamage: msg.VR,
-                  playerTwoHealth:
-                    parseInt(
-                      document.querySelector(".healthpt")?.textContent
-                    ) || 0,
-                  playerTwoDamage:
-                    parseInt(
-                      document.querySelector(".damagelpt")?.textContent
-                    ) || 0,
-                });
-              }
-
-              // Opponent card displayed updates Player Two stats
-              if (
-                playerTwoCardContainer &&
-                playerTwoCardContainer.innerHTML
-                  .toLowerCase()
-                  .includes(msg.cardName.toLowerCase())
-              ) {
-                updateStatsDisplay({
-                  playerOneHealth:
-                    parseInt(
-                      document.querySelector(".healthpo")?.textContent
-                    ) || 0,
-                  playerOneDamage:
-                    parseInt(
-                      document.querySelector(".damagelpo")?.textContent
-                    ) || 0,
-                  playerTwoHealth: msg.SP,
-                  playerTwoDamage: msg.VR,
-                });
-              }
-            } else if (currentRole === "Player Two") {
-              // Player Two selected card updates Player Two stats
-              if (selectedCard === msg.cardName) {
-                updateStatsDisplay({
-                  playerOneHealth:
-                    parseInt(
-                      document.querySelector(".healthpo")?.textContent
-                    ) || 0,
-                  playerOneDamage:
-                    parseInt(
-                      document.querySelector(".damagelpo")?.textContent
-                    ) || 0,
-                  playerTwoHealth: msg.SP,
-                  playerTwoDamage: msg.VR,
-                });
-              }
-
-              // Opponent card displayed updates Player One stats
-              if (
-                playerTwoCardContainer &&
-                playerTwoCardContainer.innerHTML
-                  .toLowerCase()
-                  .includes(msg.cardName.toLowerCase())
-              ) {
-                updateStatsDisplay({
-                  playerOneHealth: msg.SP,
-                  playerOneDamage: msg.VR,
-                  playerTwoHealth:
-                    parseInt(
-                      document.querySelector(".healthpt")?.textContent
-                    ) || 0,
-                  playerTwoDamage:
-                    parseInt(
-                      document.querySelector(".damagelpt")?.textContent
-                    ) || 0,
-                });
-              }
-            } else {
+            if (!currentRole) {
               console.warn(
                 "⚠️ currentRole is not set properly, cannot update stats"
               );
+              return;
+            }
+
+            // Update Player One stats if this is their selected card and they are Player One
+            if (selectedCard === msg.cardName && currentRole === "Player One") {
+              updateStatsDisplay({
+                playerOneHealth: msg.SP, // SP → Health Player One
+                playerOneDamage: msg.VR, // VR → Damage Player One
+                playerTwoHealth:
+                  parseInt(document.querySelector(".healthpt")?.textContent) ||
+                  0,
+                playerTwoDamage:
+                  parseInt(document.querySelector(".damagelpt")?.textContent) ||
+                  0,
+              });
+            }
+
+            // Update Player Two stats if this card is shown in the playerTwoCardContainer and user is Player Two
+            if (
+              playerTwoCardHTML.includes(msg.cardName.toLowerCase()) &&
+              currentRole === "Player Two"
+            ) {
+              updateStatsDisplay({
+                playerOneHealth:
+                  parseInt(document.querySelector(".healthpo")?.textContent) ||
+                  0,
+                playerOneDamage:
+                  parseInt(document.querySelector(".damagelpo")?.textContent) ||
+                  0,
+                playerTwoHealth: msg.SP, // SP → Health Player Two
+                playerTwoDamage: msg.VR, // VR → Damage Player Two
+              });
             }
           }
         }
