@@ -636,25 +636,22 @@
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
     <script>
-      let audio;
+      const audio = new Audio("audio/Battle.wav");
+      audio.loop = true;
+      audio.volume = 0.7;
 
+      // Try autoplay after 1 second
       window.addEventListener("DOMContentLoaded", () => {
-        audio = new Audio("audio/Battle.wav");
-        audio.loop = true;
-        audio.volume = 0.5;
-        audio.play().catch((e) => {
-          console.warn("Autoplay prevented by browser.");
-        });
-
-        const toggle = document.getElementById("audio-toggle");
-        const mutedIcon = document.getElementById("icon-muted");
-        const unmutedIcon = document.getElementById("icon-unmuted");
-
-        toggle.addEventListener("click", () => {
-          audio.muted = !audio.muted;
-          mutedIcon.style.display = audio.muted ? "block" : "none";
-          unmutedIcon.style.display = audio.muted ? "none" : "block";
-        });
+        setTimeout(() => {
+          audio.play().catch(() => {
+            // Autoplay failed, wait for user interaction
+            const resume = () => {
+              audio.play().catch(console.warn);
+              document.removeEventListener("click", resume);
+            };
+            document.addEventListener("click", resume, { once: true });
+          });
+        }, 1000);
       });
     </script>
 
