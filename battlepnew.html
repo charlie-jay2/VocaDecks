@@ -31,7 +31,6 @@
         color: white;
         background-color: black;
         background-position: center;
-        cursor: none;
         background-size: cover;
         background-repeat: no-repeat;
         background-image: var(--theme-bg);
@@ -489,55 +488,10 @@
         left: 50%;
         transform: translate(-50%, -50%);
       }
-
-      #fluid-glass-cursor {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        pointer-events: none;
-        transform: translate(-50%, -50%);
-        z-index: 9999;
-
-        background: rgba(255, 255, 255, 0.671);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-
-        background-image: radial-gradient(
-          circle at 30% 30%,
-          rgba(255, 255, 255, 0.507),
-          rgba(255, 255, 255, 0) 70%
-        );
-
-        box-shadow: inset 5px 5px 12px rgba(255, 255, 255, 0.15),
-          inset -5px -5px 12px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.1);
-
-        transition: width 0.2s ease-in-out, height 0.2s ease-in-out,
-          background-color 0.2s ease-in-out;
-      }
-
-      /* Scale up on hoverable elements */
-      a:hover ~ #fluid-glass-cursor,
-      button:hover ~ #fluid-glass-cursor,
-      [class*="btn"]:hover ~ #fluid-glass-cursor {
-        width: 80px;
-        height: 80px;
-        background-color: rgba(255, 255, 255, 0.15);
-      }
-
-      *,
-      *::before,
-      *::after {
-        cursor: none !important;
-      }
     </style>
   </head>
 
   <body>
-    <div id="fluid-glass-cursor"></div>
-
     <img src="./Assets/ICONS/Line_120.png" class="line" />
     <img src="./Assets/SERIES_1_LOGO.png" class="logo" />
 
