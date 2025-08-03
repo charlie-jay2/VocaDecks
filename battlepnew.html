@@ -31,6 +31,7 @@
         color: white;
         background-color: black;
         background-position: center;
+        cursor: none;
         background-size: cover;
         background-repeat: no-repeat;
         background-image: var(--theme-bg);
@@ -488,10 +489,55 @@
         left: 50%;
         transform: translate(-50%, -50%);
       }
+
+      #fluid-glass-cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+
+        background: rgba(255, 255, 255, 0.671);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+
+        background-image: radial-gradient(
+          circle at 30% 30%,
+          rgba(255, 255, 255, 0.507),
+          rgba(255, 255, 255, 0) 70%
+        );
+
+        box-shadow: inset 5px 5px 12px rgba(255, 255, 255, 0.15),
+          inset -5px -5px 12px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        transition: width 0.2s ease-in-out, height 0.2s ease-in-out,
+          background-color 0.2s ease-in-out;
+      }
+
+      /* Scale up on hoverable elements */
+      a:hover ~ #fluid-glass-cursor,
+      button:hover ~ #fluid-glass-cursor,
+      [class*="btn"]:hover ~ #fluid-glass-cursor {
+        width: 80px;
+        height: 80px;
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+
+      *,
+      *::before,
+      *::after {
+        cursor: none !important;
+      }
     </style>
   </head>
 
   <body>
+    <div id="fluid-glass-cursor"></div>
+
     <img src="./Assets/ICONS/Line_120.png" class="line" />
     <img src="./Assets/SERIES_1_LOGO.png" class="logo" />
 
@@ -546,8 +592,135 @@
       <img src="./Battle/Ellipse_19.png" class="inel" />
     </div>
 
+    <!-- Mute/Unmute Button -->
+    <div
+      id="audio-toggle"
+      style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 48px;
+        height: 48px;
+        cursor: pointer;
+        z-index: 9999;
+      ">
+      <!-- Unmuted Icon -->
+      <svg
+        id="icon-unmuted"
+        xmlns="http://www.w3.org/2000/svg"
+        width="48"
+        height="48"
+        fill="white"
+        viewBox="0 0 24 24">
+        <path
+          d="M5 9v6h4l5 5V4l-5 5H5zm11.5 3a4.5 4.5 0 01-4.5 4.5v-2a2.5 2.5 0 002.5-2.5 2.5 2.5 0 00-2.5-2.5v-2a4.5 4.5 0 014.5 4.5z" />
+      </svg>
+
+      <!-- Muted Icon (hidden by default) -->
+      <svg
+        id="icon-muted"
+        xmlns="http://www.w3.org/2000/svg"
+        width="48"
+        height="48"
+        fill="white"
+        viewBox="0 0 24 24"
+        style="display: none">
+        <path d="M16.5 12c0-1.77-.77-3.37-2-4.47v8.94c1.23-1.1 2-2.7 2-4.47z" />
+        <path
+          d="M19 12c0 2.21-.9 4.21-2.34 5.66l1.41 1.41C20.07 17.07 21 14.65 21 12c0-2.65-.93-5.07-2.44-6.97l-1.41 1.41C18.1 7.79 19 9.79 19 12z" />
+        <path
+          d="M5 9v6h4l5 5V4l-5 5H5zM1.39 4.22L3.27 6.1C2.47 7.26 2 8.58 2 10c0 2.65.93 5.07 2.44 6.97l1.41-1.41C4.9 16.21 4 14.21 4 12c0-1.42.47-2.74 1.27-3.9l1.11 1.11V9H5l-.61.22z" />
+      </svg>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <script>
+      let audio;
+
+      window.addEventListener("DOMContentLoaded", () => {
+        audio = new Audio("audio/Battle.wav");
+        audio.loop = true;
+        audio.volume = 0.5;
+        audio.play().catch((e) => {
+          console.warn("Autoplay prevented by browser.");
+        });
+
+        const toggle = document.getElementById("audio-toggle");
+        const mutedIcon = document.getElementById("icon-muted");
+        const unmutedIcon = document.getElementById("icon-unmuted");
+
+        toggle.addEventListener("click", () => {
+          audio.muted = !audio.muted;
+          mutedIcon.style.display = audio.muted ? "block" : "none";
+          unmutedIcon.style.display = audio.muted ? "none" : "block";
+        });
+      });
+    </script>
+
+    <script>
+      const cursor = document.getElementById("fluid-glass-cursor");
+
+      let mouseX = window.innerWidth / 2;
+      let mouseY = window.innerHeight / 2;
+      let currentX = mouseX;
+      let currentY = mouseY;
+      const speed = 0.15;
+
+      window.addEventListener("mousemove", (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      function animate() {
+        currentX += (mouseX - currentX) * speed;
+        currentY += (mouseY - currentY) * speed;
+
+        cursor.style.left = `${currentX}px`;
+        cursor.style.top = `${currentY}px`;
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      // Checks if element is clickable or matches .v or .h specifically
+      function isClickableOrSpecial(el) {
+        if (!el) return false;
+        const style = window.getComputedStyle(el);
+        return (
+          el.onclick ||
+          el.tagName === "BUTTON" ||
+          el.tagName === "A" ||
+          el.tagName === "SUMMARY" ||
+          el.getAttribute("role") === "button" ||
+          el.tabIndex >= 0 ||
+          style.cursor === "pointer" ||
+          el.classList.contains("v") ||
+          el.classList.contains("h")
+        );
+      }
+
+      document.addEventListener("mouseover", (e) => {
+        if (isClickableOrSpecial(e.target)) {
+          cursor.style.width = "50px";
+          cursor.style.height = "50px";
+          cursor.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+          cursor.style.backdropFilter = "none";
+          cursor.style.webkitBackdropFilter = "none";
+        }
+      });
+
+      document.addEventListener("mouseout", (e) => {
+        if (isClickableOrSpecial(e.target)) {
+          cursor.style.width = "30px";
+          cursor.style.height = "30px";
+          cursor.style.backgroundColor = "rgba(255, 255, 255, 0.507)";
+          cursor.style.backdropFilter = "blur(5px)";
+          cursor.style.webkitBackdropFilter = "blur(5px)";
+        }
+      });
+    </script>
+
     <script>
       const themes = {
         t1: "./Menu/bg.png",
@@ -658,10 +831,13 @@
             y = Math.min(Math.max(y, 0), rect.height);
             const rawPercent = (1 - y / rect.height) * 100;
 
-            // Snap to nearest 1%
-            const snappedPercent = Math.round(rawPercent);
+            // Clamp value between 5 and 99, then round
+            const clampedPercent = Math.min(
+              Math.max(Math.round(rawPercent), 1),
+              100
+            );
 
-            valueEl.textContent = snappedPercent;
+            valueEl.textContent = clampedPercent;
             tooltip.style.display = "flex";
             tooltip.style.opacity = "1";
             tooltip.style.pointerEvents = "none";
@@ -679,6 +855,7 @@
             tooltip.style.opacity = "0";
           });
         }
+
         setupTooltip(vBar, vrTooltip, vrValue);
         setupTooltip(hBar, healthTooltip, healthValue);
       });
