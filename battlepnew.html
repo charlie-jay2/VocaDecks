@@ -1,0 +1,685 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/x-icon" href="/Assets/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        margin: 0;
+        font-family: Panton, sans-serif;
+        color: white;
+        background-color: black;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-image: var(--theme-bg);
+        transition: background-image 0.8s ease;
+      }
+
+      .line {
+        width: 100%;
+        height: auto;
+        position: fixed;
+        top: 7%;
+      }
+
+      .logo {
+        width: 13%;
+        height: auto;
+        position: fixed;
+        top: 5%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      /* Common select base */
+      .select {
+        position: fixed;
+        top: 45%;
+        left: 13%;
+        transform: translate(-50%, -50%);
+        height: 60%;
+        width: 10%;
+        border-radius: 20px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: inset 2px 0 8px rgba(255, 0, 0, 0.15),
+          inset -2px 0 8px rgba(0, 255, 255, 0.15),
+          inset 0 2px 8px rgba(0, 255, 0, 0.15),
+          inset 0 -2px 8px rgba(0, 0, 255, 0.15),
+          inset 0 0 20px rgba(255, 255, 255, 0.05),
+          0 4px 12px rgba(0, 0, 0, 0.4);
+        backdrop-filter: brightness(1.15) contrast(1.2) blur(2px);
+        -webkit-backdrop-filter: brightness(1.15) contrast(1.2) blur(2px);
+        mix-blend-mode: hard-light;
+        animation: refractWobble 6s infinite ease-in-out;
+
+        /* Start hidden and transparent */
+        opacity: 0;
+        transition: opacity 0.8s ease;
+        pointer-events: none;
+      }
+
+      /* Visible class for fade-in */
+      .select.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* 1) Glass Transparent */
+      .select1 {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: inset 2px 0 8px rgba(255, 255, 255, 0.25),
+          inset -2px 0 8px rgba(255, 255, 255, 0.25),
+          inset 0 2px 8px rgba(255, 255, 255, 0.15),
+          inset 0 -2px 8px rgba(255, 255, 255, 0.15),
+          inset 0 0 20px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px) brightness(1.3) contrast(1.2);
+        -webkit-backdrop-filter: blur(10px) brightness(1.3) contrast(1.2);
+        mix-blend-mode: normal;
+      }
+
+      /* 2) Light Pink to Gray (subtle) */
+      .select2 {
+        background: linear-gradient(
+          to top,
+          rgba(255, 20, 147, 0.3),
+          rgba(128, 128, 128, 0.3)
+        );
+        border: 1px solid rgba(255, 192, 203, 0.3);
+        box-shadow: inset 2px 0 6px rgba(255, 182, 193, 0.25),
+          inset -2px 0 6px rgba(211, 211, 211, 0.25),
+          inset 0 2px 6px rgba(255, 192, 203, 0.2),
+          inset 0 -2px 6px rgba(211, 211, 211, 0.2),
+          inset 0 0 15px rgba(255, 182, 193, 0.15),
+          0 2px 8px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(8px) brightness(1.05) contrast(1.1);
+        -webkit-backdrop-filter: blur(8px) brightness(1.05) contrast(1.1);
+        mix-blend-mode: normal;
+      }
+
+      /* 3) Light Pink to Gray (more visible) */
+      .select3 {
+        background: linear-gradient(
+          to top,
+          rgba(255, 20, 147, 0.8),
+          rgba(128, 128, 128, 0.55)
+        );
+        border: 1px solid rgba(255, 192, 203, 0.6);
+        box-shadow: inset 2px 0 10px rgba(255, 105, 180, 0.5),
+          inset -2px 0 10px rgba(169, 169, 169, 0.5),
+          inset 0 2px 10px rgba(255, 20, 147, 0.45),
+          inset 0 -2px 10px rgba(169, 169, 169, 0.45),
+          inset 0 0 30px rgba(255, 105, 180, 0.35),
+          0 6px 18px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(6px) brightness(1.1) contrast(1.15);
+        -webkit-backdrop-filter: blur(6px) brightness(1.1) contrast(1.15);
+        mix-blend-mode: normal;
+      }
+
+      /* 4) Full Colour Pinkish to Black */
+      .select4 {
+        background: linear-gradient(
+          to top,
+          rgba(255, 20, 147, 0.8),
+          rgba(0, 0, 0, 0.85)
+        );
+        border: 1px solid rgba(255, 20, 147, 0.9);
+        box-shadow: inset 2px 0 15px rgba(255, 20, 147, 0.7),
+          inset -2px 0 15px rgba(75, 0, 130, 0.7),
+          inset 0 2px 15px rgba(255, 105, 180, 0.6),
+          inset 0 -2px 15px rgba(75, 0, 130, 0.6),
+          inset 0 0 40px rgba(255, 20, 147, 0.5), 0 8px 24px rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(3px) brightness(1.2) contrast(1.3);
+        -webkit-backdrop-filter: blur(3px) brightness(1.2) contrast(1.3);
+        mix-blend-mode: hard-light;
+      }
+
+      /* 4 solid variant when health = 0 */
+      .select4.solid {
+        background: linear-gradient(
+          to top,
+          rgba(255, 20, 147, 1),
+          rgba(0, 0, 0, 1)
+        );
+        border: 1px solid rgba(255, 20, 147, 1);
+        box-shadow: inset 2px 0 15px rgba(255, 20, 147, 1),
+          inset -2px 0 15px rgba(75, 0, 130, 1),
+          inset 0 2px 15px rgba(255, 105, 180, 1),
+          inset 0 -2px 15px rgba(75, 0, 130, 1),
+          inset 0 0 40px rgba(255, 20, 147, 0.9), 0 8px 24px rgba(0, 0, 0, 0.8);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        mix-blend-mode: normal;
+      }
+
+      /* Common dispersion pseudo elements */
+      .select::before,
+      .select::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        border-radius: 20px;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .select::before {
+        box-shadow: 0 0 6px rgba(255, 0, 80, 0.3),
+          2px 2px 10px rgba(255, 0, 80, 0.25);
+        filter: blur(2px);
+        mix-blend-mode: screen;
+      }
+
+      .select::after {
+        box-shadow: 0 0 6px rgba(0, 200, 255, 0.3),
+          -2px -2px 10px rgba(0, 200, 255, 0.25);
+        filter: blur(2px);
+        mix-blend-mode: screen;
+      }
+
+      @keyframes refractWobble {
+        0%,
+        100% {
+          transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.02) rotate(0.3deg);
+        }
+      }
+
+      /* Healthbar pt */
+
+      .d {
+        position: fixed;
+        top: 43.5%;
+        left: 10.5%;
+        transform: translate(-50%, -50%);
+        height: 50%;
+        width: 1.5%;
+        border-radius: 10px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+        background: linear-gradient(to bottom, #ff7701, #ff5656);
+      }
+
+      .v {
+        position: fixed;
+        top: 43.5%;
+        left: 13%;
+        transform: translate(-50%, -50%);
+        height: 50%;
+        width: 1.5%;
+        border-radius: 10px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: auto; /* allow hover */
+        background: linear-gradient(to bottom, #00e5ff, #00ffae);
+        cursor: pointer;
+      }
+
+      .h {
+        position: fixed;
+        top: 43.5%;
+        left: 15.5%;
+        transform: translate(-50%, -50%);
+        height: 50%;
+        width: 1.5%;
+        border-radius: 10px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: auto; /* allow hover */
+        background: linear-gradient(to bottom, #00ff1a, #d9ff00);
+        cursor: pointer;
+      }
+
+      .dt {
+        position: fixed;
+        top: 70%;
+        left: 10.5%;
+        transform: translate(-50%, -50%);
+        z-index: 11;
+        pointer-events: none;
+      }
+
+      .vt {
+        position: fixed;
+        top: 70%;
+        left: 15.5%;
+        transform: translate(-50%, -50%);
+        z-index: 11;
+        pointer-events: none;
+      }
+
+      .ht {
+        position: fixed;
+        top: 70%;
+        left: 13%;
+        transform: translate(-50%, -50%);
+        z-index: 11;
+        pointer-events: none;
+      }
+
+      .healthbarpo {
+        position: fixed;
+        top: 50%;
+        left: 2%; /* Move it to the left side; change this to right for right-side */
+        transform: translate(50%, -45%);
+        width: 2000px;
+        height: 1150px;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      /* Healthbar player two */
+
+      .healthbarpt {
+        position: fixed;
+        top: 50%;
+        left: 8.4%; /* Move it to the left side; change this to right for right-side */
+        transform: translate(10%, -45%);
+        width: 2000px;
+        height: 1150px;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .dpo {
+        position: fixed;
+        top: 43.5%;
+        left: 15.5%;
+        transform: translate(-50%, -50%);
+        height: 50%;
+        width: 1.5%;
+        border-radius: 10px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+        background: linear-gradient(to bottom, #ff7701, #ff5656);
+      }
+
+      .vpo {
+        position: fixed;
+        top: 43.5%;
+        left: 13%;
+        transform: translate(-50%, -50%);
+        height: 50%;
+        width: 1.5%;
+        border-radius: 10px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+        background: linear-gradient(to bottom, #00e5ff, #00ffae);
+      }
+
+      .hpo {
+        position: fixed;
+        top: 43.5%;
+        left: 10.5%;
+        transform: translate(-50%, -50%);
+        height: 50%;
+        width: 1.5%;
+        border-radius: 10px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+        background: linear-gradient(to bottom, #00ff1a, #d9ff00);
+      }
+
+      .dtpo {
+        position: fixed;
+        z-index: 99;
+        top: 70%;
+        left: 15.5%;
+        transform: translate(-50%, -50%);
+      }
+
+      .htpo {
+        position: fixed;
+        z-index: 99;
+        top: 70%;
+        left: 13%;
+        transform: translate(-50%, -50%);
+      }
+
+      .vtpo {
+        position: fixed;
+        z-index: 99;
+        top: 70%;
+        left: 10.45%;
+        transform: translate(-50%, -50%);
+      }
+
+      /* Common select base */
+      .selectpo {
+        position: fixed;
+        top: 45%;
+        left: 13%;
+        transform: translate(-50%, -50%);
+        height: 60%;
+        width: 10%;
+        border-radius: 20px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: inset 2px 0 8px rgba(255, 0, 0, 0.15),
+          inset -2px 0 8px rgba(0, 255, 255, 0.15),
+          inset 0 2px 8px rgba(0, 255, 0, 0.15),
+          inset 0 -2px 8px rgba(0, 0, 255, 0.15),
+          inset 0 0 20px rgba(255, 255, 255, 0.05),
+          0 4px 12px rgba(0, 0, 0, 0.4);
+        backdrop-filter: brightness(1.15) contrast(1.2) blur(2px);
+        -webkit-backdrop-filter: brightness(1.15) contrast(1.2) blur(2px);
+        mix-blend-mode: hard-light;
+        animation: refractWobble 6s infinite ease-in-out;
+
+        /* Start hidden and transparent */
+        opacity: 0;
+        transition: opacity 0.8s ease;
+        pointer-events: none;
+      }
+
+      /* Visible class for fade-in */
+      .selectpo.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #vrtt,
+      #healthtt {
+        position: absolute;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 99998;
+      }
+
+      .vrtt,
+      .healthtt {
+        width: 80px;
+        height: auto;
+        z-index: 99998;
+      }
+
+      .vrttt,
+      .healthttt {
+        position: absolute;
+        color: white;
+        font-size: 20px;
+        top: 50%;
+        z-index: 99999;
+        transform: translateY(-50%);
+        text-align: center;
+      }
+
+      .dbg {
+        position: fixed;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: 20%;
+      }
+
+      .del {
+        position: fixed;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: 20%;
+      }
+
+      .instructions {
+        position: fixed;
+        top: 97%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: 3%;
+      }
+      .inel {
+        position: fixed;
+        top: 95%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: 100%;
+      }
+
+      .instt {
+        color: black;
+        text-align: center;
+        font-size: 200%;
+        position: fixed;
+        top: 24%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </head>
+
+  <body>
+    <img src="./Assets/ICONS/Line_120.png" class="line" />
+    <img src="./Assets/SERIES_1_LOGO.png" class="logo" />
+
+    <div class="healthbarpo">
+      <div class="select select1"></div>
+      <div class="select select2"></div>
+      <div class="select select3"></div>
+      <div class="select select4"></div>
+      <div class="d"></div>
+      <div class="v"></div>
+      <div class="h"></div>
+      <h1 class="dt">D</h1>
+      <h1 class="vt">H</h1>
+      <h1 class="ht">V</h1>
+    </div>
+
+    <div class="healthbarpt">
+      <div class="select selectpo1"></div>
+      <div class="select selectpo2"></div>
+      <div class="select selectpo3"></div>
+      <div class="select selectpo4"></div>
+      <div class="dpo"></div>
+      <div class="vpo"></div>
+      <div class="hpo"></div>
+      <h1 class="dtpo">D</h1>
+      <h1 class="vtpo">H</h1>
+      <h1 class="htpo">V</h1>
+    </div>
+
+    <!-- Tooltip Images -->
+    <div id="healthtt">
+      <img src="./Tooltip/health.png" class="healthtt" />
+      <h1 class="healthttt">0</h1>
+    </div>
+
+    <div id="vrtt">
+      <img src="./Tooltip/vr.png" class="vrtt" />
+      <h1 class="vrttt">0</h1>
+    </div>
+
+    <div id="dialogue">
+      <img src="./Battle/Rectangle_213.png" class="dbg" />
+      <img src="./Battle/Ellipse_18.png" class="del" />
+    </div>
+
+    <div id="instructions">
+      <img src="./Battle/INSTRUCTIONS.png" class="instructions" />
+      <h1 class="instt">
+        ALRIGHT PLAYERS, CHOOSE<br />
+        YOUR CARDS!
+      </h1>
+      <img src="./Battle/Ellipse_19.png" class="inel" />
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <script>
+      const themes = {
+        t1: "./Menu/bg.png",
+        t2: "./Profile/MIDNIGHT_BLUE.png",
+        t3: "./Profile/TUNDRA_MANGO.png",
+        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+        t5: "./Profile/CHERRIES__CREAM.png",
+        t6: "./Profile/SIREN_PURPLE.png",
+      };
+
+      function applyStoredTheme() {
+        const key = localStorage.getItem("selectedTheme") || "t1";
+        const bgUrl = themes[key] || themes["t1"];
+        document.body.style.setProperty("--theme-bg", `url(${bgUrl})`);
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        applyStoredTheme();
+
+        // Healthpo logic
+        const selectsPo = {
+          1: document.querySelector(".selectpo1"),
+          2: document.querySelector(".selectpo2"),
+          3: document.querySelector(".selectpo3"),
+          4: document.querySelector(".selectpo4"),
+        };
+
+        function updateSelectVisibilityPo() {
+          const healthStr = localStorage.getItem("healthpo");
+          const health = healthStr !== null ? Number(healthStr) : null;
+
+          Object.values(selectsPo).forEach((el) => {
+            el.classList.remove("visible");
+            if (el.classList.contains("selectpo4")) {
+              el.classList.remove("solid");
+            }
+          });
+
+          if (health === null) return;
+
+          if (health >= 80) {
+            selectsPo[1].classList.add("visible");
+          } else if (health >= 50) {
+            selectsPo[2].classList.add("visible");
+          } else if (health >= 20) {
+            selectsPo[3].classList.add("visible");
+          } else if (health === 0) {
+            selectsPo[4].classList.add("visible", "solid");
+          } else {
+            selectsPo[4].classList.add("visible");
+          }
+        }
+
+        updateSelectVisibilityPo();
+        setInterval(updateSelectVisibilityPo, 500);
+
+        // Healthpt logic
+        const selectsPt = {
+          1: document.querySelector(".select1"),
+          2: document.querySelector(".select2"),
+          3: document.querySelector(".select3"),
+          4: document.querySelector(".select4"),
+        };
+
+        function updateSelectVisibilityPt() {
+          const healthStr = localStorage.getItem("healthpt");
+          const health = healthStr !== null ? Number(healthStr) : null;
+
+          Object.values(selectsPt).forEach((el) => {
+            el.classList.remove("visible");
+            if (el.classList.contains("select4")) {
+              el.classList.remove("solid");
+            }
+          });
+
+          if (health === null) return;
+
+          if (health >= 80) {
+            selectsPt[1].classList.add("visible");
+          } else if (health >= 50) {
+            selectsPt[2].classList.add("visible");
+          } else if (health >= 20) {
+            selectsPt[3].classList.add("visible");
+          } else if (health === 0) {
+            selectsPt[4].classList.add("visible", "solid");
+          } else {
+            selectsPt[4].classList.add("visible");
+          }
+        }
+
+        updateSelectVisibilityPt();
+        setInterval(updateSelectVisibilityPt, 500);
+
+        // Tooltip logic
+        const vBar = document.querySelector(".v");
+        const hBar = document.querySelector(".h");
+        const vrTooltip = document.getElementById("vrtt");
+        const vrValue = document.querySelector(".vrttt");
+        const healthTooltip = document.getElementById("healthtt");
+        const healthValue = document.querySelector(".healthttt");
+
+        function setupTooltip(bar, tooltip, valueEl) {
+          bar.addEventListener("mousemove", (e) => {
+            const rect = bar.getBoundingClientRect();
+            let y = e.clientY - rect.top;
+            y = Math.min(Math.max(y, 0), rect.height);
+            const rawPercent = (1 - y / rect.height) * 100;
+
+            // Snap to nearest 1%
+            const snappedPercent = Math.round(rawPercent);
+
+            valueEl.textContent = snappedPercent;
+            tooltip.style.display = "flex";
+            tooltip.style.opacity = "1";
+            tooltip.style.pointerEvents = "none";
+
+            const offsetX = -30;
+            const offsetY = 10;
+            tooltip.style.top = `${e.clientY + offsetY}px`;
+            tooltip.style.left = `${
+              e.clientX - offsetX - tooltip.offsetWidth
+            }px`;
+          });
+
+          bar.addEventListener("mouseleave", () => {
+            tooltip.style.display = "none";
+            tooltip.style.opacity = "0";
+          });
+        }
+        setupTooltip(vBar, vrTooltip, vrValue);
+        setupTooltip(hBar, healthTooltip, healthValue);
+      });
+    </script>
+  </body>
+</html>

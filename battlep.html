@@ -26,14 +26,30 @@
     }
 
     body {
-      background-image: url(./Assets/background.png);
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center;
-      font-family: Panton;
+      margin: 0;
+      font-family: Panton, sans-serif;
+      overflow: hidden;
+      color: white;
+      background-color: black; /* solid black background */
+      position: relative; /* needed for ::before positioning */
+      transition: background-image 0.8s ease;
+    }
+
+    body::before {
+      content: "";
       position: fixed;
-      width: 100%;
-      height: 100%;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      opacity: 0.2; /* 60% opacity */
+      z-index: -1; /* behind body content */
+      pointer-events: none;
+      transition: background-image 0.8s ease, opacity 0.8s ease;
+      background-image: var(--theme-bg);
     }
 
     .logo {
@@ -356,412 +372,21 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
+    const themes = {
+      t1: "./Menu/bg.png",
+      t2: "./Profile/MIDNIGHT_BLUE.png",
+      t3: "./Profile/TUNDRA_MANGO.png",
+      t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+      t5: "./Profile/CHERRIES__CREAM.png",
+      t6: "./Profile/SIREN_PURPLE.png",
+    };
+
+    function applyStoredTheme() {
+      const key = localStorage.getItem("selectedTheme") || "t1";
+      const bgUrl = themes[key] || themes["t1"];
+      document.body.style.setProperty("--theme-bg", `url(${bgUrl})`);
     }
 
-    function saveToken(token) {
-      if (typeof token === "string" && token.startsWith("Bearer ")) {
-        token = token.slice(7);
-      }
-      localStorage.setItem("token", token);
-      localStorage.setItem("tokenSavedAt", Date.now());
-
-      if (window.history.replaceState) {
-        const newUrl =
-          window.location.protocol +
-          "//" +
-          window.location.host +
-          window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-      }
-    }
-
-    function getToken() {
-      return localStorage.getItem("token");
-    }
-
-    function decodeToken(token) {
-      try {
-        return jwt_decode(token);
-      } catch {
-        return null;
-      }
-    }
-
-    function redirectToIndex() {
-      window.location.href = "index.html";
-    }
-
-    async function fetchUserCards(token) {
-      try {
-        const response = await fetch(
-          `/.netlify/functions/getUserCards?token=${encodeURIComponent(token)}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch user cards");
-        const data = await response.json();
-        console.log("Fetched cards:", data.cards);
-        return data.cards || [];
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    }
-
-    function updateStatsDisplay(stats) {
-      if (!stats) return;
-
-      const healthpo = document.querySelector(".healthpo");
-      const healthpt = document.querySelector(".healthpt");
-      const damagelpo = document.querySelector(".damagelpo");
-      const damagelpt = document.querySelector(".damagelpt");
-
-      console.log("Updating stats display:", stats);
-
-      if (healthpo) {
-        healthpo.textContent =
-          stats.playerOneHealth != null ? stats.playerOneHealth : "0";
-      } else {
-        console.warn("Element .healthpo not found");
-      }
-
-      if (healthpt) {
-        healthpt.textContent =
-          stats.playerTwoHealth != null ? stats.playerTwoHealth : "0";
-      } else {
-        console.warn("Element .healthpt not found");
-      }
-
-      if (damagelpo) {
-        damagelpo.textContent =
-          stats.playerOneDamage != null ? stats.playerOneDamage : "0";
-      } else {
-        console.warn("Element .damagelpo not found");
-      }
-
-      if (damagelpt) {
-        damagelpt.textContent =
-          stats.playerTwoDamage != null ? stats.playerTwoDamage : "0";
-      } else {
-        console.warn("Element .damagelpt not found");
-      }
-    }
-
-    function showDiscordUserInfo(user) {
-      const container = document.getElementById("discordUserInfo");
-      if (!container) return;
-
-      container.style.display = "block";
-      container.innerHTML = `
-      <div class="user-row">
-        <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="avatar" />
-        <span class="username" title="${user.username}">${user.username}</span>
-      </div>
-    `;
-    }
-
-    function displayCardImage(cardName, containerId = "selectedCardContainer") {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      if (!cardName) {
-        container.innerHTML = "";
-        if (containerId === "selectedCardContainer") updateStatsDisplay(null);
-        return;
-      }
-
-      const encodedFileName = encodeURIComponent(cardName);
-      const imgSrc = `./Cards/${encodedFileName}`;
-      console.log(`📸 Displaying in #${containerId}:`, imgSrc);
-
-      container.innerHTML = `<img src="${imgSrc}" alt="Selected Card" style="
-      width: 90%;
-      height: auto;
-      position: absolute;
-      ${
-        containerId === "playerTwoCardContainer"
-          ? "left: 43%; bottom: 15;"
-          : "left: 26.5%; bottom: 15;"
-      }
-      z-index: 1;
-    " />`;
-    }
-
-    function formatCardNameWithRarity(name) {
-      let cleanName = name;
-
-      if (!cleanName.toLowerCase().endsWith(".png")) {
-        cleanName += ".png";
-      }
-
-      const rarityMatch = cleanName.match(/^r([1-5])/i);
-      if (!rarityMatch) return cleanName.replace(/\.png$/i, "");
-
-      const rarityMap = {
-        1: "COMMON",
-        2: "EXTRA",
-        3: "RARE",
-        4: "LEGENDARY",
-        5: "UNTOUCHED",
-      };
-
-      const baseName = cleanName.replace(/^r[1-5]/i, "").replace(/\.png$/i, "");
-      return `${baseName.trim()} (${rarityMap[rarityMatch[1]] || "UNKNOWN"})`;
-    }
-
-    function getCardRarity(name) {
-      const rarityMatch = name.match(/^r([1-5])/i);
-      if (!rarityMatch) return null;
-      const rarityMap = {
-        1: "COMMON",
-        2: "EXTRA",
-        3: "RARE",
-        4: "LEGENDARY",
-        5: "UNTOUCHED",
-      };
-      return rarityMap[rarityMatch[1]] || null;
-    }
-
-    async function init() {
-      let token = getToken();
-
-      if (!token) {
-        const urlToken = getQueryParam("token");
-        if (urlToken) {
-          saveToken(urlToken);
-          token = urlToken;
-        } else {
-          console.log("No token found, redirect or handle accordingly");
-          return;
-        }
-      }
-
-      const decoded = decodeToken(token);
-      if (!decoded || !decoded.username || !decoded.id || !decoded.avatar) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("tokenSavedAt");
-        console.log("Invalid token, redirect or handle accordingly");
-        return;
-      }
-
-      showDiscordUserInfo(decoded);
-
-      const playerOneHeading = document.querySelector(".text1");
-      if (playerOneHeading) {
-        playerOneHeading.textContent = decoded.username.toUpperCase();
-      }
-
-      const matchedOpponent =
-        localStorage.getItem("matchedOpponent") || "PLAYER TWO";
-      const playerTwoHeading = document.getElementById("playerTwoUsername");
-      if (playerTwoHeading) {
-        playerTwoHeading.textContent = matchedOpponent.toUpperCase();
-      }
-
-      const selectedRarity =
-        localStorage.getItem("selectedRarity")?.toLowerCase() || null;
-      console.log("🎯 Selected rarity filter:", selectedRarity);
-
-      // Restore currentRole from storage for reconnects/reloads
-      currentRole = localStorage.getItem("yourRole");
-      console.log("Restored currentRole from storage:", currentRole);
-
-      const cards = await fetchUserCards(token);
-      const dropdown = document.getElementById("playerOneCards");
-
-      if (dropdown) {
-        dropdown.innerHTML = `<option value="">-- Your Cards --</option>`;
-
-        cards.forEach((card) => {
-          let val = (card.name || card.id || card).trim();
-          if (!val.toLowerCase().endsWith(".png")) {
-            val += ".png";
-          }
-
-          const lowerVal = val.toLowerCase();
-          const cardRarity = getCardRarity(val);
-
-          const isMikudayo =
-            lowerVal === "mikudayo.png" || lowerVal === "cherry mikudayo.png";
-
-          if (
-            isMikudayo || // Always show Mikudayo
-            !selectedRarity || // No rarity filter, show all
-            (cardRarity && cardRarity.toLowerCase() === selectedRarity)
-          ) {
-            const option = document.createElement("option");
-            option.value = val;
-            option.textContent = isMikudayo
-              ? val.replace(/\.png$/i, "")
-              : formatCardNameWithRarity(val);
-            dropdown.appendChild(option);
-          }
-        });
-
-        dropdown.addEventListener("change", (e) => {
-          displayCardImage(e.target.value, "selectedCardContainer");
-          sendCardSelection(e.target.value);
-
-          // NEW: request own card stats on selection
-          if (
-            socket &&
-            socket.readyState === WebSocket.OPEN &&
-            e.target.value
-          ) {
-            const payload = { type: "getCardStats", cardName: e.target.value };
-            socket.send(JSON.stringify(payload));
-          }
-        });
-      }
-
-      setupWebSocket(token, decoded.username);
-    }
-
-    let socket;
-    let currentUsername;
-    let currentRole = null;
-
-    function setupWebSocket(token, username) {
-      currentUsername = username;
-
-      const wsUrl = "wss://vdbe-0f2p.onrender.com";
-      socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(token)}`);
-
-      socket.addEventListener("open", () => {
-        console.log("🔗 WebSocket connected");
-      });
-
-      socket.addEventListener("message", (event) => {
-        let msg;
-        try {
-          msg = JSON.parse(event.data);
-        } catch {
-          console.warn("⚠️ Non-JSON WS message:", event.data);
-          return;
-        }
-
-        if (msg.type === "welcome") {
-          console.log(msg.message);
-        } else if (msg.type === "status") {
-          console.log("Status:", msg.message);
-        } else if (msg.type === "opponentSelection") {
-          console.log(
-            `🎴 Opponent (${msg.username}) selected: ${msg.cardName}`
-          );
-
-          if (msg.username !== currentUsername) {
-            // Show opponent's card image
-            displayCardImage(msg.cardName, "playerTwoCardContainer");
-
-            // Request opponent's card stats
-            requestCardStats(msg.cardName);
-          }
-        } else if (msg.type === "matched") {
-          console.log(`✅ Connected to ${msg.opponent}`);
-          console.log(`🧑‍💻 You are: ${msg.yourName} (${msg.role})`);
-
-          localStorage.setItem("matchedOpponent", msg.opponent);
-          localStorage.setItem("yourName", msg.yourName);
-          localStorage.setItem("yourRole", msg.role);
-
-          currentRole = msg.role;
-          console.log("Set currentRole to:", currentRole);
-
-          const p2Name = document.getElementById("playerTwoUsername");
-          if (p2Name) p2Name.textContent = msg.opponent.toUpperCase();
-        } else if (msg.type === "cardStats") {
-          console.log("📊 Received cardStats message:", msg);
-
-          if (msg.cardName) {
-            const selectedCard =
-              document.getElementById("playerOneCards").value;
-            const playerTwoCardContainer = document.getElementById(
-              "playerTwoCardContainer"
-            );
-            const playerTwoCardHTML = playerTwoCardContainer
-              ? playerTwoCardContainer.innerHTML.toLowerCase()
-              : "";
-
-            console.log("Checking cardStats for display:", {
-              selectedCard,
-              playerTwoCardHTML,
-              msgCardName: msg.cardName,
-              currentRole,
-            });
-
-            if (!currentRole) {
-              console.warn(
-                "⚠️ currentRole is not set properly, cannot update stats"
-              );
-              return;
-            }
-
-            // Update Player One stats if this is their selected card and they are Player One
-            if (selectedCard === msg.cardName && currentRole === "Player One") {
-              updateStatsDisplay({
-                playerOneHealth: msg.SP, // SP → Health Player One
-                playerOneDamage: msg.VR, // VR → Damage Player One
-                playerTwoHealth:
-                  parseInt(document.querySelector(".healthpt")?.textContent) ||
-                  0,
-                playerTwoDamage:
-                  parseInt(document.querySelector(".damagelpt")?.textContent) ||
-                  0,
-              });
-            }
-
-            // Update Player Two stats if this card is shown in the playerTwoCardContainer and user is Player Two
-            if (
-              playerTwoCardHTML.includes(msg.cardName.toLowerCase()) &&
-              currentRole === "Player Two"
-            ) {
-              updateStatsDisplay({
-                playerOneHealth:
-                  parseInt(document.querySelector(".healthpo")?.textContent) ||
-                  0,
-                playerOneDamage:
-                  parseInt(document.querySelector(".damagelpo")?.textContent) ||
-                  0,
-                playerTwoHealth: msg.SP, // SP → Health Player Two
-                playerTwoDamage: msg.VR, // VR → Damage Player Two
-              });
-            }
-          }
-        }
-      });
-
-      socket.addEventListener("close", () => {
-        console.log("❌ WebSocket disconnected");
-      });
-
-      socket.addEventListener("error", (error) => {
-        console.error("🚨 WebSocket error:", error);
-      });
-    }
-
-    function sendCardSelection(cardName) {
-      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
-        const payload = {
-          type: "selection",
-          cardName: cardName,
-        };
-        console.log("📤 Sending card selection:", payload);
-        socket.send(JSON.stringify(payload));
-      }
-    }
-
-    function requestCardStats(cardName) {
-      if (socket && socket.readyState === WebSocket.OPEN && cardName) {
-        const payload = {
-          type: "getCardStats",
-          cardName: cardName,
-        };
-        console.log("📤 Requesting card stats:", payload);
-        socket.send(JSON.stringify(payload));
-      }
-    }
-
-    init();
+    window.addEventListener("DOMContentLoaded", applyStoredTheme);
   </script>
 </html>
