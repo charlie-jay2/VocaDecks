@@ -640,6 +640,28 @@
       audio.loop = true;
       audio.volume = 0.7;
 
+      const iconMuted = document.getElementById("icon-muted");
+      const iconUnmuted = document.getElementById("icon-unmuted");
+      const toggleBtn = document.getElementById("audio-toggle");
+
+      let isMuted = false;
+
+      function updateIcons() {
+        if (isMuted) {
+          iconMuted.style.display = "block";
+          iconUnmuted.style.display = "none";
+        } else {
+          iconMuted.style.display = "none";
+          iconUnmuted.style.display = "block";
+        }
+      }
+
+      toggleBtn.addEventListener("click", () => {
+        isMuted = !isMuted;
+        audio.muted = isMuted;
+        updateIcons();
+      });
+
       // Try autoplay after 1 second
       window.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
@@ -653,6 +675,8 @@
           });
         }, 1000);
       });
+
+      updateIcons(); // initial icon state
     </script>
 
     <script>
