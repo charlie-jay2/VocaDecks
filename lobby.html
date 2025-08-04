@@ -1,0 +1,217 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/x-icon" href="/Assets/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        margin: 0;
+        font-family: Panton, sans-serif;
+        color: white;
+        background-color: black;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-image: var(--theme-bg);
+        transition: background-image 0.8s ease;
+      }
+
+      .pfp {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: 200px;
+        background-color: white;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        overflow: hidden;
+      }
+
+      .cha {
+        position: fixed;
+        top: 30%;
+        left: 21%;
+        width: 25%;
+        height: auto;
+      }
+      .se {
+        position: fixed;
+        top: 53%;
+        left: 53%;
+        width: 25%;
+        height: auto;
+      }
+
+      .so {
+        position: fixed;
+        top: 20%;
+        left: 53%;
+        width: 25%;
+        height: auto;
+      }
+
+      .sh {
+        position: fixed;
+        top: 53%;
+        left: 21%;
+        width: 25%;
+        height: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="pfp"></div>
+    <img src="./lobby/CHAOS.png" class="cha" />
+    <img src="./lobby/SETTINGS.png" class="se" />
+    <img src="./lobby/SHOP.png" class="sh" />
+    <img
+      src="./lobby/SOLOS.png"
+      class="so"
+      onclick="window.location.href='./matchmaking.html';" />
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <script>
+      const themes = {
+        t1: "./Menu/bg.png",
+        t2: "./Profile/MIDNIGHT_BLUE.png",
+        t3: "./Profile/TUNDRA_MANGO.png",
+        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+        t5: "./Profile/CHERRIES__CREAM.png",
+        t6: "./Profile/SIREN_PURPLE.png",
+      };
+
+      function applyStoredTheme() {
+        const key = localStorage.getItem("selectedTheme") || "t1";
+        const bgUrl = themes[key] || themes["t1"];
+        document.body.style.setProperty("--theme-bg", `url(${bgUrl})`);
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        applyStoredTheme();
+      });
+
+      function isTokenValid(token) {
+        try {
+          const decoded = jwt_decode(token);
+          return decoded.exp * 1000 > Date.now();
+        } catch {
+          return false;
+        }
+      }
+
+      function renderLoggedOut() {
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+      }
+
+      document.querySelector(".logout").addEventListener("click", () => {
+        renderLoggedOut();
+      });
+
+      (function () {
+        const token = localStorage.getItem("token");
+        if (!token || !isTokenValid(token)) {
+          renderLoggedOut();
+        }
+      })();
+
+      function setTheme(key) {
+        const now = Date.now();
+        if (now - lastChange < 1000) return;
+        lastChange = now;
+
+        document.body.style.background = `url(${themes[key].bg}) center/cover fixed no-repeat`;
+
+        const [start, end] = themes[key].gradient;
+        document.querySelector(
+          ".pb-fill"
+        ).style.background = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+
+        document
+          .querySelectorAll(".t1, .t2, .t3, .t4, .t5, .t6")
+          .forEach((el) => el.classList.remove("active-theme"));
+        document.querySelector("." + key).classList.add("active-theme");
+
+        localStorage.setItem("selectedTheme", key);
+      }
+
+      function getXpForLevel(level) {
+        return level * 50;
+      }
+
+      async function loadUserData() {
+        try {
+          const response = await fetch("/.netlify/functions/getUserData", {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          });
+          if (!response.ok) throw new Error("Failed to fetch user data");
+          const data = await response.json();
+
+          document.querySelector(".name").textContent = data.username;
+          document.querySelector(".level").textContent = `LEVEL: ${data.level
+            .toString()
+            .padStart(3, "0")}`;
+          document.querySelector(".synthc").textContent =
+            data.points.toLocaleString();
+          document.querySelector(".battlewn").textContent =
+            data.battlesWon.toLocaleString();
+          document.querySelector(".battleln").textContent =
+            data.battlesLost.toLocaleString();
+
+          const neededXp = getXpForLevel(data.level);
+          const progress = Math.min(data.xp / neededXp, 0.99);
+          document.querySelector(".pb-fill").style.width = `${progress * 100}%`;
+
+          // level badge
+          const badge = document.querySelector(".levelb");
+          let src = "./Profile/C.png";
+          if (data.level >= 1 && data.level <= 10) src = "./Profile/C.png";
+          else if (data.level <= 40) src = "./Profile/E.png";
+          else if (data.level <= 90) src = "./Profile/R.png";
+          else if (data.level <= 110) src = "./Profile/L.png";
+          else if (data.level < 200) src = "./Profile/U.png";
+          else if (data.level === 200) src = "./Profile/I.png";
+          badge.src = src;
+
+          const pfpDiv = document.querySelector(".pfp");
+          pfpDiv.innerHTML = `<img src="${data.avatar}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;" />`;
+        } catch (err) {
+          console.error("Error loading user data:", err);
+        }
+      }
+
+      window.addEventListener("load", () => {
+        const saved = localStorage.getItem("selectedTheme") || "t1";
+        setTheme(saved);
+        loadUserData();
+        setInterval(loadUserData, 5000);
+      });
+    </script>
+  </body>
+</html>
