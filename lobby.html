@@ -47,54 +47,45 @@
         border-radius: 50%;
         transform: translate(-50%, -50%);
         overflow: hidden;
+        cursor: pointer;
       }
 
-      .cha {
+      /* Common styles for floating circles */
+      .chaos,
+      .settings,
+      .shop,
+      .solos {
         position: fixed;
-        top: 30%;
-        left: 21%;
-        width: 25%;
-        height: auto;
-      }
-      .se {
-        position: fixed;
-        top: 53%;
-        left: 53%;
-        width: 25%;
-        height: auto;
+        width: 150px; /* adjust size as needed */
+        height: 150px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        user-select: none;
       }
 
-      .so {
-        position: fixed;
-        top: 20%;
-        left: 53%;
-        width: 25%;
-        height: auto;
-      }
-
-      .sh {
-        position: fixed;
-        top: 53%;
-        left: 21%;
-        width: 25%;
-        height: auto;
+      /* Enlarge on hover */
+      .chaos:hover,
+      .settings:hover,
+      .shop:hover,
+      .solos:hover {
+        transform: scale(1.15);
+        z-index: 1000;
       }
     </style>
   </head>
 
   <body>
-    <div class="pfp"></div>
-    <img src="./lobby/CHAOS.png" class="cha" />
-    <img src="./lobby/SETTINGS.png" class="se" />
-    <img src="./lobby/SHOP.png" class="sh" />
-    <img
-      src="./lobby/SOLOS.png"
-      class="so"
-      onclick="window.location.href='./matchmaking.html';" />
+    <div class="pfp" onclick="window.location.href='./profile.html';"></div>
+    <!-- CIRCLES -->
+    <img src="./lobby/CHAOS.png" class="chaos" alt="Chaos" />
+    <img src="./lobby/SETTINGS.png" class="settings" alt="Settings" />
+    <img src="./lobby/SHOP.png" class="shop" alt="Shop" />
+    <img src="./lobby/SOLOS.png" class="solos" alt="Solos" />
 
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
     <script>
+      // Your existing theme and user logic here (unchanged)
       const themes = {
         t1: "./Menu/bg.png",
         t2: "./Profile/MIDNIGHT_BLUE.png",
@@ -128,7 +119,7 @@
         window.location.href = "index.html";
       }
 
-      document.querySelector(".logout").addEventListener("click", () => {
+      document.querySelector(".logout")?.addEventListener("click", () => {
         renderLoggedOut();
       });
 
@@ -146,15 +137,17 @@
 
         document.body.style.background = `url(${themes[key].bg}) center/cover fixed no-repeat`;
 
-        const [start, end] = themes[key].gradient;
-        document.querySelector(
-          ".pb-fill"
-        ).style.background = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+        const [start, end] = themes[key].gradient || [];
+        if (start && end) {
+          document.querySelector(
+            ".pb-fill"
+          ).style.background = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+        }
 
         document
           .querySelectorAll(".t1, .t2, .t3, .t4, .t5, .t6")
           .forEach((el) => el.classList.remove("active-theme"));
-        document.querySelector("." + key).classList.add("active-theme");
+        document.querySelector("." + key)?.classList.add("active-theme");
 
         localStorage.setItem("selectedTheme", key);
       }
@@ -211,6 +204,123 @@
         setTheme(saved);
         loadUserData();
         setInterval(loadUserData, 5000);
+      });
+
+      // --- Floating Circles Logic ---
+
+      const circleSize = 150; // px
+      const moveSpeed = 3; // px per frame approx
+
+      class FloatingCircle {
+        constructor(el, startX, startY) {
+          this.el = el;
+          this.width = circleSize;
+          this.height = circleSize;
+
+          this.windowWidth = window.innerWidth;
+          this.windowHeight = window.innerHeight;
+
+          // Start near the given start position (around pfp)
+          this.x = startX;
+          this.y = startY;
+
+          // Random small velocity
+          this.vx = (Math.random() - 0.5) * moveSpeed;
+          this.vy = (Math.random() - 0.5) * moveSpeed;
+
+          this.updatePosition();
+        }
+
+        updatePosition() {
+          this.el.style.left = this.x + "px";
+          this.el.style.top = this.y + "px";
+        }
+
+        step() {
+          this.x += this.vx;
+          this.y += this.vy;
+
+          // Bounce inside window bounds
+          if (this.x <= 0) {
+            this.x = 0;
+            this.vx = -this.vx;
+          }
+          if (this.x >= this.windowWidth - this.width) {
+            this.x = this.windowWidth - this.width;
+            this.vx = -this.vx;
+          }
+
+          if (this.y <= 0) {
+            this.y = 0;
+            this.vy = -this.vy;
+          }
+          if (this.y >= this.windowHeight - this.height) {
+            this.y = this.windowHeight - this.height;
+            this.vy = -this.vy;
+          }
+
+          this.updatePosition();
+        }
+
+        updateWindowSize(width, height) {
+          this.windowWidth = width;
+          this.windowHeight = height;
+        }
+      }
+
+      const floatingCircles = [];
+
+      function initFloatingCircles() {
+        const selectors = [".chaos", ".settings", ".shop", ".solos"];
+        const pfp = document.querySelector(".pfp");
+        if (!pfp) return;
+
+        // Get .pfp bounding rect and calculate center position in px
+        const pfpRect = pfp.getBoundingClientRect();
+        const pfpCenterX = pfpRect.left + pfpRect.width / 2 - circleSize / 2;
+        const pfpCenterY = pfpRect.top + pfpRect.height / 2 - circleSize / 2;
+
+        const radius = 10; // 10px radius around pfp center to start
+
+        selectors.forEach((selector, i) => {
+          const el = document.querySelector(selector);
+          if (el) {
+            // Distribute angles evenly around circle with some randomness
+            const baseAngle = (i * (2 * Math.PI)) / selectors.length;
+            // Add a bit of random offset to angle +- 20 degrees (in radians)
+            const angleOffset = (Math.random() - 0.5) * (Math.PI / 9); // ~20deg in radians
+            const angle = baseAngle + angleOffset;
+
+            const startX = pfpCenterX + radius * Math.cos(angle);
+            const startY = pfpCenterY + radius * Math.sin(angle);
+
+            floatingCircles.push(new FloatingCircle(el, startX, startY));
+          }
+        });
+      }
+
+      function animate() {
+        floatingCircles.forEach((circle) => circle.step());
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener("resize", () => {
+        floatingCircles.forEach((circle) =>
+          circle.updateWindowSize(window.innerWidth, window.innerHeight)
+        );
+      });
+
+      window.addEventListener("DOMContentLoaded", () => {
+        initFloatingCircles();
+        animate();
+
+        const solos = document.querySelector(".solos");
+        if (solos) {
+          solos.style.cursor = "pointer";
+          solos.addEventListener("click", () => {
+            window.location.href = "matchmaking.html";
+          });
+        }
       });
     </script>
   </body>
