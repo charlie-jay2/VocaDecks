@@ -488,6 +488,183 @@
         left: 50%;
         transform: translate(-50%, -50%);
       }
+
+      .playeronecontainer {
+        position: fixed;
+        top: 50%;
+        left: 14%;
+        transform: translate(-50%, -50%);
+        height: 63%;
+        width: 25%;
+        border-radius: 20px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.363);
+        box-shadow: inset 2px 0 8px rgba(255, 0, 0, 0.15),
+          inset -2px 0 8px rgba(0, 255, 255, 0.15),
+          inset 0 2px 8px rgba(0, 255, 0, 0.15),
+          inset 0 -2px 8px rgba(0, 0, 255, 0.15),
+          inset 0 0 20px rgba(255, 255, 255, 0.05),
+          0 4px 12px rgba(0, 0, 0, 0.4);
+        backdrop-filter: brightness(1.15) contrast(1.2) blur(15px);
+        -webkit-backdrop-filter: brightness(1.15) contrast(1.2) blur(15px);
+      }
+
+      .cardselect {
+        width: 50%;
+        height: auto;
+        z-index: 99999;
+        position: fixed;
+        left: 24%;
+        top: 13%;
+      }
+
+      .chevron {
+        position: absolute;
+        top: 36%;
+        transform: translateY(-50%);
+        font-size: 180px;
+        color: white;
+        z-index: 5;
+        pointer-events: auto;
+        cursor: pointer;
+        user-select: none;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+        transition: transform 0.2s ease;
+      }
+
+      .chevron-left {
+        left: 5px;
+      }
+
+      .chevron-right {
+        right: 10px;
+      }
+
+      .chevron:hover {
+        transform: translateY(-50%) scale(1.2);
+      }
+
+      .spcs {
+        font-size: 25px;
+        position: fixed;
+        top: 61%;
+        left: 5%;
+      }
+
+      .vrcs {
+        font-size: 25px;
+        position: fixed;
+        top: 72%;
+        left: 5%;
+      }
+      .vrcss {
+        font-size: 25px;
+        position: fixed;
+        top: 72%;
+        left: 90%;
+      }
+      .spcss {
+        font-size: 25px;
+        position: fixed;
+        top: 61%;
+        left: 90%;
+      }
+
+      .selectcc-wrapper {
+        display: inline-block;
+        position: fixed;
+        left: 30%;
+        top: 87%;
+        padding: 4px; /* border thickness */
+        border-radius: 20px;
+        background: linear-gradient(to right, #55dccd, #ffef3c);
+        z-index: 99998;
+      }
+
+      .selectcc {
+        width: 100%;
+        height: auto;
+        color: black;
+        font-size: 30px;
+        background: white; /* or any background */
+        border-radius: 15px;
+        padding: 5px 30px;
+        text-align: center;
+        z-index: 99999;
+        position: relative;
+        background-clip: padding-box;
+        transition: 0.3s ease-in-out;
+      }
+
+      .stat-title {
+        margin: 8px 0 4px;
+        font-weight: bold;
+      }
+
+      .cardname {
+        font-size: 25px;
+        position: absolute;
+        top: 2%;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+
+      .stat-bar {
+        width: 90%;
+        height: 30px;
+        background: linear-gradient(90deg, #4dc2f0, #1a9ed9);
+        border-radius: 6px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 0;
+      }
+
+      /* OUTER GLOW LAYER */
+      .stat-bar::before {
+        content: "";
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border-radius: px;
+        background: linear-gradient(90deg, #e41aff, #1a9ed9);
+        opacity: 0.6;
+        filter: blur(10px);
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .bar-fill {
+        height: 100%;
+        width: 70%; /* test width */
+        transition: width 0.3s ease;
+        border-radius: 6px 0 0 6px;
+        position: relative;
+        background: linear-gradient(
+          to right,
+          rgba(228, 26, 255, 1) 0%,
+          rgba(228, 26, 255, 1) 35%,
+          rgba(228, 26, 255, 0) 100%
+        );
+      }
+
+      .sp-container {
+        position: fixed;
+        top: 66%;
+        left: 5%;
+        width: 100%;
+      }
+
+      .vr-container {
+        position: fixed;
+        top: 77%;
+        left: 5%;
+        width: 100%;
+      }
     </style>
   </head>
 
@@ -519,6 +696,39 @@
       <h1 class="dtpo">D</h1>
       <h1 class="vtpo">H</h1>
       <h1 class="htpo">V</h1>
+    </div>
+
+    <!-- Player One Stuff -->
+    <div class="playeronecontainer">
+      <div class="chevron chevron-left" onclick="prevCard()">&#10094;</div>
+      <img src="./Cards/placeholder.png" class="cardselect" />
+      <div class="chevron chevron-right" onclick="nextCard()">&#10095;</div>
+
+      <div class="playerstats">
+        <div class="sp-container">
+          <p class="spcs">Song Power</p>
+          <div class="stat-bar">
+            <div id="sp-bar" class="bar-fill sp-fill"></div>
+          </div>
+        </div>
+
+        <div class="vr-container">
+          <p class="vrcs">Vocal Range</p>
+          <div class="stat-bar">
+            <div id="vr-bar" class="bar-fill vr-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Values -->
+      <p class="spcss">0</p>
+      <p class="vrcss">0</p>
+      <p class="cardname">N/A</p>
+
+      <!-- SELECT -->
+      <div class="selectcc-wrapper">
+        <div class="selectcc" onclick="selectCard()">SELECT</div>
+      </div>
     </div>
 
     <!-- Tooltip Images -->
@@ -589,6 +799,81 @@
 
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <script>
+      const token = localStorage.getItem("token"); // Assuming your token is stored in localStorage
+      let currentCardIndex = 0;
+      let cards = [];
+
+      async function fetchCards() {
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `/.netlify/functions/getUserCards?token=${token}`
+          );
+          const data = await response.json();
+
+          if (response.ok) {
+            cards = data.cards;
+            if (cards.length > 0) {
+              displayCard(0);
+            } else {
+              console.warn("No cards found for user");
+            }
+          } else {
+            console.error(data.error || "Failed to load cards");
+          }
+        } catch (err) {
+          console.error("Error fetching cards:", err);
+        }
+      }
+
+      function displayCard(index) {
+        const card = cards[index];
+        if (!card) return;
+
+        document.querySelector(".cardselect").src =
+          card.image || "./Cards/placeholder.png";
+        document.querySelector(".cardname").textContent =
+          card.name || "Unknown";
+        document.getElementById("sp-bar").style.width = `${card.songPower}%`;
+        document.getElementById("vr-bar").style.width = `${
+          (card.vocalRange / 4) * 100
+        }%`;
+        document.querySelector(".spcss").textContent = card.songPower;
+        document.querySelector(".vrcss").textContent = card.vocalRange;
+      }
+
+      function prevCard() {
+        if (cards.length === 0) return;
+        currentCardIndex = (currentCardIndex - 1 + cards.length) % cards.length;
+        displayCard(currentCardIndex);
+      }
+
+      function nextCard() {
+        if (cards.length === 0) return;
+        currentCardIndex = (currentCardIndex + 1) % cards.length;
+        displayCard(currentCardIndex);
+      }
+
+      function selectCard() {
+        const selected = cards[currentCardIndex];
+        console.log("Selected card:", selected);
+        // Optional: Save selection to localStorage or send to server
+      }
+
+      // Expose functions globally
+      window.prevCard = prevCard;
+      window.nextCard = nextCard;
+      window.selectCard = selectCard;
+
+      // Fetch cards on load
+      fetchCards();
+    </script>
+
     <script>
       const audio = new Audio("audio/Battle.wav");
       audio.loop = true;
