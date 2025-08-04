@@ -812,11 +812,11 @@
       const rightChevron = document.querySelector(".chevron-right");
 
       let currentIndex = 0;
+      let eventListenersSet = false; // prevent adding event listeners multiple times
 
       function renderCard(index) {
         const card = cards[index];
         if (!card) {
-          // No card to show
           cardImage.src = "./backs/CLASSIC_BACK.png";
           cardName.textContent = "NO CARD SELECTED";
           spBar.style.width = "0%";
@@ -840,7 +840,23 @@
         localStorage.setItem("selectedCardIndex", index);
       }
 
+      function setChevronActive(active) {
+        if (active) {
+          leftChevron.style.pointerEvents = "auto";
+          rightChevron.style.pointerEvents = "auto";
+          leftChevron.style.opacity = 1;
+          rightChevron.style.opacity = 1;
+        } else {
+          leftChevron.style.pointerEvents = "none";
+          rightChevron.style.pointerEvents = "none";
+          leftChevron.style.opacity = 0.3;
+          rightChevron.style.opacity = 0.3;
+        }
+      }
+
       function setupEventListeners() {
+        if (eventListenersSet) return; // Only set once
+
         leftChevron.addEventListener("click", () => {
           if (cards.length === 0) return;
           currentIndex = (currentIndex - 1 + cards.length) % cards.length;
@@ -852,17 +868,17 @@
           currentIndex = (currentIndex + 1) % cards.length;
           renderCard(currentIndex);
         });
+
+        eventListenersSet = true;
       }
 
       async function loadUserCards() {
         const token = localStorage.getItem("token");
         if (!token) {
           console.error("No token found in localStorage");
-          // Show no card selected and disable arrows
           currentIndex = -1;
           renderCard(currentIndex);
-          leftChevron.style.opacity = 1;
-          rightChevron.style.opacity = 1;
+          setChevronActive(false);
           return;
         }
 
@@ -872,41 +888,32 @@
           );
           if (!res.ok) throw new Error("Failed to fetch user cards");
           const data = await res.json();
+
           cards = data.cards || [];
 
           if (cards.length === 0) {
             currentIndex = -1;
             renderCard(currentIndex);
-            leftChevron.style.opacity = 0.3;
-            rightChevron.style.opacity = 0.3;
+            setChevronActive(false);
           } else {
             const savedIndex = parseInt(
               localStorage.getItem("selectedCardIndex")
             );
-            if (
-              !isNaN(savedIndex) &&
-              savedIndex >= 0 &&
-              savedIndex < cards.length
-            ) {
-              currentIndex = savedIndex;
-            } else {
-              currentIndex = 0;
-            }
+            currentIndex =
+              !isNaN(savedIndex) && savedIndex >= 0 && savedIndex < cards.length
+                ? savedIndex
+                : 0;
 
-            leftChevron.style.pointerEvents = "auto";
-            rightChevron.style.pointerEvents = "auto";
-            leftChevron.style.opacity = 1;
-            rightChevron.style.opacity = 1;
-
+            setChevronActive(true);
             renderCard(currentIndex);
           }
+
           setupEventListeners();
         } catch (err) {
           console.error("Error loading user cards:", err);
           currentIndex = -1;
           renderCard(currentIndex);
-          leftChevron.style.opacity = 0.3;
-          rightChevron.style.opacity = 0.3;
+          setChevronActive(false);
         }
       }
 

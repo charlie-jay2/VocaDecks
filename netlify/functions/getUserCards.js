@@ -47,9 +47,15 @@ exports.handler = async function (event, context) {
     const userCardImages = userDoc.cards || [];
 
     // Filter cardStats to only cards user owns by matching image filenames
-    const userCardsFullData = cardStats.filter((card) =>
-      userCardImages.includes(card.image)
+    let userCardsFullData = cardStats.filter((card) =>
+      userCardImages.includes(card.image.split("/").pop())
     );
+
+    // Prepend './Cards/' to each card image path for frontend usage
+    userCardsFullData = userCardsFullData.map((card) => ({
+      ...card,
+      image: "./Cards/" + card.image.split("/").pop(),
+    }));
 
     return {
       statusCode: 200,
