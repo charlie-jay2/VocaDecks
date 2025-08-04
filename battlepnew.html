@@ -700,9 +700,9 @@
 
     <!-- Player One Stuff -->
     <div class="playeronecontainer">
-      <div class="chevron chevron-left" onclick="prevCard()">&#10094;</div>
-      <img src="./Cards/placeholder.png" class="cardselect" />
-      <div class="chevron chevron-right" onclick="nextCard()">&#10095;</div>
+      <div class="chevron chevron-left">&#10094;</div>
+      <img src="./backs/COMMON_BACK.png" class="cardselect" />
+      <div class="chevron chevron-right">&#10095;</div>
 
       <div class="playerstats">
         <div class="sp-container">
@@ -800,78 +800,118 @@
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
     <script>
-      const token = localStorage.getItem("token"); // Assuming your token is stored in localStorage
-      let currentCardIndex = 0;
       let cards = [];
+      const cardImage = document.querySelector(".cardselect");
+      const spBar = document.getElementById("sp-bar");
+      const vrBar = document.getElementById("vr-bar");
+      const spValue = document.querySelector(".spcss");
+      const vrValue = document.querySelector(".vrcss");
+      const cardName = document.querySelector(".cardname");
 
-      async function fetchCards() {
-        if (!token) {
-          console.error("No token found");
+      const leftChevron = document.querySelector(".chevron-left");
+      const rightChevron = document.querySelector(".chevron-right");
+
+      let currentIndex = 0;
+
+      function renderCard(index) {
+        const card = cards[index];
+        if (!card) {
+          // No card to show
+          cardImage.src = "./backs/CLASSIC_BACK.png";
+          cardName.textContent = "NO CARD SELECTED";
+          spBar.style.width = "0%";
+          vrBar.style.width = "0%";
+          spValue.textContent = "";
+          vrValue.textContent = "";
           return;
         }
 
+        cardImage.src = card.image;
+        cardName.textContent = card.name;
+
+        const spPercent = Math.min(100, card.songPower);
+        spBar.style.width = `${spPercent}%`;
+        spValue.textContent = card.songPower;
+
+        const vrPercent = (card.vocalRange / 5) * 100;
+        vrBar.style.width = `${vrPercent}%`;
+        vrValue.textContent = card.vocalRange;
+
+        localStorage.setItem("selectedCardIndex", index);
+      }
+
+      function setupEventListeners() {
+        leftChevron.addEventListener("click", () => {
+          if (cards.length === 0) return;
+          currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+          renderCard(currentIndex);
+        });
+
+        rightChevron.addEventListener("click", () => {
+          if (cards.length === 0) return;
+          currentIndex = (currentIndex + 1) % cards.length;
+          renderCard(currentIndex);
+        });
+      }
+
+      async function loadUserCards() {
+        // IMPORTANT: Replace the line below with your actual JWT token retrieval logic
+        // For example, from localStorage: const token = localStorage.getItem("jwtToken");
+        const token =
+          "7c8302a4fc4b08c0938227d30c646dc9a7bfcc2649a894ebc044aedee6ab8019197eb11190f6beadd58fd22996ad52b9"; // <-- Replace with actual JWT token obtained after login
+
         try {
-          const response = await fetch(
+          const res = await fetch(
             `/.netlify/functions/getUserCards?token=${token}`
           );
-          const data = await response.json();
+          if (!res.ok) throw new Error("Failed to fetch user cards");
+          const data = await res.json();
+          cards = data.cards || [];
 
-          if (response.ok) {
-            cards = data.cards;
-            if (cards.length > 0) {
-              displayCard(0);
-            } else {
-              console.warn("No cards found for user");
-            }
+          if (cards.length === 0) {
+            // No cards owned
+            currentIndex = -1;
+            renderCard(currentIndex);
+            // Disable arrows
+            leftChevron.style.pointerEvents = "none";
+            rightChevron.style.pointerEvents = "none";
+            leftChevron.style.opacity = 0.3;
+            rightChevron.style.opacity = 0.3;
           } else {
-            console.error(data.error || "Failed to load cards");
+            // Load saved index if valid, else 0
+            const savedIndex = parseInt(
+              localStorage.getItem("selectedCardIndex")
+            );
+            if (
+              !isNaN(savedIndex) &&
+              savedIndex >= 0 &&
+              savedIndex < cards.length
+            ) {
+              currentIndex = savedIndex;
+            } else {
+              currentIndex = 0;
+            }
+
+            leftChevron.style.pointerEvents = "auto";
+            rightChevron.style.pointerEvents = "auto";
+            leftChevron.style.opacity = 1;
+            rightChevron.style.opacity = 1;
+
+            renderCard(currentIndex);
           }
+          setupEventListeners();
         } catch (err) {
-          console.error("Error fetching cards:", err);
+          console.error("Error loading user cards:", err);
+          currentIndex = -1;
+          renderCard(currentIndex);
+          leftChevron.style.pointerEvents = "none";
+          rightChevron.style.pointerEvents = "none";
+          leftChevron.style.opacity = 0.3;
+          rightChevron.style.opacity = 0.3;
         }
       }
 
-      function displayCard(index) {
-        const card = cards[index];
-        if (!card) return;
-
-        document.querySelector(".cardselect").src =
-          card.image || "./Cards/placeholder.png";
-        document.querySelector(".cardname").textContent =
-          card.name || "Unknown";
-        document.getElementById("sp-bar").style.width = `${card.songPower}%`;
-        document.getElementById("vr-bar").style.width = `${
-          (card.vocalRange / 4) * 100
-        }%`;
-        document.querySelector(".spcss").textContent = card.songPower;
-        document.querySelector(".vrcss").textContent = card.vocalRange;
-      }
-
-      function prevCard() {
-        if (cards.length === 0) return;
-        currentCardIndex = (currentCardIndex - 1 + cards.length) % cards.length;
-        displayCard(currentCardIndex);
-      }
-
-      function nextCard() {
-        if (cards.length === 0) return;
-        currentCardIndex = (currentCardIndex + 1) % cards.length;
-        displayCard(currentCardIndex);
-      }
-
-      function selectCard() {
-        const selected = cards[currentCardIndex];
-        console.log("Selected card:", selected);
-        // Optional: Save selection to localStorage or send to server
-      }
-
-      // Expose functions globally
-      window.prevCard = prevCard;
-      window.nextCard = nextCard;
-      window.selectCard = selectCard;
-
-      // Fetch cards on load
-      fetchCards();
+      loadUserCards();
     </script>
 
     <script>
@@ -917,70 +957,6 @@
 
       updateIcons(); // initial icon state
     </script>
-
-    <script>
-      const cursor = document.getElementById("fluid-glass-cursor");
-
-      let mouseX = window.innerWidth / 2;
-      let mouseY = window.innerHeight / 2;
-      let currentX = mouseX;
-      let currentY = mouseY;
-      const speed = 0.15;
-
-      window.addEventListener("mousemove", (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-      });
-
-      function animate() {
-        currentX += (mouseX - currentX) * speed;
-        currentY += (mouseY - currentY) * speed;
-
-        cursor.style.left = `${currentX}px`;
-        cursor.style.top = `${currentY}px`;
-
-        requestAnimationFrame(animate);
-      }
-      animate();
-
-      // Checks if element is clickable or matches .v or .h specifically
-      function isClickableOrSpecial(el) {
-        if (!el) return false;
-        const style = window.getComputedStyle(el);
-        return (
-          el.onclick ||
-          el.tagName === "BUTTON" ||
-          el.tagName === "A" ||
-          el.tagName === "SUMMARY" ||
-          el.getAttribute("role") === "button" ||
-          el.tabIndex >= 0 ||
-          style.cursor === "pointer" ||
-          el.classList.contains("v") ||
-          el.classList.contains("h")
-        );
-      }
-
-      document.addEventListener("mouseover", (e) => {
-        if (isClickableOrSpecial(e.target)) {
-          cursor.style.width = "50px";
-          cursor.style.height = "50px";
-          cursor.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
-          cursor.style.backdropFilter = "none";
-          cursor.style.webkitBackdropFilter = "none";
-        }
-      });
-
-      document.addEventListener("mouseout", (e) => {
-        if (isClickableOrSpecial(e.target)) {
-          cursor.style.width = "30px";
-          cursor.style.height = "30px";
-          cursor.style.backgroundColor = "rgba(255, 255, 255, 0.507)";
-          cursor.style.backdropFilter = "blur(5px)";
-          cursor.style.webkitBackdropFilter = "blur(5px)";
-        }
-      });
-    </script>
-
     <script>
       const themes = {
         t1: "./Menu/bg.png",

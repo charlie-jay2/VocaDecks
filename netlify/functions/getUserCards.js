@@ -1,5 +1,6 @@
 const { MongoClient } = require("mongodb");
 const jwt = require("jsonwebtoken");
+const cardStats = require("../../cardStats.json"); // Adjust path if needed
 
 let client;
 
@@ -33,7 +34,6 @@ exports.handler = async function (event, context) {
     const db = client.db("test");
     const users = db.collection("users");
 
-    // NOTE: Query by 'userId' here, not 'discordId'
     const userDoc = await users.findOne({ userId: decoded.id });
 
     if (!userDoc) {
@@ -43,9 +43,17 @@ exports.handler = async function (event, context) {
       };
     }
 
+    // userDoc.cards is an array of filenames, e.g. ["r1KAITO C.png", "r2Rin E.png", ...]
+    const userCardImages = userDoc.cards || [];
+
+    // Filter cardStats to only cards user owns by matching image filenames
+    const userCardsFullData = cardStats.filter((card) =>
+      userCardImages.includes(card.image)
+    );
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ cards: userDoc.cards || [] }),
+      body: JSON.stringify({ cards: userCardsFullData }),
     };
   } catch (error) {
     console.error("Error in getUserCards:", error);

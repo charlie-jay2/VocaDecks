@@ -407,3 +407,253 @@
 
     init();
   </script> -->
+
+
+  -----------------------
+
+      <script>
+      const audio = new Audio("audio/Battle.wav");
+      audio.loop = true;
+      audio.volume = 0.7;
+
+      const iconMuted = document.getElementById("icon-muted");
+      const iconUnmuted = document.getElementById("icon-unmuted");
+      const toggleBtn = document.getElementById("audio-toggle");
+
+      let isMuted = false;
+
+      function updateIcons() {
+        if (isMuted) {
+          iconMuted.style.display = "block";
+          iconUnmuted.style.display = "none";
+        } else {
+          iconMuted.style.display = "none";
+          iconUnmuted.style.display = "block";
+        }
+      }
+
+      toggleBtn.addEventListener("click", () => {
+        isMuted = !isMuted;
+        audio.muted = isMuted;
+        updateIcons();
+      });
+
+      // Try autoplay after 1 second
+      window.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+          audio.play().catch(() => {
+            // Autoplay failed, wait for user interaction
+            const resume = () => {
+              audio.play().catch(console.warn);
+              document.removeEventListener("click", resume);
+            };
+            document.addEventListener("click", resume, { once: true });
+          });
+        }, 1000);
+      });
+
+      updateIcons(); // initial icon state
+    </script>
+
+    <script>
+      const cursor = document.getElementById("fluid-glass-cursor");
+
+      let mouseX = window.innerWidth / 2;
+      let mouseY = window.innerHeight / 2;
+      let currentX = mouseX;
+      let currentY = mouseY;
+      const speed = 0.15;
+
+      window.addEventListener("mousemove", (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      function animate() {
+        currentX += (mouseX - currentX) * speed;
+        currentY += (mouseY - currentY) * speed;
+
+        cursor.style.left = `${currentX}px`;
+        cursor.style.top = `${currentY}px`;
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      // Checks if element is clickable or matches .v or .h specifically
+      function isClickableOrSpecial(el) {
+        if (!el) return false;
+        const style = window.getComputedStyle(el);
+        return (
+          el.onclick ||
+          el.tagName === "BUTTON" ||
+          el.tagName === "A" ||
+          el.tagName === "SUMMARY" ||
+          el.getAttribute("role") === "button" ||
+          el.tabIndex >= 0 ||
+          style.cursor === "pointer" ||
+          el.classList.contains("v") ||
+          el.classList.contains("h")
+        );
+      }
+
+      document.addEventListener("mouseover", (e) => {
+        if (isClickableOrSpecial(e.target)) {
+          cursor.style.width = "50px";
+          cursor.style.height = "50px";
+          cursor.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+          cursor.style.backdropFilter = "none";
+          cursor.style.webkitBackdropFilter = "none";
+        }
+      });
+
+      document.addEventListener("mouseout", (e) => {
+        if (isClickableOrSpecial(e.target)) {
+          cursor.style.width = "30px";
+          cursor.style.height = "30px";
+          cursor.style.backgroundColor = "rgba(255, 255, 255, 0.507)";
+          cursor.style.backdropFilter = "blur(5px)";
+          cursor.style.webkitBackdropFilter = "blur(5px)";
+        }
+      });
+    </script>
+
+    <script>
+      const themes = {
+        t1: "./Menu/bg.png",
+        t2: "./Profile/MIDNIGHT_BLUE.png",
+        t3: "./Profile/TUNDRA_MANGO.png",
+        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+        t5: "./Profile/CHERRIES__CREAM.png",
+        t6: "./Profile/SIREN_PURPLE.png",
+      };
+
+      function applyStoredTheme() {
+        const key = localStorage.getItem("selectedTheme") || "t1";
+        const bgUrl = themes[key] || themes["t1"];
+        document.body.style.setProperty("--theme-bg", `url(${bgUrl})`);
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        applyStoredTheme();
+        localStorage.setItem("healthpo", "100");
+        localStorage.setItem("healthpt", "100");
+
+        // Healthpo logic
+        const selectsPo = {
+          1: document.querySelector(".selectpo1"),
+          2: document.querySelector(".selectpo2"),
+          3: document.querySelector(".selectpo3"),
+          4: document.querySelector(".selectpo4"),
+        };
+
+        function updateSelectVisibilityPo() {
+          const healthStr = localStorage.getItem("healthpo");
+          const health = healthStr !== null ? Number(healthStr) : null;
+
+          Object.values(selectsPo).forEach((el) => {
+            el.classList.remove("visible");
+            if (el.classList.contains("selectpo4")) {
+              el.classList.remove("solid");
+            }
+          });
+
+          if (health === null) return;
+
+          if (health >= 80) {
+            selectsPo[1].classList.add("visible");
+          } else if (health >= 50) {
+            selectsPo[2].classList.add("visible");
+          } else if (health >= 20) {
+            selectsPo[3].classList.add("visible");
+          } else if (health === 0) {
+            selectsPo[4].classList.add("visible", "solid");
+          } else {
+            selectsPo[4].classList.add("visible");
+          }
+        }
+
+        updateSelectVisibilityPo();
+        setInterval(updateSelectVisibilityPo, 500);
+
+        // Healthpt logic
+        const selectsPt = {
+          1: document.querySelector(".select1"),
+          2: document.querySelector(".select2"),
+          3: document.querySelector(".select3"),
+          4: document.querySelector(".select4"),
+        };
+
+        function updateSelectVisibilityPt() {
+          const healthStr = localStorage.getItem("healthpt");
+          const health = healthStr !== null ? Number(healthStr) : null;
+
+          Object.values(selectsPt).forEach((el) => {
+            el.classList.remove("visible");
+            if (el.classList.contains("select4")) {
+              el.classList.remove("solid");
+            }
+          });
+
+          if (health === null) return;
+
+          if (health >= 80) {
+            selectsPt[1].classList.add("visible");
+          } else if (health >= 50) {
+            selectsPt[2].classList.add("visible");
+          } else if (health >= 20) {
+            selectsPt[3].classList.add("visible");
+          } else if (health === 0) {
+            selectsPt[4].classList.add("visible", "solid");
+          } else {
+            selectsPt[4].classList.add("visible");
+          }
+        }
+
+        updateSelectVisibilityPt();
+        setInterval(updateSelectVisibilityPt, 500);
+
+        // Tooltip logic
+        const vBar = document.querySelector(".v");
+        const hBar = document.querySelector(".h");
+        const vrTooltip = document.getElementById("vrtt");
+        const vrValue = document.querySelector(".vrttt");
+        const healthTooltip = document.getElementById("healthtt");
+        const healthValue = document.querySelector(".healthttt");
+
+        function setupTooltip(bar, tooltip, valueEl) {
+          bar.addEventListener("mousemove", (e) => {
+            const rect = bar.getBoundingClientRect();
+            let y = e.clientY - rect.top;
+            y = Math.min(Math.max(y, 0), rect.height);
+            const rawPercent = (1 - y / rect.height) * 100;
+
+            // Clamp value between 5 and 99, then round
+            const clampedPercent = Math.min(
+              Math.max(Math.round(rawPercent), 1),
+              100
+            );
+
+            valueEl.textContent = clampedPercent;
+            tooltip.style.display = "flex";
+            tooltip.style.opacity = "1";
+            tooltip.style.pointerEvents = "none";
+
+            const offsetX = -30;
+            const offsetY = 10;
+            tooltip.style.top = `${e.clientY + offsetY}px`;
+            tooltip.style.left = `${
+              e.clientX - offsetX - tooltip.offsetWidth
+            }px`;
+          });
+
+          bar.addEventListener("mouseleave", () => {
+            tooltip.style.display = "none";
+            tooltip.style.opacity = "0";
+          });
+        }
+
+        setupTooltip(vBar, vrTooltip, vrValue);
+        setupTooltip(hBar, healthTooltip, healthValue);
+      });
+    </script>
