@@ -861,10 +861,8 @@
           // Show no card selected and disable arrows
           currentIndex = -1;
           renderCard(currentIndex);
-          leftChevron.style.pointerEvents = "none";
-          rightChevron.style.pointerEvents = "none";
-          leftChevron.style.opacity = 0.3;
-          rightChevron.style.opacity = 0.3;
+          leftChevron.style.opacity = 1;
+          rightChevron.style.opacity = 1;
           return;
         }
 
@@ -879,8 +877,6 @@
           if (cards.length === 0) {
             currentIndex = -1;
             renderCard(currentIndex);
-            leftChevron.style.pointerEvents = "none";
-            rightChevron.style.pointerEvents = "none";
             leftChevron.style.opacity = 0.3;
             rightChevron.style.opacity = 0.3;
           } else {
@@ -909,8 +905,6 @@
           console.error("Error loading user cards:", err);
           currentIndex = -1;
           renderCard(currentIndex);
-          leftChevron.style.pointerEvents = "none";
-          rightChevron.style.pointerEvents = "none";
           leftChevron.style.opacity = 0.3;
           rightChevron.style.opacity = 0.3;
         }
