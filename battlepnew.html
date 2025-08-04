@@ -855,10 +855,18 @@
       }
 
       async function loadUserCards() {
-        // IMPORTANT: Replace the line below with your actual JWT token retrieval logic
-        // For example, from localStorage: const token = localStorage.getItem("jwtToken");
-        const token =
-          "7c8302a4fc4b08c0938227d30c646dc9a7bfcc2649a894ebc044aedee6ab8019197eb11190f6beadd58fd22996ad52b9"; // <-- Replace with actual JWT token obtained after login
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No token found in localStorage");
+          // Show no card selected and disable arrows
+          currentIndex = -1;
+          renderCard(currentIndex);
+          leftChevron.style.pointerEvents = "none";
+          rightChevron.style.pointerEvents = "none";
+          leftChevron.style.opacity = 0.3;
+          rightChevron.style.opacity = 0.3;
+          return;
+        }
 
         try {
           const res = await fetch(
@@ -869,16 +877,13 @@
           cards = data.cards || [];
 
           if (cards.length === 0) {
-            // No cards owned
             currentIndex = -1;
             renderCard(currentIndex);
-            // Disable arrows
             leftChevron.style.pointerEvents = "none";
             rightChevron.style.pointerEvents = "none";
             leftChevron.style.opacity = 0.3;
             rightChevron.style.opacity = 0.3;
           } else {
-            // Load saved index if valid, else 0
             const savedIndex = parseInt(
               localStorage.getItem("selectedCardIndex")
             );
