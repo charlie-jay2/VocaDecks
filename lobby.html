@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <link
@@ -50,20 +51,24 @@
         cursor: pointer;
       }
 
-      /* Common styles for floating circles */
+      .pfp img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
       .chaos,
       .settings,
       .shop,
       .solos {
         position: fixed;
-        width: 150px; /* adjust size as needed */
+        width: 150px;
         height: 150px;
         cursor: pointer;
         transition: transform 0.3s ease;
         user-select: none;
       }
 
-      /* Enlarge on hover */
       .chaos:hover,
       .settings:hover,
       .shop:hover,
@@ -76,7 +81,8 @@
 
   <body>
     <div class="pfp" onclick="window.location.href='./profile.html';"></div>
-    <!-- CIRCLES -->
+
+    <!-- Floating Circles -->
     <img src="./lobby/CHAOS.png" class="chaos" alt="Chaos" />
     <img src="./lobby/SETTINGS.png" class="settings" alt="Settings" />
     <img src="./lobby/SHOP.png" class="shop" alt="Shop" />
@@ -84,8 +90,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+
     <script>
-      // Your existing theme and user logic here (unchanged)
       const themes = {
         t1: "./Menu/bg.png",
         t2: "./Profile/MIDNIGHT_BLUE.png",
@@ -101,10 +107,6 @@
         document.body.style.setProperty("--theme-bg", `url(${bgUrl})`);
       }
 
-      window.addEventListener("DOMContentLoaded", () => {
-        applyStoredTheme();
-      });
-
       function isTokenValid(token) {
         try {
           const decoded = jwt_decode(token);
@@ -119,16 +121,33 @@
         window.location.href = "index.html";
       }
 
-      document.querySelector(".logout")?.addEventListener("click", () => {
-        renderLoggedOut();
-      });
-
-      (function () {
+      async function loadDiscordPfp() {
         const token = localStorage.getItem("token");
         if (!token || !isTokenValid(token)) {
           renderLoggedOut();
+          return;
         }
-      })();
+
+        try {
+          const res = await fetch("https://discord.com/api/v10/users/@me", {
+            headers: {
+              Authorization: token,
+            },
+          });
+
+          if (!res.ok) throw new Error("Invalid token or rate-limited");
+
+          const user = await res.json();
+          const avatarUrl = user.avatar
+            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
+            : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+          const pfpDiv = document.querySelector(".pfp");
+          pfpDiv.innerHTML = `<img src="${avatarUrl}" alt="Avatar" />`;
+        } catch (err) {
+          console.error("Failed to fetch Discord avatar:", err);
+        }
+      }
 
       function setTheme(key) {
         const now = Date.now();
@@ -152,81 +171,21 @@
         localStorage.setItem("selectedTheme", key);
       }
 
-      function getXpForLevel(level) {
-        return level * 50;
-      }
-
-      async function loadUserData() {
-        try {
-          const response = await fetch("/.netlify/functions/getUserData", {
-            headers: {
-              Authorization: "Bearer " + localStorage.getItem("token"),
-            },
-          });
-          if (!response.ok) throw new Error("Failed to fetch user data");
-          const data = await response.json();
-
-          document.querySelector(".name").textContent = data.username;
-          document.querySelector(".level").textContent = `LEVEL: ${data.level
-            .toString()
-            .padStart(3, "0")}`;
-          document.querySelector(".synthc").textContent =
-            data.points.toLocaleString();
-          document.querySelector(".battlewn").textContent =
-            data.battlesWon.toLocaleString();
-          document.querySelector(".battleln").textContent =
-            data.battlesLost.toLocaleString();
-
-          const neededXp = getXpForLevel(data.level);
-          const progress = Math.min(data.xp / neededXp, 0.99);
-          document.querySelector(".pb-fill").style.width = `${progress * 100}%`;
-
-          // level badge
-          const badge = document.querySelector(".levelb");
-          let src = "./Profile/C.png";
-          if (data.level >= 1 && data.level <= 10) src = "./Profile/C.png";
-          else if (data.level <= 40) src = "./Profile/E.png";
-          else if (data.level <= 90) src = "./Profile/R.png";
-          else if (data.level <= 110) src = "./Profile/L.png";
-          else if (data.level < 200) src = "./Profile/U.png";
-          else if (data.level === 200) src = "./Profile/I.png";
-          badge.src = src;
-
-          const pfpDiv = document.querySelector(".pfp");
-          pfpDiv.innerHTML = `<img src="${data.avatar}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;" />`;
-        } catch (err) {
-          console.error("Error loading user data:", err);
-        }
-      }
-
-      window.addEventListener("load", () => {
-        const saved = localStorage.getItem("selectedTheme") || "t1";
-        setTheme(saved);
-        loadUserData();
-        setInterval(loadUserData, 5000);
-      });
-
-      // --- Floating Circles Logic ---
-
-      const circleSize = 150; // px
-      const moveSpeed = 3; // px per frame approx
+      const floatingCircles = [];
 
       class FloatingCircle {
         constructor(el, startX, startY) {
           this.el = el;
-          this.width = circleSize;
-          this.height = circleSize;
+          this.width = 150;
+          this.height = 150;
 
           this.windowWidth = window.innerWidth;
           this.windowHeight = window.innerHeight;
 
-          // Start near the given start position (around pfp)
           this.x = startX;
           this.y = startY;
-
-          // Random small velocity
-          this.vx = (Math.random() - 0.5) * moveSpeed;
-          this.vy = (Math.random() - 0.5) * moveSpeed;
+          this.vx = (Math.random() - 0.5) * 3;
+          this.vy = (Math.random() - 0.5) * 3;
 
           this.updatePosition();
         }
@@ -240,24 +199,10 @@
           this.x += this.vx;
           this.y += this.vy;
 
-          // Bounce inside window bounds
-          if (this.x <= 0) {
-            this.x = 0;
-            this.vx = -this.vx;
-          }
-          if (this.x >= this.windowWidth - this.width) {
-            this.x = this.windowWidth - this.width;
-            this.vx = -this.vx;
-          }
-
-          if (this.y <= 0) {
-            this.y = 0;
-            this.vy = -this.vy;
-          }
-          if (this.y >= this.windowHeight - this.height) {
-            this.y = this.windowHeight - this.height;
-            this.vy = -this.vy;
-          }
+          if (this.x <= 0 || this.x >= this.windowWidth - this.width)
+            this.vx *= -1;
+          if (this.y <= 0 || this.y >= this.windowHeight - this.height)
+            this.vy *= -1;
 
           this.updatePosition();
         }
@@ -268,31 +213,25 @@
         }
       }
 
-      const floatingCircles = [];
-
       function initFloatingCircles() {
         const selectors = [".chaos", ".settings", ".shop", ".solos"];
         const pfp = document.querySelector(".pfp");
         if (!pfp) return;
 
-        // Get .pfp bounding rect and calculate center position in px
-        const pfpRect = pfp.getBoundingClientRect();
-        const pfpCenterX = pfpRect.left + pfpRect.width / 2 - circleSize / 2;
-        const pfpCenterY = pfpRect.top + pfpRect.height / 2 - circleSize / 2;
-
-        const radius = 10; // 10px radius around pfp center to start
+        const rect = pfp.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2 - 75;
+        const centerY = rect.top + rect.height / 2 - 75;
+        const radius = 10;
 
         selectors.forEach((selector, i) => {
           const el = document.querySelector(selector);
           if (el) {
-            // Distribute angles evenly around circle with some randomness
             const baseAngle = (i * (2 * Math.PI)) / selectors.length;
-            // Add a bit of random offset to angle +- 20 degrees (in radians)
-            const angleOffset = (Math.random() - 0.5) * (Math.PI / 9); // ~20deg in radians
+            const angleOffset = (Math.random() - 0.5) * (Math.PI / 9);
             const angle = baseAngle + angleOffset;
 
-            const startX = pfpCenterX + radius * Math.cos(angle);
-            const startY = pfpCenterY + radius * Math.sin(angle);
+            const startX = centerX + radius * Math.cos(angle);
+            const startY = centerY + radius * Math.sin(angle);
 
             floatingCircles.push(new FloatingCircle(el, startX, startY));
           }
@@ -304,15 +243,11 @@
         requestAnimationFrame(animate);
       }
 
-      window.addEventListener("resize", () => {
-        floatingCircles.forEach((circle) =>
-          circle.updateWindowSize(window.innerWidth, window.innerHeight)
-        );
-      });
-
       window.addEventListener("DOMContentLoaded", () => {
+        applyStoredTheme();
         initFloatingCircles();
         animate();
+        loadDiscordPfp();
 
         const solos = document.querySelector(".solos");
         if (solos) {
@@ -322,6 +257,14 @@
           });
         }
       });
+
+      window.addEventListener("resize", () => {
+        floatingCircles.forEach((circle) =>
+          circle.updateWindowSize(window.innerWidth, window.innerHeight)
+        );
+      });
+
+      let lastChange = 0;
     </script>
   </body>
 </html>
