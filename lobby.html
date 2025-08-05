@@ -121,7 +121,7 @@
         window.location.href = "index.html";
       }
 
-      async function loadDiscordPfp() {
+      async function loadUserData() {
         const token = localStorage.getItem("token");
         if (!token || !isTokenValid(token)) {
           renderLoggedOut();
@@ -129,23 +129,21 @@
         }
 
         try {
-          const res = await fetch("https://discord.com/api/v10/users/@me", {
+          const response = await fetch("/.netlify/functions/getUserData", {
             headers: {
-              Authorization: token,
+              Authorization: "Bearer " + token,
             },
           });
+          if (!response.ok) throw new Error("Failed to fetch user data");
+          const data = await response.json();
 
-          if (!res.ok) throw new Error("Invalid token or rate-limited");
-
-          const user = await res.json();
-          const avatarUrl = user.avatar
-            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
-            : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
+          // Discord avatar only
           const pfpDiv = document.querySelector(".pfp");
-          pfpDiv.innerHTML = `<img src="${avatarUrl}" alt="Avatar" />`;
+          if (pfpDiv && data.avatar) {
+            pfpDiv.innerHTML = `<img src="${data.avatar}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+          }
         } catch (err) {
-          console.error("Failed to fetch Discord avatar:", err);
+          console.error("Error loading user data:", err);
         }
       }
 
@@ -247,7 +245,8 @@
         applyStoredTheme();
         initFloatingCircles();
         animate();
-        loadDiscordPfp();
+        loadUserData();
+        setInterval(loadUserData, 5000);
 
         const solos = document.querySelector(".solos");
         if (solos) {
