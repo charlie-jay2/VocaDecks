@@ -1,5 +1,10 @@
 const jwt = require("jsonwebtoken");
-const { MongoClient } = require("mongodb");
+const { createClient } = require("@supabase/supabase-js");
+require("dotenv").config();
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 exports.handler = async (event) => {
   const {
@@ -7,8 +12,8 @@ exports.handler = async (event) => {
     DISCORD_CLIENT_SECRET,
     DISCORD_REDIRECT_URI,
     SESSION_SECRET,
-    MONGO_URI,
   } = process.env;
+
   const query = event.queryStringParameters;
 
   if (!query.code) {
@@ -44,31 +49,26 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: "Failed to fetch user data" };
   }
 
-  // Connect to MongoDB and upsert user
-  const client = new MongoClient(MONGO_URI);
+  // Upsert user in Supabase 'users' table
   try {
-    await client.connect();
-    const users = client.db("test").collection("users");
+    // Try to upsert user by discordId (userid column)
+    const { error } = await supabase.from("users").upsert({
+      userid: userData.id,
+      username: `${userData.username}#${userData.discriminator}`,
+      avatar: userData.avatar,
+      lastlogin: new Date().toISOString(),
+      // Use insert defaults for cards and createdAt if possible:
+      cards: [],  // Initialize empty cards array (adjust if your DB schema differs)
+      createdat: new Date().toISOString(),
+    }, { onConflict: "userid" });
 
-    // Upsert user by Discord ID:
-    await users.updateOne(
-      { discordId: userData.id },
-      {
-        $set: {
-          discordId: userData.id,
-          username: `${userData.username}#${userData.discriminator}`,
-          avatar: userData.avatar,
-          lastLogin: new Date(),
-        },
-        $setOnInsert: {
-          cards: [], // initialize cards array on first insert
-          createdAt: new Date(),
-        },
-      },
-      { upsert: true }
-    );
-  } finally {
-    await client.close();
+    if (error) {
+      console.error("Supabase upsert error:", error);
+      return { statusCode: 500, body: "Database error" };
+    }
+  } catch (err) {
+    console.error("Upsert exception:", err);
+    return { statusCode: 500, body: "Internal server error" };
   }
 
   // Create JWT token with user info (expires in 48 hours)
