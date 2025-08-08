@@ -56,9 +56,7 @@ exports.handler = async (event) => {
       userid: userData.id,
       username: `${userData.username}#${userData.discriminator}`,
       lastlogin: new Date().toISOString(),
-      // Use insert defaults for cards and createdAt if possible:
-      cards: [],  // Initialize empty cards array (adjust if your DB schema differs)
-      createdat: new Date().toISOString(),
+      cards: [],
     }, { onConflict: "userid" });
 
     if (error) {
