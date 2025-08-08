@@ -55,7 +55,6 @@ exports.handler = async (event) => {
     const { error } = await supabase.from("users").upsert({
       userid: userData.id,
       username: `${userData.username}#${userData.discriminator}`,
-      lastlogin: new Date().toISOString(),
       cards: [],
     }, { onConflict: "userid" });
 
