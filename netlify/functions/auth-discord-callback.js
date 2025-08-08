@@ -54,7 +54,6 @@ exports.handler = async (event) => {
     // Try to upsert user by discordId (userid column)
     const { error } = await supabase.from("users").upsert({
       userid: userData.id,
-      username: `${userData.username}#${userData.discriminator}`,
       cards: [],
     }, { onConflict: "userid" });
 
