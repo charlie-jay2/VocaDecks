@@ -52,10 +52,14 @@ exports.handler = async (event) => {
   // Upsert user in Supabase 'users' table
   try {
     // Try to upsert user by discordId (userid column)
-    const { error } = await supabase.from("users").upsert({
-      userid: userData.id,
-      cards: [],
-    }, { onConflict: "userid" });
+    const { error } = await supabase
+      .from("users")
+      .insert({
+        userid: userData.id,
+        cards: [],
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error("Supabase upsert error:", error);
