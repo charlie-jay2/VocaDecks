@@ -55,7 +55,6 @@ exports.handler = async (event) => {
     const { error } = await supabase.from("users").upsert({
       userid: userData.id,
       username: `${userData.username}#${userData.discriminator}`,
-      avatar: userData.avatar,
       lastlogin: new Date().toISOString(),
       // Use insert defaults for cards and createdAt if possible:
       cards: [],  // Initialize empty cards array (adjust if your DB schema differs)
@@ -76,7 +75,6 @@ exports.handler = async (event) => {
     {
       id: userData.id,
       username: `${userData.username}#${userData.discriminator}`,
-      avatar: userData.avatar,
     },
     SESSION_SECRET,
     { expiresIn: "48h" }
