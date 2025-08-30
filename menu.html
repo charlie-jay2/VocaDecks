@@ -1,0 +1,426 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-display: swap;
+      }
+      body {
+        margin: 0;
+        font-family: Panton, sans-serif;
+        background: url(./Menu/bg.png) center/cover fixed no-repeat;
+        overflow: hidden;
+        transition: background 0.8s ease; /* smooth fade */
+      }
+
+      /* Shared screens */
+      .menu-screen,
+      .selection-screen,
+      .rarity-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      /* MENU SCREEN */
+      .menu-screen img {
+        position: absolute;
+        transition: all 1s ease;
+      }
+      .trad {
+        top: 65%;
+        left: 17%;
+        transform: translate(-50%, -50%);
+        height: 70%;
+        cursor: pointer;
+        transition: transform 0.6s ease, opacity 0.6s ease;
+      }
+      .battle {
+        top: 65%;
+        left: 80%;
+        transform: translate(-50%, -50%);
+        height: 70%;
+        cursor: pointer;
+        transition: transform 0.6s ease, opacity 0.6s ease;
+      }
+      .menu-line {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: transform 0.8s ease, opacity 0.8s ease;
+      }
+      .menu-logo {
+        top: 5%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 10%;
+        transition: transform 0.8s ease, opacity 0.8s ease;
+      }
+
+      /* SELECTION SCREEN (hidden) */
+      .selection-screen {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.8s ease 0.2s;
+      }
+      .selection-screen.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      /* Welcome text */
+      .fade-in-content {
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 2em;
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
+      .fade-in-content.visible {
+        opacity: 1;
+      }
+      .fade-in-content.slide-up {
+        transition: top 1s ease;
+        top: 10%;
+      }
+
+      /* PVB/PVP assets (hidden until final step) */
+      .pvb,
+      .pvp,
+      .pvbse,
+      .pvpse {
+        position: absolute;
+        opacity: 0;
+        transition: opacity 1s ease, transform 0.8s ease;
+        cursor: pointer;
+      }
+      .pvb {
+        top: 40%;
+        left: 60%;
+        transform: translate(-50%, -50%);
+        height: 30%;
+      }
+      .pvp {
+        top: 75%;
+        left: 60%;
+        transform: translate(-50%, -50%);
+        height: 30%;
+      }
+      .pvbse {
+        top: 49%;
+        left: 79%;
+        transform: translate(-50%, -50%);
+        height: 8%;
+      }
+      .pvpse {
+        top: 84%;
+        left: 79%;
+        transform: translate(-50%, -50%);
+        height: 8%;
+      }
+
+      .pvbse:hover,
+      .pvpse:hover {
+        animation: intricate-hover 0.8s ease-in-out forwards;
+      }
+
+      @keyframes intricate-hover {
+        0% {
+          transform: translate(-50%, -50%) scale(1) rotate(0);
+        }
+        25% {
+          transform: translate(-50%, -60%) scale(1.1) rotate(-5deg);
+        }
+        50% {
+          transform: translate(-50%, -45%) scale(1.05) rotate(5deg);
+        }
+        75% {
+          transform: translate(-50%, -58%) scale(1.1) rotate(-5deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1) rotate(0);
+        }
+      }
+
+      /* RARITY SCREEN (hidden) */
+      .rarity-screen {
+        transform: translateX(100vw);
+        transition: transform 0.8s ease;
+        pointer-events: none;
+      }
+      .rarity-screen.active {
+        transform: translateX(0);
+        pointer-events: all;
+      }
+
+      .par {
+        width: auto;
+        height: 20%;
+        position: absolute;
+        left: 50%;
+        top: 15%;
+        transform: translate(-50%, -50%);
+      }
+      .rarity {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2vw;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .rarity img {
+        height: 80%;
+        max-height: 230px;
+        width: auto;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+      .rarity img:hover {
+        transform: scale(1.1);
+      }
+
+      /* Swipe targets */
+      .swipe-line {
+        top: 50%;
+        left: 10%;
+        transform: translate(-50%, -50%);
+      }
+      .swipe-logo {
+        top: 30%;
+        left: 13%;
+        transform: translate(-50%, -50%) rotate(-57.5deg);
+        height: 8%;
+      }
+
+      /* Profile picture in top right */
+      #profile-pic {
+        position: fixed;
+        top: 10px;
+        right: 26px;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+      }
+    </style>
+  </head>
+  <body>
+    <img id="profile-pic" alt="PFP" />
+    <!-- MENU SCREEN -->
+    <div class="menu-screen">
+      <img src="./Menu/traditional.png" class="trad" />
+      <img
+        src="./Menu/battle.png"
+        class="battle"
+        onclick="window.location.href='./lobby.html';" />
+      <img src="./Menu/Line_121.png" class="menu-line" />
+      <img src="./Menu/logo.png" class="menu-logo" />
+    </div>
+
+    <!-- SELECTION SCREEN -->
+    <div class="selection-screen">
+      <div class="fade-in-content">Welcome to the Selection Screen!</div>
+      <img src="/Menu/pvp.png" class="pvb" />
+      <img src="/Menu/pvb.png" class="pvp" />
+      <img src="/Menu/select.png" class="pvbse" />
+      <img src="/Menu/select.png" class="pvpse" />
+    </div>
+
+    <!-- RARITY SCREEN -->
+    <div class="rarity-screen">
+      <img src="Battle/PICK_A_RARITY.png" class="par" />
+      <div class="rarity">
+        <img
+          src="Battle/COMMON_SELECTOR.png"
+          class="r1"
+          data-rarity="Common"
+          onclick="selectRarity(this)" />
+        <img
+          src="Battle/EXTRA_SELECTOR.png"
+          class="r2"
+          data-rarity="Extra"
+          onclick="selectRarity(this)" />
+        <img
+          src="Battle/RARE_SELECTOR.png"
+          class="r3"
+          data-rarity="Rare"
+          onclick="selectRarity(this)" />
+        <img
+          src="Battle/LEGENDARY_SELECTOR.png"
+          class="r4"
+          data-rarity="Legendary"
+          onclick="selectRarity(this)" />
+        <img
+          src="Battle/UNTOUCHED_SELECTOR.png"
+          class="r5"
+          data-rarity="Untouched"
+          onclick="selectRarity(this)" />
+      </div>
+
+      <script>
+        function selectRarity(img) {
+          const rarity = img.getAttribute("data-rarity");
+          if (rarity) {
+            localStorage.setItem("selectedRarity", rarity);
+            window.location.href = "matchmaking.html";
+          }
+        }
+      </script>
+    </div>
+
+    <script>
+      const themes = {
+        t1: "./Menu/bg.png",
+        t2: "./Profile/MIDNIGHT_BLUE.png",
+        t3: "./Profile/TUNDRA_MANGO.png",
+        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+        t5: "./Profile/CHERRIES__CREAM.png",
+        t6: "./Profile/SIREN_PURPLE.png",
+      };
+      function applyStoredTheme() {
+        const key = localStorage.getItem("selectedTheme") || "t1";
+        document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
+      }
+
+      // apply stored theme on load
+      window.addEventListener("DOMContentLoaded", () => {
+        applyStoredTheme();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get("token");
+        if (token) {
+          localStorage.setItem("token", token);
+          history.replaceState(null, "", window.location.pathname);
+        }
+
+        const storedToken = localStorage.getItem("token");
+        const profilePic = document.getElementById("profile-pic");
+
+        if (storedToken) {
+          try {
+            const payloadBase64 = storedToken.split(".")[1];
+            const base64 = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+              atob(base64)
+                .split("")
+                .map(
+                  (c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+                )
+                .join("")
+            );
+            const payload = JSON.parse(jsonPayload);
+            if (payload && payload.avatar && payload.id) {
+              let avatarUrl;
+              if (payload.avatar) {
+                avatarUrl = `https://cdn.discordapp.com/avatars/${payload.id}/${payload.avatar}.png`;
+              } else {
+                const discrim = payload.discriminator || "0";
+                const defaultAvatarNumber = parseInt(discrim) % 5;
+                avatarUrl = `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
+              }
+              profilePic.src = avatarUrl;
+              profilePic.style.display = "block";
+              profilePic.title = payload.username || "Profile";
+            }
+          } catch (err) {
+            console.warn("Invalid token or unable to parse:", err);
+          }
+        }
+
+        profilePic.addEventListener("click", () => {
+          window.location.href = "profile.html";
+        });
+      });
+
+      const battle = document.querySelector(".battle");
+      const trad = document.querySelector(".trad");
+      const line = document.querySelector(".menu-line");
+      const logo = document.querySelector(".menu-logo");
+      const selection = document.querySelector(".selection-screen");
+      const fadeIn = document.querySelector(".fade-in-content");
+      const pvb = document.querySelector(".pvb");
+      const pvp = document.querySelector(".pvp");
+      const pvbse = document.querySelector(".pvbse");
+      const pvpse = document.querySelector(".pvpse");
+      const rarityScreen = document.querySelector(".rarity-screen");
+
+      battle.addEventListener("mouseenter", () => {
+        battle.style.transform = "translate(-60%,-60%) scale(1.1)";
+      });
+      battle.addEventListener("mouseleave", () => {
+        battle.style.transform = "translate(-50%,-50%) scale(1)";
+      });
+
+      battle.addEventListener("click", () => {
+        trad.style.opacity = "0";
+        battle.style.opacity = "0";
+        line.classList.add("swipe-line");
+        logo.classList.add("swipe-logo");
+
+        setTimeout(() => {
+          selection.classList.add("active");
+          fadeIn.classList.add("visible");
+          setTimeout(() => {
+            fadeIn.classList.add("slide-up");
+            setTimeout(() => {
+              [pvb, pvp, pvbse, pvpse].forEach(
+                (el) => (el.style.opacity = "1")
+              );
+            }, 1000);
+          }, 1000);
+        }, 1000);
+      });
+
+      // PVBSE click triggers swipe-out and rarity swipe-in
+      pvbse.addEventListener("click", () => {
+        // Slide all elements fully off-screen
+        [pvb, pvp, pvbse, pvpse].forEach((el) => {
+          el.style.transform = "translateX(-150vw)"; // slide far left
+          el.style.opacity = "0"; // fade out
+        });
+
+        line.style.transform = "translateY(-150vh)"; // slide line up out of view
+        line.style.opacity = "0";
+
+        logo.style.transform = "translateY(-150vh)"; // slide logo up out of view
+        logo.style.opacity = "0";
+
+        fadeIn.style.transform = "translateY(-150vh)";
+        fadeIn.style.opacity = "0";
+
+        // Activate rarity screen after swipe-out animation
+        setTimeout(() => {
+          rarityScreen.classList.add("active");
+        }, 800); // matches transition time
+      });
+
+      // Select all rarity images
+      const rarityImages = document.querySelectorAll(".rarity img");
+
+      rarityImages.forEach((img) => {
+        img.addEventListener("click", () => {
+          const selectedRarity = img.dataset.rarity;
+          if (selectedRarity) {
+            localStorage.setItem("selectedRarity", selectedRarity);
+            window.location.href = "matchmaking.html"; // change if your file is named differently
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

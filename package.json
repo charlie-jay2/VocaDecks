@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@react-three/drei": "^10.6.1",
+    "@react-three/fiber": "^9.3.0",
+    "@supabase/supabase-js": "^2.54.0",
+    "dotenv": "^17.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
+    "maath": "^0.10.8",
+    "mongodb": "^6.17.0",
+    "mongoose": "^8.16.1",
+    "netlify": "^22.2.1",
+    "node-fetch": "^2.7.0",
+    "nodemailer": "^7.0.5",
+    "three": "^0.179.1"
+  }
+}

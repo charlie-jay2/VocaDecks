@@ -1,0 +1,97 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-display: swap;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden; /* Prevent scrolling */
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-image: url(./Assets/background.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        font-family: Panton;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="scripts/loading2.js"></script>
+    <script>
+      const themes = {
+        t1: "./Menu/bg.png",
+        t2: "./Profile/MIDNIGHT_BLUE.png",
+        t3: "./Profile/TUNDRA_MANGO.png",
+        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+        t5: "./Profile/CHERRIES__CREAM.png",
+        t6: "./Profile/SIREN_PURPLE.png",
+      };
+      function applyStoredTheme() {
+        const key = localStorage.getItem("selectedTheme") || "t1";
+        document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
+      }
+
+      // apply stored theme on load
+      window.addEventListener("DOMContentLoaded", () => {
+        applyStoredTheme();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get("token");
+        if (token) {
+          localStorage.setItem("token", token);
+          history.replaceState(null, "", window.location.pathname);
+        }
+
+        const storedToken = localStorage.getItem("token");
+        const profilePic = document.getElementById("profile-pic");
+
+        if (storedToken) {
+          try {
+            const payloadBase64 = storedToken.split(".")[1];
+            const base64 = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+              atob(base64)
+                .split("")
+                .map(
+                  (c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+                )
+                .join("")
+            );
+            const payload = JSON.parse(jsonPayload);
+            if (payload && payload.avatar && payload.id) {
+              let avatarUrl;
+              if (payload.avatar) {
+                avatarUrl = `https://cdn.discordapp.com/avatars/${payload.id}/${payload.avatar}.png`;
+              } else {
+                const discrim = payload.discriminator || "0";
+                const defaultAvatarNumber = parseInt(discrim) % 5;
+                avatarUrl = `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
+              }
+              profilePic.src = avatarUrl;
+              profilePic.style.display = "block";
+              profilePic.title = payload.username || "Profile";
+            }
+          } catch (err) {
+            console.warn("Invalid token or unable to parse:", err);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

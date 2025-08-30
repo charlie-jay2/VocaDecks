@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/x-icon" href="/Assets/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        margin: 0;
+        font-family: Panton, sans-serif;
+        color: white;
+        background-color: black;
+        overflow: hidden;
+      }
+
+      /* Fullscreen background video */
+      #bg-video {
+        position: fixed;
+        top: -30%;
+        left: -30%;
+        width: 150vw;
+        height: 150vh;
+        object-fit: cover;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .pfp {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: 200px;
+        background-color: white;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        overflow: hidden;
+        cursor: pointer;
+        z-index: 2;
+      }
+
+      .pfp img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .chaos,
+      .settings,
+      .shop,
+      .solos {
+        position: fixed;
+        width: 200px;
+        height: 200px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        user-select: none;
+      }
+
+      .chaos:hover,
+      .settings:hover,
+      .shop:hover,
+      .solos:hover {
+        transform: scale(1.15);
+        z-index: 1000;
+      }
+
+      .shop {
+        top: 50%;
+        left: 60%;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        position: fixed;
+        cursor: pointer;
+        overflow: visible;
+        /* For pulse glow container */
+      }
+      /* Pulse glow as a ::before element wrapping shop exactly */
+      .shop.glow::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: -1;
+        background: rgba(72, 255, 0, 0.3);
+        animation: pulseGlow 2.5s infinite ease-out;
+        box-shadow: 0 0 8px 4px rgba(72, 255, 0, 0.7);
+      }
+
+      .settings {
+        top: 50%;
+        left: 30%;
+        width: 200px;
+        height: 200px;
+      }
+
+      .solos {
+        top: 10%;
+        left: 60%;
+        width: 200px;
+        height: 200px;
+        border-radius: 20px; /* smooth rounded edges like glass */
+        overflow: hidden;
+        filter: contrast(1.1) brightness(1.05); /* slight pop */
+        -webkit-tap-highlight-color: transparent;
+        /* make it a stacking context for ::before */
+        position: fixed;
+        z-index: 1;
+      }
+
+      /* Shine/highlight overlay */
+      .solos::before {
+        content: "";
+        pointer-events: none;
+        position: absolute;
+        top: -20%;
+        left: -20%;
+        width: 140%;
+        height: 140%;
+        background: linear-gradient(
+          120deg,
+          rgba(255, 255, 255, 0.4) 0%,
+          rgba(255, 255, 255, 0.1) 50%,
+          rgba(255, 255, 255, 0) 80%
+        );
+        transform: rotate(-25deg);
+        filter: brightness(1.2);
+        border-radius: 20px;
+        mix-blend-mode: screen;
+        transition: opacity 0.3s ease;
+        opacity: 0.6;
+        z-index: 2;
+      }
+
+      /* On hover, brighten shine and scale */
+      .solos:hover::before {
+        opacity: 0.9;
+      }
+
+      .settings {
+        cursor: pointer;
+      }
+
+      .chaos {
+        top: 10%;
+        left: 20%;
+        cursor: pointer;
+      }
+
+      .shop {
+        transition: opacity 0.6s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mobile-overlay" style="display: none">
+      <div
+        style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background-image: url(Assets/background.png);
+          color: white;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          z-index: 99999;
+          font-family: Panton, sans-serif;
+          padding: 20px;
+        ">
+        <p style="font-size: 18px; margin-bottom: 30px">
+          To play the mobile version, head to:
+        </p>
+        <a
+          href="https://mobile.vocadecks.com"
+          style="
+            background: white;
+            color: black;
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 8px;
+            text-decoration: none;
+          ">
+          Go to mobile.vocadecks.com
+        </a>
+      </div>
+    </div>
+    <script>
+      function isMobileDevice() {
+        return window.innerWidth <= 768;
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        if (isMobileDevice()) {
+          document.getElementById("mobile-overlay").style.display = "block";
+        }
+      });
+    </script>
+
+    <div class="pfp" onclick="window.location.href='./profile.html';"></div>
+    <img src="./lobby/CHAOS.png" class="chaos" alt="Chaos" />
+    <img src="./lobby/SETTINGS.png" class="settings" alt="Settings" />
+    <img src="./lobby/SHOP.png" class="shop" alt="Shop" />
+    <img src="./lobby/SOLOS.png" class="solos" alt="Solos" />
+
+    <script>
+      // Fixed bouncing logic for floating circles
+
+      class FloatingCircle {
+        constructor(el, startX, startY) {
+          this.el = el;
+          this.width = el.offsetWidth;
+          this.height = el.offsetHeight;
+
+          this.windowWidth = window.innerWidth;
+          this.windowHeight = window.innerHeight;
+
+          this.x = startX;
+          this.y = startY;
+
+          // Random velocity between -2 and 2, not 0
+          this.vx = Math.random() * 4 - 2 || 1;
+          this.vy = Math.random() * 4 - 2 || 1;
+
+          this.updatePosition();
+        }
+
+        updatePosition() {
+          this.el.style.left = this.x + "px";
+          this.el.style.top = this.y + "px";
+        }
+
+        step() {
+          this.x += this.vx;
+          this.y += this.vy;
+
+          // Bounce off window edges
+          if (this.x <= 0) {
+            this.x = 0;
+            this.vx = Math.abs(this.vx);
+          } else if (this.x + this.width >= this.windowWidth) {
+            this.x = this.windowWidth - this.width;
+            this.vx = -Math.abs(this.vx);
+          }
+
+          if (this.y <= 0) {
+            this.y = 0;
+            this.vy = Math.abs(this.vy);
+          } else if (this.y + this.height >= this.windowHeight) {
+            this.y = this.windowHeight - this.height;
+            this.vy = -Math.abs(this.vy);
+          }
+
+          this.updatePosition();
+        }
+
+        updateWindowSize(width, height) {
+          this.windowWidth = width;
+          this.windowHeight = height;
+        }
+
+        checkCollisionWith(other) {
+          // Simple AABB collision detection
+          if (
+            this.x < other.x + other.width &&
+            this.x + this.width > other.x &&
+            this.y < other.y + other.height &&
+            this.y + this.height > other.y
+          ) {
+            // Reverse velocity for a simple bounce effect
+            const tempVx = this.vx;
+            const tempVy = this.vy;
+            this.vx = other.vx;
+            this.vy = other.vy;
+            other.vx = tempVx;
+            other.vy = tempVy;
+
+            // Adjust positions to avoid sticking
+            if (this.x < other.x) {
+              this.x -= 5;
+              other.x += 5;
+            } else {
+              this.x += 5;
+              other.x -= 5;
+            }
+            if (this.y < other.y) {
+              this.y -= 5;
+              other.y += 5;
+            } else {
+              this.y += 5;
+              other.y -= 5;
+            }
+          }
+        }
+
+        checkCollisionWithPFP(pfpX, pfpY, pfpRadius) {
+          // Circle collision with profile pic (circle)
+          // Using circle centers and radius for collision detection
+
+          const circleCenterX = this.x + this.width / 2;
+          const circleCenterY = this.y + this.height / 2;
+          const circleRadius = Math.min(this.width, this.height) / 2;
+
+          const dx = circleCenterX - pfpX;
+          const dy = circleCenterY - pfpY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < circleRadius + pfpRadius) {
+            // Calculate overlap and push away
+            const overlap = circleRadius + pfpRadius - distance;
+            const angle = Math.atan2(dy, dx);
+
+            this.x += Math.cos(angle) * overlap;
+            this.y += Math.sin(angle) * overlap;
+
+            // Bounce velocity
+            this.vx = -this.vx;
+            this.vy = -this.vy;
+          }
+        }
+      }
+
+      const floatingCircles = [];
+
+      function initFloatingCircles() {
+        const selectors = [".chaos", ".settings", ".shop", ".solos"];
+
+        selectors.forEach((selector) => {
+          const el = document.querySelector(selector);
+          if (el) {
+            // Use getBoundingClientRect for initial positions relative to viewport
+            const rect = el.getBoundingClientRect();
+            // Adjust x,y to position from top-left corner of viewport (not including scrolling)
+            const startX = rect.left;
+            const startY = rect.top;
+
+            // Set element style position to fixed and override top/left for JS control
+            el.style.position = "fixed";
+            el.style.left = startX + "px";
+            el.style.top = startY + "px";
+
+            floatingCircles.push(new FloatingCircle(el, startX, startY));
+          }
+        });
+      }
+
+      function animate() {
+        const pfp = document.querySelector(".pfp");
+        const pfpRect = pfp.getBoundingClientRect();
+        const pfpCenterX = pfpRect.left + pfpRect.width / 2;
+        const pfpCenterY = pfpRect.top + pfpRect.height / 2;
+        const pfpRadius = pfpRect.width / 2;
+
+        // Check collisions between floating circles
+        for (let i = 0; i < floatingCircles.length; i++) {
+          for (let j = i + 1; j < floatingCircles.length; j++) {
+            floatingCircles[i].checkCollisionWith(floatingCircles[j]);
+          }
+          floatingCircles[i].checkCollisionWithPFP(
+            pfpCenterX,
+            pfpCenterY,
+            pfpRadius
+          );
+        }
+
+        floatingCircles.forEach((circle) => circle.step());
+
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        applyStoredTheme();
+        initFloatingCircles();
+        animate();
+        loadUserData();
+        setInterval(loadUserData, 5000);
+
+        const solos = document.querySelector(".solos");
+        if (solos) {
+          solos.style.cursor = "pointer";
+          solos.addEventListener("click", () => {
+            window.location.href = "matchmaking.html";
+          });
+        }
+
+        // Play UI sound on hover for all buttons and pfp
+        const uiSound = document.getElementById("ui-sound");
+
+        const hoverElements = [
+          document.querySelector(".chaos"),
+          document.querySelector(".settings"),
+          document.querySelector(".shop"),
+          document.querySelector(".solos"),
+          document.querySelector(".pfp"),
+        ];
+
+        hoverElements.forEach((el) => {
+          if (el) {
+            el.addEventListener("mouseenter", () => {
+              // Clone to allow overlapping rapid hovers
+              uiSound.cloneNode().play();
+            });
+          }
+        });
+      });
+
+      window.addEventListener("resize", () => {
+        floatingCircles.forEach((circle) =>
+          circle.updateWindowSize(window.innerWidth, window.innerHeight)
+        );
+      });
+
+      // Themes and user data functions
+      const themes = {
+        t1: "./Menu/bg.png",
+        t2: "./Profile/MIDNIGHT_BLUE.png",
+        t3: "./Profile/TUNDRA_MANGO.png",
+        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+        t5: "./Profile/CHERRIES__CREAM.png",
+        t6: "./Profile/SIREN_PURPLE.png",
+      };
+
+      function applyStoredTheme() {
+        const key = localStorage.getItem("selectedTheme") || "t1";
+        const bgUrl = themes[key] || themes["t1"];
+        document.body.style.setProperty("--theme-bg", `url(${bgUrl})`);
+      }
+
+      function isTokenValid(token) {
+        try {
+          const decoded = jwt_decode(token);
+          return decoded.exp * 1000 > Date.now();
+        } catch {
+          return false;
+        }
+      }
+
+      async function loadUserData() {
+        const token = localStorage.getItem("token");
+        if (!token || !isTokenValid(token)) {
+          // renderLoggedOut();
+          return;
+        }
+
+        try {
+          const response = await fetch("/.netlify/functions/getUserData", {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          });
+          if (!response.ok) throw new Error("Failed to fetch user data");
+          const data = await response.json();
+
+          const pfpDiv = document.querySelector(".pfp");
+          if (pfpDiv && data.avatar) {
+            pfpDiv.innerHTML = `<img src="${data.avatar}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+          }
+        } catch (err) {
+          console.error("Error loading user data:", err);
+        }
+      }
+    </script>
+    <script>
+      async function checkShopNotification() {
+        try {
+          const response = await fetch("/shopNotif.txt", { cache: "no-store" });
+          console.log("[ShopNotif] Fetching /shopNotif.txt...");
+
+          if (!response.ok) {
+            console.error(
+              "[ShopNotif] Failed to fetch shopNotif.txt. Status:",
+              response.status
+            );
+            return;
+          }
+
+          const text = await response.text();
+          const trimmedText = text.trim().toLowerCase();
+          console.log("[ShopNotif] shopNotif.txt contents:", trimmedText);
+
+          const shopImg = document.querySelector(".shop");
+          if (!shopImg) {
+            console.warn("[ShopNotif] .shop image element not found.");
+            return;
+          }
+
+          const shouldNotify = trimmedText === "true";
+          const currentSrc = shopImg.getAttribute("src");
+          const targetSrc = shouldNotify
+            ? "./lobby/SHOP_NOTIFY.png"
+            : "./lobby/SHOP.png";
+
+          if (currentSrc !== targetSrc) {
+            console.log(`[ShopNotif] Changing shop icon to: ${targetSrc}`);
+
+            shopImg.style.opacity = 0;
+
+            setTimeout(() => {
+              shopImg.setAttribute("src", targetSrc);
+              shopImg.style.opacity = 1;
+              console.log("[ShopNotif] Shop icon update complete.");
+            }, 600);
+          } else {
+            console.log(
+              "[ShopNotif] Shop icon already correct. No change needed."
+            );
+          }
+        } catch (err) {
+          console.error("[ShopNotif] Error checking shop notification:", err);
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        checkShopNotification();
+        setInterval(checkShopNotification, 5000);
+      });
+    </script>
+
+    <audio id="bg-music" src="./Assets/background.mp3" autoplay loop></audio>
+    <script>
+      const bgMusic = document.getElementById("bg-music");
+      bgMusic.volume = 0.3;
+    </script>
+
+    <video id="bg-video" autoplay loop muted playsinline>
+      <source
+        src="https://www.dropbox.com/scl/fi/hontk24ked988qvdwuas0/100823-video-2160.mp4?rlkey=bmz7f6e34xmgd8il53xvtvj2v&st=odou8xd2&raw=1"
+        type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+
+    <audio id="ui-sound" src="./Assets/Next.wav" preload="auto"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  </body>
+</html>

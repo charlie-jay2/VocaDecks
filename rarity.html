@@ -1,0 +1,143 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/x-icon" href="/Assets/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-display: swap;
+      }
+      body {
+        margin: 0;
+        font-family: Panton, sans-serif;
+        background: url(./Menu/bg.png) center/cover fixed no-repeat;
+        overflow: hidden;
+        transition: background 0.8s ease; /* smooth fade */
+      }
+
+      .par {
+        width: auto;
+        height: 20%;
+        position: absolute;
+        left: 50%;
+        top: 15%;
+        transform: translate(-50%, -50%);
+      }
+
+      /* Center container for rarity images */
+      .rarity {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2vw; /* space between images */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .rarity img {
+        height: 80%; /* Adjust as needed */
+        max-height: 230px;
+        width: auto;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+
+      .rarity img:hover {
+        transform: scale(1.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <img src="Battle/PICK_A_RARITY.png" class="par" />
+    </div>
+    <div class="rarity">
+      <img src="Battle/COMMON_SELECTOR.png" class="r1" />
+      <img src="Battle/EXTRA_SELECTOR.png" class="r2" />
+      <img src="Battle/RARE_SELECTOR.png" class="r3" />
+      <img src="Battle/LEGENDARY_SELECTOR.png" class="r4" />
+      <img src="Battle/UNTOUCHED_SELECTOR.png" class="r5" />
+    </div>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <script>
+    const themes = {
+      t1: "./Menu/bg.png",
+      t2: "./Profile/MIDNIGHT_BLUE.png",
+      t3: "./Profile/TUNDRA_MANGO.png",
+      t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+      t5: "./Profile/CHERRIES__CREAM.png",
+      t6: "./Profile/SIREN_PURPLE.png",
+    };
+    function applyStoredTheme() {
+      const key = localStorage.getItem("selectedTheme") || "t1";
+      document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
+    }
+
+    // apply stored theme on load
+    window.addEventListener("DOMContentLoaded", () => {
+      applyStoredTheme();
+
+      // Handle token in URL & localStorage
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("token");
+      if (token) {
+        localStorage.setItem("token", token);
+        // optionally remove token from URL
+        history.replaceState(null, "", window.location.pathname);
+      }
+
+      // Show profile picture if token exists
+      const storedToken = localStorage.getItem("token");
+      const profilePic = document.getElementById("profile-pic");
+
+      if (storedToken) {
+        try {
+          // Decode JWT (assumes format header.payload.signature)
+          const payloadBase64 = storedToken.split(".")[1];
+          // Decode base64 URL (replace URL-safe chars)
+          const base64 = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map(function (c) {
+                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+              })
+              .join("")
+          );
+          const payload = JSON.parse(jsonPayload);
+          if (payload && payload.avatar && payload.id) {
+            // Discord CDN URL for avatar
+            // avatar can be null, fallback to default avatar URL if needed
+            let avatarUrl;
+            if (payload.avatar) {
+              avatarUrl = `https://cdn.discordapp.com/avatars/${payload.id}/${payload.avatar}.png`;
+            } else {
+              // Default avatar (discriminator modulo 5)
+              const discrim = payload.discriminator || "0";
+              const defaultAvatarNumber = parseInt(discrim) % 5;
+              avatarUrl = `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
+            }
+            profilePic.src = avatarUrl;
+            profilePic.style.display = "block";
+            profilePic.title = payload.username || "Profile";
+          }
+        } catch (err) {
+          // Invalid token or parse error
+          console.warn("Invalid token or unable to parse:", err);
+        }
+      }
+    });
+  </script>
+</html>
