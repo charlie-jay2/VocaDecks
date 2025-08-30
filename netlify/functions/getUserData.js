@@ -11,7 +11,8 @@ exports.handler = async function (event, context) {
 
   try {
     // Get Authorization header and validate token presence
-    const authHeader = event.headers.authorization || event.headers.Authorization;
+    const authHeader =
+      event.headers.authorization || event.headers.Authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return {
         statusCode: 401,
@@ -78,14 +79,15 @@ exports.handler = async function (event, context) {
     let xpPercent = (xp / xpNeeded) * 100;
     xpPercent = Math.min(xpPercent, 99); // Clamp to 99%
 
-    const avatarURL = decoded.avatar
-      ? `https://cdn.discordapp.com/avatars/${decoded.id}/${decoded.avatar}.png`
+    // Avatar from Supabase (saved during login in auth callback)
+    const avatarURL = userDoc.avatar
+      ? `https://cdn.discordapp.com/avatars/${userDoc.userid}/${userDoc.avatar}.png`
       : "https://cdn.discordapp.com/embed/avatars/0.png";
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        username: decoded.username,
+        username: userDoc.username ?? decoded.username,
         avatar: avatarURL,
         level: level,
         xp: xp,
