@@ -53,7 +53,7 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: "Failed to fetch Discord token" };
   }
 
-  // Fetch user info
+  // Fetch user info from Discord
   let userData;
   try {
     const userRes = await fetch("https://discord.com/api/users/@me", {
@@ -70,11 +70,19 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: "Failed to fetch Discord user" };
   }
 
-  // Upsert user in Supabase 'users' table
+  // Upsert user in Supabase 'users' table with username + avatar
   try {
     const { error } = await supabase
       .from("users")
-      .upsert({ userid: userData.id, cards: [] }, { onConflict: "userid" })
+      .upsert(
+        {
+          userid: userData.id,
+          username: userData.username,
+          avatar: userData.avatar, // just the hash, URL built later
+          cards: [],
+        },
+        { onConflict: "userid" }
+      )
       .select()
       .single();
 
