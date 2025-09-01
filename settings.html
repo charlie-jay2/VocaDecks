@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+    />
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-display: swap;
+      }
+
+      body {
+        margin: 0;
+        font-family: Panton, sans-serif;
+        background: url(./Profile/bg.png) center/cover fixed no-repeat;
+        overflow: hidden;
+        transition: background 0.8s ease;
+      }
+
+      .logo {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .logotop {
+        width: 30%;
+        height: auto;
+      }
+
+      .settings-container {
+        width: 40%;
+        margin: 50px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 15px;
+        text-align: left;
+      }
+
+      h2 {
+        color: #fff;
+        margin-bottom: 10px;
+        margin-left: 10px;
+      }
+
+      .slidecontainer {
+        width: 90%;
+        margin: 10px auto 30px auto;
+        position: relative;
+      }
+
+      .slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 25px;
+        outline: none;
+        opacity: 0.9;
+        transition: opacity 0.2s;
+        border-radius: 12px;
+        background: transparent; /* <- make sure this is transparent */
+      }
+
+      .slider:hover {
+        opacity: 1;
+      }
+
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        background: #04aa6d;
+        cursor: pointer;
+        border-radius: 50%;
+      }
+
+      .slider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        background: #04aa6d;
+        cursor: pointer;
+        border-radius: 50%;
+      }
+
+      .back {
+        rotate: 90deg;
+        width: 3%;
+        height: auto;
+        position: fixed;
+        left: 1%;
+        top: 10%;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo">
+      <img src="https://iili.io/KfJPRwB.png" class="logotop" />
+    </div>
+
+    <img src="./Menu/Vector.png" class="back" id="backBtn" />
+
+    <div class="settings-container">
+      <h2>Music</h2>
+      <div class="slidecontainer">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="10"
+          class="slider"
+          id="musicSlider"
+        />
+      </div>
+
+      <h2>SFX</h2>
+      <div class="slidecontainer">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="10"
+          class="slider"
+          id="sfxSlider"
+        />
+      </div>
+    </div>
+
+    <script>
+      // --- Background music ---
+      const bgMusic = new Audio("Menu/Challenger_Junction_VocaDecks_Theme.wav");
+      bgMusic.loop = true;
+      const savedTime = localStorage.getItem("bgMusicTime");
+      const savedVolume = localStorage.getItem("bgMusicVolume");
+      bgMusic.volume = savedVolume !== null ? parseFloat(savedVolume) : 0.1;
+      if (savedTime) bgMusic.currentTime = parseFloat(savedTime);
+
+      const musicSlider = document.getElementById("musicSlider");
+      musicSlider.value = bgMusic.volume * 100;
+
+      setInterval(() => {
+        if (!isNaN(bgMusic.currentTime)) {
+          localStorage.setItem("bgMusicTime", bgMusic.currentTime);
+        }
+      }, 500);
+
+      window.addEventListener("load", () => {
+        bgMusic.play().catch(() => {
+          document.body.addEventListener("click", () => bgMusic.play(), {
+            once: true,
+          });
+        });
+      });
+
+      // --- SFX setup ---
+      let sfxVolume = localStorage.getItem("sfxVolume");
+      sfxVolume = sfxVolume !== null ? parseFloat(sfxVolume) : 0.1;
+
+      const sfxSlider = document.getElementById("sfxSlider");
+      sfxSlider.value = sfxVolume * 100;
+
+      const backSFX = new Audio("Menu/Back.wav");
+      const okaySFX = new Audio("Menu/Okay.wav");
+      const hoverSFX = new Audio("Menu/Hover.wav");
+
+      function setSFXVolume(vol) {
+        backSFX.volume = vol;
+        okaySFX.volume = vol;
+        hoverSFX.volume = vol;
+      }
+
+      setSFXVolume(sfxVolume);
+
+      // --- Function to update slider gradient ---
+      function updateSliderGradient(slider, color1, color2) {
+        const val = slider.value;
+        const percentage = val + "%";
+        slider.style.background = `linear-gradient(to right, ${color1} 0%, ${color2} ${percentage}, rgba(255,255,255,0.1) ${percentage}, rgba(255,255,255,0.1) 100%)`;
+      }
+
+      // --- Initialize gradients ---
+      updateSliderGradient(musicSlider, "#55ddcd", "#fcee40");
+      updateSliderGradient(sfxSlider, "#55ddcd", "#fcee40");
+
+      // --- Event listeners for sliders ---
+      musicSlider.addEventListener("input", (e) => {
+        let vol = parseFloat(e.target.value) / 100;
+        bgMusic.volume = vol;
+        localStorage.setItem("bgMusicVolume", vol);
+        updateSliderGradient(musicSlider, "#55ddcd", "#fcee40");
+      });
+
+      sfxSlider.addEventListener("input", (e) => {
+        let vol = parseFloat(e.target.value) / 100;
+        sfxVolume = vol;
+        setSFXVolume(vol);
+        localStorage.setItem("sfxVolume", vol);
+        updateSliderGradient(sfxSlider, "#55ddcd", "#fcee40");
+      });
+
+      // --- Back button click with SFX ---
+      const backBtn = document.querySelector(".back");
+      if (backBtn) {
+        backBtn.addEventListener("click", () => {
+          okaySFX.currentTime = 0;
+          okaySFX.volume = sfxVolume;
+          okaySFX
+            .play()
+            .then(() => {
+              okaySFX.onended = () => {
+                window.location.href = "menu.html";
+              };
+            })
+            .catch(() => {
+              window.location.href = "menu.html";
+            });
+        });
+
+        // Optional hover SFX for back button
+        backBtn.addEventListener("mouseenter", () => {
+          hoverSFX.currentTime = 0;
+          hoverSFX.volume = sfxVolume;
+          hoverSFX.play();
+        });
+      }
+    </script>
+  </body>
+</html>

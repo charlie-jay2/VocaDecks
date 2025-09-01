@@ -358,6 +358,34 @@
         onclick="window.location.href='menu.html'"
       />
     </div>
+    <script>
+      const bgMusic = new Audio("Menu/Challenger_Junction_VocaDecks_Theme.wav");
+      bgMusic.volume = 0.1;
+      bgMusic.loop = true;
+
+      const savedTime = localStorage.getItem("bgMusicTime");
+      if (savedTime) {
+        bgMusic.currentTime = parseFloat(savedTime);
+      }
+
+      setInterval(() => {
+        if (!isNaN(bgMusic.currentTime)) {
+          localStorage.setItem("bgMusicTime", bgMusic.currentTime);
+        }
+      }, 1000);
+
+      window.addEventListener("load", () => {
+        bgMusic.play().catch(() => {
+          document.body.addEventListener(
+            "click",
+            () => {
+              bgMusic.play();
+            },
+            { once: true }
+          );
+        });
+      });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3/build/jwt-decode.min.js"></script>
     <script>

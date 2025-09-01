@@ -1,96 +1,208 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+    />
     <style>
       @font-face {
         font-family: "Panton";
         src: url("./Fonts/Panton.otf") format("truetype");
         font-display: swap;
       }
-      html,
-      body {
-        height: 100%;
-        overflow: hidden; /* Prevent scrolling */
-        margin: 0;
-        padding: 0;
-      }
 
       body {
-        background-image: url(./Assets/background.png);
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center;
-        font-family: Panton;
+        margin: 0;
+        font-family: Panton, sans-serif;
+        background: url(./Profile/bg.png) center/cover fixed no-repeat;
+        overflow-x: hidden;
+        color: white;
+      }
+
+      /* Top logo */
+      .logotop {
+        width: 25%;
         position: fixed;
+        left: 50%;
+        top: 5%;
+        transform: translateX(-50%);
+        height: auto;
+      }
+
+      /* Section titles */
+      .section-title {
+        font-size: 2em;
+        text-transform: uppercase;
+        font-weight: bold;
+        text-align: left;
+        margin: 40px 0 20px 40px;
+        color: #fff;
+        text-shadow: 2px 2px 4px black;
+      }
+
+      /* Shop grid */
+      .shop-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        padding: 0 40px 40px;
+      }
+
+      .shop-item {
+        background: linear-gradient(160deg, #1e1e40, #2a2a60);
+        border: 3px solid #4db8ff;
+        border-radius: 15px;
+        text-align: center;
+        padding: 12px;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        cursor: pointer;
+      }
+
+      .shop-item:hover {
+        transform: scale(1.07);
+        box-shadow: 0px 0px 20px #4db8ff;
+      }
+
+      .shop-item img {
         width: 100%;
-        height: 100%;
+        border-radius: 10px;
+        margin-bottom: 10px;
+      }
+
+      .item-name {
+        font-size: 1.3em;
+        font-weight: bold;
+        margin-top: 5px;
+      }
+
+      .item-price {
+        font-size: 1.1em;
+        color: #ffd700;
+        margin-top: 5px;
+      }
+
+      .shop-section {
+        margin-top: 120px;
+      }
+
+      /* Back button */
+      .back {
+        rotate: 90deg;
+        width: 3%;
+        height: auto;
+        position: fixed;
+        left: 1%;
+        top: 10%;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
-    <script src="scripts/loading2.js"></script>
+    <!-- Logo -->
+    <div class="logo">
+      <img src="./Menu/VOCADECKS_LOGO_NO_GLINT_314.png" class="logotop" />
+    </div>
+
+    <!-- Back Button -->
+    <img src="./Menu/Vector.png" class="back" id="backBtn" />
+
+    <!-- Featured Section -->
+    <div class="shop-section">
+      <div class="section-title">Featured</div>
+      <div class="shop-container">
+        <div class="shop-item">
+          <img src="./Shop/skin1.png" alt="Skin 1" />
+          <div class="item-name">Galaxy Raider</div>
+          <div class="item-price">1500 V-Bucks</div>
+        </div>
+
+        <div class="shop-item">
+          <img src="./Shop/skin2.png" alt="Skin 2" />
+          <div class="item-name">Shadow Blade</div>
+          <div class="item-price">1200 V-Bucks</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Section -->
+    <div class="shop-section">
+      <div class="section-title">Daily</div>
+      <div class="shop-container">
+        <div class="shop-item">
+          <img src="./Shop/emote1.png" alt="Emote" />
+          <div class="item-name">Victory Dance</div>
+          <div class="item-price">500 V-Bucks</div>
+        </div>
+
+        <div class="shop-item">
+          <img src="./Shop/pickaxe1.png" alt="Pickaxe" />
+          <div class="item-name">Thunder Pick</div>
+          <div class="item-price">800 V-Bucks</div>
+        </div>
+      </div>
+    </div>
+
     <script>
-      const themes = {
-        t1: "./Menu/bg.png",
-        t2: "./Profile/MIDNIGHT_BLUE.png",
-        t3: "./Profile/TUNDRA_MANGO.png",
-        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
-        t5: "./Profile/CHERRIES__CREAM.png",
-        t6: "./Profile/SIREN_PURPLE.png",
-      };
-      function applyStoredTheme() {
-        const key = localStorage.getItem("selectedTheme") || "t1";
-        document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
+      // --- Load SFX volume ---
+      let sfxVolume = localStorage.getItem("sfxVolume");
+      sfxVolume = sfxVolume !== null ? parseFloat(sfxVolume) : 0.1;
+
+      const backSFX = new Audio("Menu/Back.wav");
+      const okaySFX = new Audio("Menu/Okay.wav");
+      const hoverSFX = new Audio("Menu/Hover.wav");
+
+      function setSFXVolume(vol) {
+        backSFX.volume = vol;
+        okaySFX.volume = vol;
+        hoverSFX.volume = vol;
+      }
+      setSFXVolume(sfxVolume);
+
+      // --- Back button click with SFX ---
+      const backBtn = document.querySelector(".back");
+      if (backBtn) {
+        backBtn.addEventListener("click", () => {
+          okaySFX.currentTime = 0;
+          okaySFX.volume = sfxVolume;
+          okaySFX
+            .play()
+            .then(() => {
+              okaySFX.onended = () => {
+                window.location.href = "menu.html";
+              };
+            })
+            .catch(() => {
+              window.location.href = "menu.html";
+            });
+        });
+
+        // Optional hover SFX for back button
+        backBtn.addEventListener("mouseenter", () => {
+          hoverSFX.currentTime = 0;
+          hoverSFX.volume = sfxVolume;
+          hoverSFX.play();
+        });
       }
 
-      // apply stored theme on load
-      window.addEventListener("DOMContentLoaded", () => {
-        applyStoredTheme();
+      // --- Shop item hover + click ---
+      const shopItems = document.querySelectorAll(".shop-item");
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get("token");
-        if (token) {
-          localStorage.setItem("token", token);
-          history.replaceState(null, "", window.location.pathname);
-        }
+      shopItems.forEach((item) => {
+        item.addEventListener("mouseenter", () => {
+          backSFX.currentTime = 0;
+          backSFX.volume = sfxVolume;
+          backSFX.play();
+        });
 
-        const storedToken = localStorage.getItem("token");
-        const profilePic = document.getElementById("profile-pic");
-
-        if (storedToken) {
-          try {
-            const payloadBase64 = storedToken.split(".")[1];
-            const base64 = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
-            const jsonPayload = decodeURIComponent(
-              atob(base64)
-                .split("")
-                .map(
-                  (c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
-                )
-                .join("")
-            );
-            const payload = JSON.parse(jsonPayload);
-            if (payload && payload.avatar && payload.id) {
-              let avatarUrl;
-              if (payload.avatar) {
-                avatarUrl = `https://cdn.discordapp.com/avatars/${payload.id}/${payload.avatar}.png`;
-              } else {
-                const discrim = payload.discriminator || "0";
-                const defaultAvatarNumber = parseInt(discrim) % 5;
-                avatarUrl = `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
-              }
-              profilePic.src = avatarUrl;
-              profilePic.style.display = "block";
-              profilePic.title = payload.username || "Profile";
-            }
-          } catch (err) {
-            console.warn("Invalid token or unable to parse:", err);
-          }
-        }
+        item.addEventListener("click", () => {
+          okaySFX.currentTime = 0;
+          okaySFX.volume = sfxVolume;
+          okaySFX.play();
+        });
       });
     </script>
   </body>
