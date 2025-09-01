@@ -241,6 +241,16 @@
     </div>
 
     <script>
+      // Store token from URL query params into localStorage
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const tokenFromURL = params.get("token");
+        if (tokenFromURL) {
+          localStorage.setItem("token", tokenFromURL);
+          localStorage.setItem("jwtToken", tokenFromURL); // optional duplicate for compatibility
+        }
+      })();
+
       // Define the sets (each includes image, rectangle, and text element)
       const sets = [
         ["happy", "happyrec", "happyt"],
@@ -251,20 +261,25 @@
       // Hide everything initially
       sets.flat().forEach((cls) => {
         const el = document.querySelector("." + cls);
-        if (el) {
-          el.style.opacity = 0;
-        }
+        if (el) el.style.opacity = 0;
       });
 
       // Fetch username from server (fallback = "MikuDayo")
       async function fetchUsername() {
         try {
+          // Try both tokens from localStorage
+          const token =
+            localStorage.getItem("jwtToken") ||
+            localStorage.getItem("token") ||
+            "";
+          if (!token) throw new Error("No token found in localStorage");
+
           const res = await fetch("/.netlify/functions/getUserData", {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           });
+
           if (!res.ok) throw new Error("Network response not ok");
+
           const data = await res.json();
           return data.username || "MikuDayo";
         } catch (e) {
@@ -273,7 +288,7 @@
         }
       }
 
-      // Show one random set (different each load)
+      // Show one random greeting set
       async function showRandomSet() {
         const newSet = sets[Math.floor(Math.random() * sets.length)];
 
@@ -302,36 +317,6 @@
 
       // Run on page load
       document.addEventListener("DOMContentLoaded", showRandomSet);
-    </script>
-
-    <script>
-      async function fetchUsername() {
-        try {
-          const res = await fetch("/.netlify/functions/getUserData", {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("jwtToken") || ""}`,
-            },
-          });
-          if (!res.ok) throw new Error("Network response not ok");
-          const data = await res.json();
-          return data.username || "MikuDayo";
-        } catch (e) {
-          console.error("Failed to fetch username:", e);
-          return "MikuDayo";
-        }
-      }
-
-      // Update Happy Bubble
-      const speechTextEl = document.querySelector(".speech-text");
-      fetchUsername().then((username) => {
-        speechTextEl.textContent = `Hey ${username},\nLet's spin some decks!`;
-      });
-
-      // Update Surprised Bubble
-      const speechText1El = document.querySelector(".speech-text1");
-      fetchUsername().then((username) => {
-        speechText1El.textContent = `${username},\nlook how rich I am!`;
-      });
     </script>
 
     <div class="buttons">
