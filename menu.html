@@ -195,6 +195,7 @@
         rotate: -40deg;
         transform: translate(-50%, -50%);
         font-size: 2.5rem;
+        text-align: center;
         height: auto;
       }
 
@@ -306,8 +307,7 @@
             speechEl.innerHTML = `Hey ${username},<br>Let's spin some decks!<br>`;
         } else if (newSet.includes("sadt")) {
           const speechEl = document.querySelector(".sadt");
-          if (speechEl)
-            speechEl.innerHTML = `Cheer up ${username},<br>things will get better.<br>`;
+          if (speechEl) speechEl.innerHTML = `I lost my favourite card <br> :(`;
         } else if (newSet.includes("surprisedt")) {
           const speechEl = document.querySelector(".surprisedt");
           if (speechEl)
