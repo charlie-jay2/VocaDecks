@@ -242,16 +242,6 @@
     </div>
 
     <script>
-      // Store token from URL query params into localStorage
-      (function () {
-        const params = new URLSearchParams(window.location.search);
-        const tokenFromURL = params.get("token");
-        if (tokenFromURL) {
-          localStorage.setItem("token", tokenFromURL);
-          localStorage.setItem("jwtToken", tokenFromURL); // optional duplicate for compatibility
-        }
-      })();
-
       // Define the sets (each includes image, rectangle, and text element)
       const sets = [
         ["happy", "happyrec", "happyt"],
@@ -307,7 +297,8 @@
             speechEl.innerHTML = `Hey ${username},<br>Let's spin some decks!<br>`;
         } else if (newSet.includes("sadt")) {
           const speechEl = document.querySelector(".sadt");
-          if (speechEl) speechEl.innerHTML = `I lost my favourite card <br> :(`;
+          if (speechEl)
+            speechEl.innerHTML = `Cheer up ${username},<br>things will get better.<br>`;
         } else if (newSet.includes("surprisedt")) {
           const speechEl = document.querySelector(".surprisedt");
           if (speechEl)
