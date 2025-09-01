@@ -249,10 +249,13 @@
         ["surprised", "surprisedrec", "surprisedt"],
       ];
 
-      // Hide everything initially
+      // Hide everything initially and remove any previous active markers
       sets.flat().forEach((cls) => {
         const el = document.querySelector("." + cls);
-        if (el) el.style.opacity = 0;
+        if (el) {
+          el.style.opacity = 0;
+          el.dataset.active = "false";
+        }
       });
 
       // Fetch username from server (fallback = "MikuDayo")
@@ -283,10 +286,13 @@
       async function showRandomSet() {
         const newSet = sets[Math.floor(Math.random() * sets.length)];
 
-        // Make selected set visible
+        // Make selected set visible and mark as active
         newSet.forEach((cls) => {
           const el = document.querySelector("." + cls);
-          if (el) el.style.opacity = 1;
+          if (el) {
+            el.style.opacity = 1;
+            el.dataset.active = "true";
+          }
         });
 
         // Update greeting text depending on set
@@ -297,8 +303,7 @@
             speechEl.innerHTML = `Hey ${username},<br>Let's spin some decks!<br>`;
         } else if (newSet.includes("sadt")) {
           const speechEl = document.querySelector(".sadt");
-          if (speechEl)
-            speechEl.innerHTML = `Cheer up ${username},<br>things will get better.<br>`;
+          if (speechEl) speechEl.innerHTML = `I lost my favourite card <br>:(`;
         } else if (newSet.includes("surprisedt")) {
           const speechEl = document.querySelector(".surprisedt");
           if (speechEl)
@@ -333,9 +338,13 @@
 
     <script>
       // --- Load SFX and Music Volumes from localStorage ---
-      let sfxVolume = parseFloat(localStorage.getItem("sfxVolume")) || 0.1;
+      let sfxVolumeStored = localStorage.getItem("sfxVolume");
+      let sfxVolume =
+        sfxVolumeStored !== null ? parseFloat(sfxVolumeStored) : 0.1;
+
+      let musicVolumeStored = localStorage.getItem("bgMusicVolume");
       let musicVolume =
-        parseFloat(localStorage.getItem("bgMusicVolume")) || 0.1;
+        musicVolumeStored !== null ? parseFloat(musicVolumeStored) : 0.1;
 
       const hoverSound = new Audio("Menu/Back.wav");
       const clickSound = new Audio("Menu/Okay.wav");
@@ -346,7 +355,9 @@
       clickSound.volume = sfxVolume;
       bgMusic.volume = musicVolume;
 
-      const savedTime = parseFloat(localStorage.getItem("bgMusicTime")) || 0;
+      const savedTimeStored = localStorage.getItem("bgMusicTime");
+      const savedTime =
+        savedTimeStored !== null ? parseFloat(savedTimeStored) : 0;
       bgMusic.currentTime = savedTime;
 
       setInterval(() => {
@@ -405,22 +416,62 @@
       const goldrush = document.querySelector(".goldrush");
       const infogr = document.querySelector(".infogr");
 
+      // All greeting elements
+      const greetingElements = [
+        ...document.querySelectorAll(
+          ".happy, .sad, .surprised, .happyrec, .sadrec, .surprisedrec, .happyt, .sadt, .surprisedt"
+        ),
+      ];
+
+      // Hide greetings immediately
+      function hideGreetings() {
+        greetingElements.forEach((el) => (el.style.opacity = 0));
+      }
+
+      // Show greetings with fade-in
+      function showGreetings() {
+        greetingElements.forEach((el) => {
+          if (el.dataset.active === "true") {
+            el.style.transition = "opacity 0.8s ease"; // smooth fade
+            el.style.opacity = 1;
+          }
+        });
+      }
+
+      // Keep track of hover timeout
+      let greetingTimeout;
+
+      function scheduleGreetingShow() {
+        clearTimeout(greetingTimeout);
+        greetingTimeout = setTimeout(() => {
+          showGreetings();
+        }, 1000); // 3 seconds delay
+      }
+
+      // Classic Button Hover
       cbtn.addEventListener("mouseenter", () => {
         solo.classList.add("show");
         infocl.classList.add("show");
+        hideGreetings();
+        clearTimeout(greetingTimeout);
       });
       cbtn.addEventListener("mouseleave", () => {
         solo.classList.remove("show");
         infocl.classList.remove("show");
+        scheduleGreetingShow();
       });
 
+      // Gold Rush Button Hover
       grbtn.addEventListener("mouseenter", () => {
         goldrush.classList.add("show");
         infogr.classList.add("show");
+        hideGreetings();
+        clearTimeout(greetingTimeout);
       });
       grbtn.addEventListener("mouseleave", () => {
         goldrush.classList.remove("show");
         infogr.classList.remove("show");
+        scheduleGreetingShow();
       });
 
       let t = 0;
@@ -437,6 +488,52 @@
         requestAnimationFrame(animate);
       }
       animate();
+
+      const themes = {
+        t1: { bg: "./Profile/bg.png", gradient: ["#40e0d0", "#29ff52"] },
+        t2: {
+          bg: "./Profile/MIDNIGHT_BLUE.png",
+          gradient: ["#e393ff", "#1b11fc"],
+        },
+        t3: {
+          bg: "./Profile/TUNDRA_MANGO.png",
+          gradient: ["#f16300", "#09b313"],
+        },
+        t4: {
+          bg: "./Profile/RADIANT_ROCKET_LOLLY.png",
+          gradient: ["#d01ae6", "#ebf415"],
+        },
+        t5: {
+          bg: "./Profile/CHERRIES__CREAM.png",
+          gradient: ["#ff54c0", "#ffe1e4"],
+        },
+        t6: {
+          bg: "./Profile/SIREN_PURPLE.png",
+          gradient: ["#ec1927", "#0617af"],
+        },
+      };
+
+      function applyTheme(key) {
+        const theme = themes[key];
+        if (!theme) return;
+
+        document.body.style.background = `url(${theme.bg}) center/cover fixed no-repeat`;
+
+        const pbFill = document.querySelector(".pb-fill");
+        if (pbFill) {
+          const [start, end] = theme.gradient;
+          pbFill.style.background = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+        }
+
+        document
+          .querySelectorAll(".t1, .t2, .t3, .t4, .t5, .t6")
+          .forEach((el) => el.classList.remove("active-theme"));
+        const activeEl = document.querySelector("." + key);
+        if (activeEl) activeEl.classList.add("active-theme");
+      }
+
+      const savedTheme = localStorage.getItem("selectedTheme") || "t1";
+      applyTheme(savedTheme);
     </script>
   </body>
 </html>
