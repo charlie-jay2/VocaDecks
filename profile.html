@@ -359,30 +359,40 @@
       />
     </div>
     <script>
-      const bgMusic = new Audio("Menu/Challenger_Junction_VocaDecks_Theme.wav");
-      bgMusic.volume = 0.1;
-      bgMusic.loop = true;
+      // --- Load SFX and Music Volumes from localStorage ---
+      let sfxVolumeStored = localStorage.getItem("sfxVolume");
+      let sfxVolume =
+        sfxVolumeStored !== null ? parseFloat(sfxVolumeStored) : 0.1;
 
-      const savedTime = localStorage.getItem("bgMusicTime");
-      if (savedTime) {
-        bgMusic.currentTime = parseFloat(savedTime);
-      }
+      let musicVolumeStored = localStorage.getItem("bgMusicVolume");
+      let musicVolume =
+        musicVolumeStored !== null ? parseFloat(musicVolumeStored) : 0.1;
+
+      const hoverSound = new Audio("Menu/Back.wav");
+      const clickSound = new Audio("Menu/Okay.wav");
+      const bgMusic = new Audio("Menu/Challenger_Junction_VocaDecks_Theme.wav");
+
+      bgMusic.loop = true;
+      hoverSound.volume = sfxVolume;
+      clickSound.volume = sfxVolume;
+      bgMusic.volume = musicVolume;
+
+      const savedTimeStored = localStorage.getItem("bgMusicTime");
+      const savedTime =
+        savedTimeStored !== null ? parseFloat(savedTimeStored) : 0;
+      bgMusic.currentTime = savedTime;
 
       setInterval(() => {
         if (!isNaN(bgMusic.currentTime)) {
           localStorage.setItem("bgMusicTime", bgMusic.currentTime);
         }
-      }, 1000);
+      }, 500);
 
       window.addEventListener("load", () => {
         bgMusic.play().catch(() => {
-          document.body.addEventListener(
-            "click",
-            () => {
-              bgMusic.play();
-            },
-            { once: true }
-          );
+          document.body.addEventListener("click", () => bgMusic.play(), {
+            once: true,
+          });
         });
       });
     </script>
