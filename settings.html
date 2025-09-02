@@ -229,6 +229,52 @@
           hoverSFX.play();
         });
       }
+
+      const themes = {
+        t1: { bg: "./Profile/bg.png", gradient: ["#40e0d0", "#29ff52"] },
+        t2: {
+          bg: "./Profile/MIDNIGHT_BLUE.png",
+          gradient: ["#e393ff", "#1b11fc"],
+        },
+        t3: {
+          bg: "./Profile/TUNDRA_MANGO.png",
+          gradient: ["#f16300", "#09b313"],
+        },
+        t4: {
+          bg: "./Profile/RADIANT_ROCKET_LOLLY.png",
+          gradient: ["#d01ae6", "#ebf415"],
+        },
+        t5: {
+          bg: "./Profile/CHERRIES__CREAM.png",
+          gradient: ["#ff54c0", "#ffe1e4"],
+        },
+        t6: {
+          bg: "./Profile/SIREN_PURPLE.png",
+          gradient: ["#ec1927", "#0617af"],
+        },
+      };
+
+      function applyTheme(key) {
+        const theme = themes[key];
+        if (!theme) return;
+
+        document.body.style.background = `url(${theme.bg}) center/cover fixed no-repeat`;
+
+        const pbFill = document.querySelector(".pb-fill");
+        if (pbFill) {
+          const [start, end] = theme.gradient;
+          pbFill.style.background = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+        }
+
+        document
+          .querySelectorAll(".t1, .t2, .t3, .t4, .t5, .t6")
+          .forEach((el) => el.classList.remove("active-theme"));
+        const activeEl = document.querySelector("." + key);
+        if (activeEl) activeEl.classList.add("active-theme");
+      }
+
+      const savedTheme = localStorage.getItem("selectedTheme") || "t1";
+      applyTheme(savedTheme);
     </script>
   </body>
 </html>

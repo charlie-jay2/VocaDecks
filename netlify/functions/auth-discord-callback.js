@@ -113,9 +113,8 @@ exports.handler = async (event) => {
 
   // Redirect back to frontend with token in query string
   return {
-    statusCode: 302,
-    headers: {
-      Location: `/menu.html?token=${jwtToken}`,
-    },
+    statusCode: 200,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: jwtToken }),
   };
 };
