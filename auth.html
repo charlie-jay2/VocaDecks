@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("truetype");
+        font-display: swap;
+      }
+
+      body {
+        margin: 0;
+        font-family: Panton, sans-serif;
+        background: url(./Profile/bg.png) center/cover fixed no-repeat;
+        overflow: hidden;
+        transition: background 0.8s ease;
+      }
+
+      .p {
+        font-size: 3.5rem;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        text-align: center;
+        text-shadow: -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black,
+          2px 2px 0 black, 0 -2px 0 black, 0 2px 0 black, -2px 0 0 black,
+          2px 0 0 black;
+      }
+    </style>
+    <meta charset="UTF-8" />
+    <title>Logging in . . .</title>
+  </head>
+  <body>
+    <p class="p">Logging in</p>
+
+    <script>
+      // Animate dots for "Logging in..."
+      const p = document.querySelector(".p");
+      let dotCount = 0;
+      setInterval(() => {
+        dotCount = (dotCount % 3) + 1; // cycles 1 → 2 → 3 → 1 ...
+        p.textContent = "Logging in" + " . ".repeat(dotCount);
+      }, 300);
+
+      // Discord OAuth callback
+      (async () => {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
+        if (!code) {
+          alert("No code found");
+          window.location.href = "/index.html";
+          return;
+        }
+
+        try {
+          const res = await fetch(
+            `/.netlify/functions/auth-discord-callback?code=${code}`
+          );
+          const data = await res.json();
+          if (data.token) {
+            localStorage.setItem("token", data.token);
+            window.location.href = "/menu.html";
+          } else {
+            alert("Login failed");
+            window.location.href = "/index.html";
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Login failed");
+          window.location.href = "/index.html";
+        }
+      })();
+    </script>
+  </body>
+</html>
