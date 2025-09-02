@@ -62,10 +62,10 @@
       .cbtn:hover {
         left: 20%;
       }
-
+      /* 
       .grbtn:hover {
         left: 19%;
-      }
+      } */
 
       .settings {
         width: 4%;
@@ -125,6 +125,10 @@
         top: 52%;
         transform: translate(-50%, -50%);
         height: auto;
+      }
+
+      .grbtn {
+        opacity: 0.5;
       }
 
       .infocl,
@@ -394,7 +398,6 @@
 
       const buttons = [
         document.querySelector(".cbtn"),
-        document.querySelector(".grbtn"),
         document.querySelector(".settings").parentElement,
         document.querySelector(".profile").parentElement,
       ];
@@ -410,7 +413,6 @@
       });
 
       const cbtn = document.querySelector(".cbtn");
-      const grbtn = document.querySelector(".grbtn");
       const solo = document.querySelector(".solo");
       const infocl = document.querySelector(".infocl");
       const goldrush = document.querySelector(".goldrush");
@@ -458,19 +460,6 @@
       cbtn.addEventListener("mouseleave", () => {
         solo.classList.remove("show");
         infocl.classList.remove("show");
-        scheduleGreetingShow();
-      });
-
-      // Gold Rush Button Hover
-      grbtn.addEventListener("mouseenter", () => {
-        goldrush.classList.add("show");
-        infogr.classList.add("show");
-        hideGreetings();
-        clearTimeout(greetingTimeout);
-      });
-      grbtn.addEventListener("mouseleave", () => {
-        goldrush.classList.remove("show");
-        infogr.classList.remove("show");
         scheduleGreetingShow();
       });
 
