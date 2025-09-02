@@ -27,7 +27,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: "Missing code" };
   }
 
-  // Exchange code for access token
+  // Exchange code for Discord access token
   let tokenData;
   try {
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
@@ -70,7 +70,7 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: "Failed to fetch Discord user" };
   }
 
-  // Upsert user in Supabase 'users' table with username + avatar
+  // Upsert user in Supabase 'users' table
   try {
     const { error } = await supabase
       .from("users")
@@ -78,7 +78,7 @@ exports.handler = async (event) => {
         {
           userid: userData.id,
           username: userData.username,
-          avatar: userData.avatar, // just the hash, URL built later
+          avatar: userData.avatar,
           cards: [],
         },
         { onConflict: "userid" }
@@ -95,7 +95,7 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: "Internal server error" };
   }
 
-  // Create JWT token with user info (expires in 48 hours)
+  // Create JWT token
   let jwtToken;
   try {
     jwtToken = jwt.sign(
@@ -111,10 +111,20 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: "Failed to create session token" };
   }
 
-  // Redirect back to frontend with token in query string
+  // Return HTML that saves the token and redirects
   return {
     statusCode: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: jwtToken }),
+    headers: { "Content-Type": "text/html" },
+    body: `
+      <html>
+        <body>
+          <script>
+            localStorage.setItem('token', '${jwtToken}');
+            window.location.href = '/menu.html';
+          </script>
+          Redirecting...
+        </body>
+      </html>
+    `,
   };
 };
