@@ -300,6 +300,26 @@
       .clear-loadout:hover {
         transform: translate(-50%, -50%) scale(1.13); /* Scale and rotate at the center */
       }
+
+      .back-button-wrapper {
+        padding: 1ch;
+        transition: 0.3s ease-in-out;
+        position: fixed;
+        top: 10%;
+        left: 0%;
+      }
+
+      .back-button {
+        width: 10ch;
+        cursor: pointer;
+        height: auto;
+        transition: 0.3s ease-in-out;
+        rotate: 90deg;
+      }
+
+      .back-button:hover {
+        filter: invert(1);
+      }
     </style>
   </head>
 
@@ -346,6 +366,11 @@
     </div>
     <img src="./Menu/PLAY_BUTTON.png" class="lets-go" />
     <img src="./Menu/CLEAR LOADOUT.png" class="clear-loadout" />
+    <div class="back-button-wrapper">
+      <a href="./menu.html"
+        ><img src="Menu/Vector.png" class="back-button"
+      /></a>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
@@ -724,6 +749,106 @@
         } catch (err) {
           console.error("[updateLetsGoState] Error:", err);
         }
+      }
+    </script>
+    <script>
+      // --- Load SFX and Music Volumes from localStorage ---
+      let sfxVolume = parseFloat(localStorage.getItem("sfxVolume") ?? 0.1);
+      let musicVolume = parseFloat(
+        localStorage.getItem("bgMusicVolume") ?? 0.1
+      );
+
+      const hoverSound = new Audio("Menu/Back.wav");
+      const clickSound = new Audio("Menu/Okay.wav");
+      const bgMusic = new Audio("Menu/Challenger_Junction_VocaDecks_Theme.wav");
+
+      bgMusic.loop = true;
+      hoverSound.volume = sfxVolume;
+      clickSound.volume = sfxVolume;
+      bgMusic.volume = musicVolume;
+
+      const savedTime = parseFloat(localStorage.getItem("bgMusicTime") ?? 0);
+      bgMusic.currentTime = savedTime;
+
+      setInterval(() => {
+        if (!isNaN(bgMusic.currentTime)) {
+          localStorage.setItem("bgMusicTime", bgMusic.currentTime);
+        }
+      }, 500);
+
+      window.addEventListener("load", () => {
+        bgMusic.play().catch(() => {
+          document.body.addEventListener("click", () => bgMusic.play(), {
+            once: true,
+          });
+        });
+      });
+
+      function playClickSound() {
+        clickSound.currentTime = 0;
+        clickSound.volume = sfxVolume;
+        clickSound.play();
+      }
+
+      function playHoverSound() {
+        hoverSound.currentTime = 0;
+        hoverSound.volume = sfxVolume;
+        hoverSound.play();
+      }
+
+      // --- Add sound effects to buttons ---
+      const letsGoButton = document.querySelector(".lets-go");
+      if (letsGoButton) {
+        letsGoButton.addEventListener("mouseenter", playHoverSound);
+        letsGoButton.addEventListener("click", playClickSound);
+      }
+
+      const clearButton = document.querySelector(".clear-loadout");
+      if (clearButton) {
+        clearButton.addEventListener("mouseenter", playHoverSound);
+        clearButton.addEventListener("click", playClickSound);
+      }
+
+      const closeButton = document.querySelector(".close-btn");
+      if (closeButton) {
+        closeButton.addEventListener("mouseenter", playHoverSound);
+        closeButton.addEventListener("click", playClickSound);
+      }
+
+      const arrowImgs = document.querySelectorAll(".arrow-wrapper img.arrows");
+      arrowImgs.forEach((arrow) => {
+        arrow.addEventListener("mouseenter", playHoverSound);
+        arrow.addEventListener("click", playClickSound);
+      });
+
+      // --- Back button hover & click ---
+      const backButton = document.querySelector(".back-button");
+      if (backButton) {
+        // Hover sound
+        backButton.addEventListener("mouseenter", () => {
+          hoverSound.currentTime = 0;
+          hoverSound.volume = sfxVolume;
+          hoverSound.play();
+        });
+
+        // Click sound + navigate
+        backButton.addEventListener("click", (e) => {
+          e.preventDefault();
+          const targetUrl = backButton.parentElement.href || "./menu.html";
+
+          clickSound.currentTime = 0;
+          clickSound.volume = sfxVolume;
+          clickSound
+            .play()
+            .then(() => {
+              clickSound.onended = () => {
+                if (targetUrl) window.location.href = targetUrl;
+              };
+            })
+            .catch(() => {
+              if (targetUrl) window.location.href = targetUrl;
+            });
+        });
       }
     </script>
   </body>
