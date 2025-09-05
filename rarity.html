@@ -15,129 +15,716 @@
         src: url("./Fonts/Panton.otf") format("truetype");
         font-display: swap;
       }
+
       body {
         margin: 0;
         font-family: Panton, sans-serif;
         background: url(./Menu/bg.png) center/cover fixed no-repeat;
         overflow: hidden;
-        transition: background 0.8s ease; /* smooth fade */
+        transition: background 0.8s ease;
       }
 
-      .par {
-        width: auto;
-        height: 20%;
-        position: absolute;
-        left: 50%;
-        top: 15%;
-        transform: translate(-50%, -50%);
-      }
-
-      /* Center container for rarity images */
-      .rarity {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 2vw; /* space between images */
-        position: absolute;
+      .rarity-selector-container {
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
       }
 
-      .rarity img {
-        height: 80%; /* Adjust as needed */
-        max-height: 230px;
-        width: auto;
-        transition: transform 0.3s ease;
-        cursor: pointer;
+      .cardholder {
+        width: 180ch;
+        height: 60ch;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 1.2rem;
+        text-align: center;
+        gap: 2ch;
       }
 
-      .rarity img:hover {
-        transform: scale(1.1);
+      .placeholder-container {
+        display: flex;
+        justify-content: space-around;
+        gap: 3ch;
+        width: 100%;
+        flex-wrap: wrap;
+        margin-bottom: 1ch;
+      }
+
+      .placeholder-card {
+        width: 15%;
+        height: auto;
+        margin-bottom: 1ch;
+      }
+
+      .arrows-container {
+        display: flex;
+        justify-content: center;
+        gap: 25ch;
+        margin-top: 1ch;
+      }
+
+      .arrow-wrapper {
+        padding: 1ch;
+        transition: 0.3s ease-in-out;
+      }
+
+      .arrows {
+        width: 10ch;
+        cursor: pointer;
+        height: auto;
+        transition: 0.3s ease-in-out;
+        rotate: 180deg;
+      }
+
+      .arrow-wrapper:hover .arrows {
+        filter: invert(1);
+        transform: rotate(-180deg);
+      }
+
+      .card-library {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        z-index: 9999;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+      }
+
+      .card-library-bg {
+        width: 95%;
+        height: 95%;
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 40px rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      .card-library-text {
+        color: white;
+        position: absolute;
+        top: 2%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 5rem;
+        z-index: 1000;
+        text-align: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: -0.5%;
+        right: 3%;
+        font-size: 9rem;
+        color: white;
+        cursor: pointer;
+        z-index: 1001;
+      }
+
+      .card-list {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+        overflow-y: auto;
+        max-height: 70vh;
+        padding: 20px;
+        width: 100%;
+        background: transparent;
+        border-radius: 10px;
+      }
+
+      /* CSS for rounded rectangles behind images with rarity-based colors */
+      .card {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin: 10px;
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+      }
+
+      .card .card-image-wrapper {
+        background-color: transparent;
+        padding: 10px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        display: inline-block;
+      }
+
+      .card.common .card-image-wrapper {
+        background-color: #ffffff; /* Common (white) */
+      }
+
+      .card.extra .card-image-wrapper {
+        background-color: #33ff41; /* Extra (green) */
+      }
+
+      .card.rare .card-image-wrapper {
+        background-color: #33e0ff; /* Rare (blue) */
+      }
+
+      .card.legendary .card-image-wrapper {
+        background-color: #ffb0fe; /* Legendary (purple) */
+      }
+
+      .card.untouched .card-image-wrapper {
+        background-color: #eca64d; /* Untouched (gold) */
+      }
+
+      .card img {
+        max-width: 100%;
+        border-radius: 8px;
+        border: 2px solid #fff;
+      }
+
+      .card p {
+        color: #fff;
+        font-size: 2rem;
+        margin-top: 10px;
+      }
+
+      .card-list::-webkit-scrollbar {
+        width: 12px; /* width of the scrollbar */
+      }
+
+      .card-list::-webkit-scrollbar-track {
+        background: transparent; /* transparent background for the track */
+        border-radius: 10px; /* round the track */
+      }
+
+      .card-list::-webkit-scrollbar-thumb {
+        background-color: #ffb0fe; /* Color for the thumb */
+        border-radius: 10px; /* round the thumb */
+        border: 3px solid rgba(255, 255, 255, 0.2); /* Optional: Adds a subtle border to the thumb */
+      }
+
+      .card-list::-webkit-scrollbar-thumb:hover {
+        background-color: #ff80df; /* Change thumb color on hover */
+      }
+
+      .enlarged-card {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        width: 300px;
+        height: auto;
+        transition: transform 0.2s ease-in-out;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+      }
+
+      .logo {
+        position: fixed;
+        top: 5%;
+        left: 16%;
+        transform: translate(-50%, -50%);
+        width: 30%;
+        height: auto;
+      }
+
+      .tt {
+        position: fixed;
+        top: 10%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 5rem;
+        font-family: "Panton";
+        color: white;
+        -webkit-text-stroke: 2px black; /* Adds a solid black outline */
+      }
+
+      .tb {
+        position: fixed;
+        top: 17%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3.5rem;
+        text-align: center;
+        font-family: "Panton";
+        color: white;
+        -webkit-text-stroke: 2px black; /* Adds a solid black outline */
+      }
+
+      .lets-go {
+        position: fixed;
+        top: 85%;
+        left: 30%;
+        transform: translate(-50%, -50%);
+        width: 30%;
+        height: auto;
+        transition: transform 0.3s ease-in-out;
+        transform-origin: center;
+        z-index: 9998;
+      }
+
+      .lets-go:hover {
+        transform: translate(-50%, -50%) scale(1.13); /* Scale and rotate at the center */
+      }
+
+      .clear-loadout {
+        position: fixed;
+        top: 85%;
+        left: 70%;
+        transform: translate(-50%, -50%);
+        width: 30%;
+        height: auto;
+        transition: transform 0.3s ease-in-out;
+        transform-origin: center;
+        z-index: 9998;
+      }
+
+      .clear-loadout:hover {
+        transform: translate(-50%, -50%) scale(1.13); /* Scale and rotate at the center */
       }
     </style>
   </head>
+
   <body>
-    <div>
-      <img src="Battle/PICK_A_RARITY.png" class="par" />
+    <img src="./Menu/logo.png" class="logo" />
+    <h1 class="tt">CONFIRM CARD LOADOUT</h1>
+    <h1 class="tb">
+      (These are your cards that will be available before and during the match.)
+    </h1>
+    <div class="rarity-selector-container">
+      <div class="cardholder">
+        <div class="placeholder-container">
+          <img src="Menu/placeholder.png" class="placeholder-card" />
+          <img src="Menu/placeholder.png" class="placeholder-card" />
+          <img src="Menu/placeholder.png" class="placeholder-card" />
+          <img src="Menu/placeholder.png" class="placeholder-card" />
+          <img src="Menu/placeholder.png" class="placeholder-card" />
+        </div>
+        <div class="arrows-container">
+          <div class="arrow-wrapper">
+            <img src="Menu/Vector.png" class="arrows" />
+          </div>
+          <div class="arrow-wrapper">
+            <img src="Menu/Vector.png" class="arrows" />
+          </div>
+          <div class="arrow-wrapper">
+            <img src="Menu/Vector.png" class="arrows" />
+          </div>
+          <div class="arrow-wrapper">
+            <img src="Menu/Vector.png" class="arrows" />
+          </div>
+          <div class="arrow-wrapper">
+            <img src="Menu/Vector.png" class="arrows" />
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="rarity">
-      <img src="Battle/COMMON_SELECTOR.png" class="r1" />
-      <img src="Battle/EXTRA_SELECTOR.png" class="r2" />
-      <img src="Battle/RARE_SELECTOR.png" class="r3" />
-      <img src="Battle/LEGENDARY_SELECTOR.png" class="r4" />
-      <img src="Battle/UNTOUCHED_SELECTOR.png" class="r5" />
+    <div class="card-library">
+      <div class="card-library-bg">
+        <h1 class="card-library-text">Edit Slot (N/A)</h1>
+        <span class="close-btn" onclick="closeCardLibrary()">×</span>
+        <div class="card-list" id="card-list-container"></div>
+      </div>
     </div>
-  </body>
-  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
-  <script>
-    const themes = {
-      t1: "./Menu/bg.png",
-      t2: "./Profile/MIDNIGHT_BLUE.png",
-      t3: "./Profile/TUNDRA_MANGO.png",
-      t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
-      t5: "./Profile/CHERRIES__CREAM.png",
-      t6: "./Profile/SIREN_PURPLE.png",
-    };
-    function applyStoredTheme() {
-      const key = localStorage.getItem("selectedTheme") || "t1";
-      document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
-    }
+    <img src="./Menu/PLAY_BUTTON.png" class="lets-go" />
+    <img src="./Menu/CLEAR LOADOUT.png" class="clear-loadout" />
 
-    // apply stored theme on load
-    window.addEventListener("DOMContentLoaded", () => {
-      applyStoredTheme();
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <script>
+      const themes = {
+        t1: "./Menu/bg.png",
+        t2: "./Profile/MIDNIGHT_BLUE.png",
+        t3: "./Profile/TUNDRA_MANGO.png",
+        t4: "./Profile/RADIANT_ROCKET_LOLLY.png",
+        t5: "./Profile/CHERRIES__CREAM.png",
+        t6: "./Profile/SIREN_PURPLE.png",
+      };
 
-      // Handle token in URL & localStorage
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get("token");
-      if (token) {
-        localStorage.setItem("token", token);
-        // optionally remove token from URL
-        history.replaceState(null, "", window.location.pathname);
-      }
+      let currentEditingSlot = null;
 
-      // Show profile picture if token exists
-      const storedToken = localStorage.getItem("token");
-      const profilePic = document.getElementById("profile-pic");
-
-      if (storedToken) {
+      function applyStoredTheme() {
+        console.log("[applyStoredTheme] Running...");
         try {
-          // Decode JWT (assumes format header.payload.signature)
-          const payloadBase64 = storedToken.split(".")[1];
-          // Decode base64 URL (replace URL-safe chars)
-          const base64 = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
-          const jsonPayload = decodeURIComponent(
-            atob(base64)
-              .split("")
-              .map(function (c) {
-                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-              })
-              .join("")
-          );
-          const payload = JSON.parse(jsonPayload);
-          if (payload && payload.avatar && payload.id) {
-            // Discord CDN URL for avatar
-            // avatar can be null, fallback to default avatar URL if needed
-            let avatarUrl;
-            if (payload.avatar) {
-              avatarUrl = `https://cdn.discordapp.com/avatars/${payload.id}/${payload.avatar}.png`;
-            } else {
-              // Default avatar (discriminator modulo 5)
-              const discrim = payload.discriminator || "0";
-              const defaultAvatarNumber = parseInt(discrim) % 5;
-              avatarUrl = `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
-            }
-            profilePic.src = avatarUrl;
-            profilePic.style.display = "block";
-            profilePic.title = payload.username || "Profile";
-          }
+          const key = localStorage.getItem("selectedTheme") || "t1";
+          console.log("[applyStoredTheme] Selected theme:", key);
+          document.body.style.background = `url(${themes[key]}) center/cover fixed no-repeat`;
         } catch (err) {
-          // Invalid token or parse error
-          console.warn("Invalid token or unable to parse:", err);
+          console.error("[applyStoredTheme] Error:", err);
         }
       }
-    });
-  </script>
+
+      window.addEventListener("DOMContentLoaded", () => {
+        console.log("[DOMContentLoaded] Page loaded, running init...");
+        applyStoredTheme();
+        syncSelectedListFromLoadout();
+        loadSavedLoadout();
+
+        const cardLibraryText = document.querySelector(".card-library-text");
+        const cardLibraryBg = document.querySelector(".card-library-bg");
+
+        const arrows = document.querySelectorAll(".arrow-wrapper");
+        arrows.forEach((arrow, index) => {
+          arrow.addEventListener("click", () => {
+            console.log(`[ArrowClick] Opening library for slot ${index + 1}`);
+            currentEditingSlot = index + 1;
+            cardLibraryText.textContent = `Edit Slot (${currentEditingSlot})`;
+            cardLibraryText.style.opacity = "1";
+            cardLibraryText.style.visibility = "visible";
+            cardLibraryBg.style.opacity = "1";
+            cardLibraryBg.style.visibility = "visible";
+            const lib = document.querySelector(".card-library");
+            lib.style.opacity = "1";
+            lib.style.visibility = "visible";
+            loadUserCards(currentEditingSlot);
+          });
+        });
+
+        const letsGoButton = document.querySelector(".lets-go");
+        letsGoButton.style.pointerEvents = "none";
+        letsGoButton.style.opacity = "0.5";
+
+        const clearButton = document.querySelector(".clear-loadout");
+        clearButton.addEventListener("click", clearLoadout);
+
+        const placeholders = document.querySelectorAll(".placeholder-card");
+        placeholders.forEach((placeholder) => {
+          placeholder.addEventListener("load", updateLetsGoState);
+        });
+      });
+
+      function closeCardLibrary() {
+        console.log("[closeCardLibrary] Closing card library");
+        document.querySelector(".card-library-text").style.opacity = "0";
+        document.querySelector(".card-library-text").style.visibility =
+          "hidden";
+        document.querySelector(".card-library-bg").style.opacity = "0";
+        document.querySelector(".card-library-bg").style.visibility = "hidden";
+        const lib = document.querySelector(".card-library");
+        lib.style.opacity = "0";
+        lib.style.visibility = "hidden";
+      }
+
+      // ---- persistence helpers ----
+      function getSelectedCardImages() {
+        console.log("[getSelectedCardImages] Getting selected cards...");
+        try {
+          const arr = JSON.parse(localStorage.getItem("selectedCardImages"));
+          console.log("[getSelectedCardImages] Current:", arr);
+          return Array.isArray(arr) ? arr : [];
+        } catch (err) {
+          console.error("[getSelectedCardImages] Error:", err);
+          return [];
+        }
+      }
+
+      function setSelectedCardImages(arr) {
+        console.log("[setSelectedCardImages] Saving selected:", arr);
+        try {
+          const unique = Array.from(new Set(arr.filter(Boolean)));
+          localStorage.setItem("selectedCardImages", JSON.stringify(unique));
+        } catch (err) {
+          console.error("[setSelectedCardImages] Error:", err);
+        }
+      }
+
+      function syncSelectedListFromLoadout() {
+        console.log("[syncSelectedListFromLoadout] Syncing with loadout...");
+        try {
+          const loadoutData = JSON.parse(localStorage.getItem("cardLoadout"));
+          let selected = getSelectedCardImages();
+          if (loadoutData && Array.isArray(loadoutData.loadout)) {
+            loadoutData.loadout.forEach((src) => {
+              if (src && !src.includes("Menu/placeholder.png")) {
+                selected.push(src);
+              }
+            });
+          }
+          setSelectedCardImages(selected);
+        } catch (err) {
+          console.error("[syncSelectedListFromLoadout] Error:", err);
+        }
+      }
+
+      async function loadUserCards(selectedSlot) {
+        console.log(`[loadUserCards] Loading cards for slot ${selectedSlot}`);
+        syncSelectedListFromLoadout();
+        const selectedSet = new Set(getSelectedCardImages());
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("[loadUserCards] No token found in localStorage");
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `/.netlify/functions/getUserCards?token=${token}`
+          );
+          const text = await response.text();
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch (error) {
+            console.error(
+              "[loadUserCards] JSON parse error:",
+              error,
+              "Raw:",
+              text
+            );
+            return;
+          }
+
+          if (data.error) {
+            console.error("[loadUserCards] Backend error:", data.error);
+            alert(data.error);
+            return;
+          }
+
+          const userCards = data.cards || [];
+          console.log("[loadUserCards] User cards:", userCards.length);
+          if (userCards.length === 0) {
+            alert("No cards available to this user.");
+            return;
+          }
+
+          const sortedCards = userCards.sort((a, b) => {
+            const aRarity = extractRarity(a.image);
+            const bRarity = extractRarity(b.image);
+            const rarityOrder = { r1: 1, r2: 2, r3: 3, r4: 4, r5: 5 };
+            return (
+              (rarityOrder[aRarity] || 999) - (rarityOrder[bRarity] || 999)
+            );
+          });
+
+          const cardListContainer = document.getElementById(
+            "card-list-container"
+          );
+          cardListContainer.innerHTML = "";
+
+          sortedCards.forEach((card) => {
+            const cardElement = document.createElement("div");
+            cardElement.classList.add("card");
+
+            const r = extractRarity(card.image);
+            const rarityClass = rarityToClass(r);
+            if (rarityClass) cardElement.classList.add(rarityClass);
+
+            cardElement.innerHTML = `
+          <div class="card-image-wrapper ${rarityClass || ""}">
+            <img src="${card.image}" alt="${card.name}" />
+          </div>
+          <p>${card.name}</p>
+        `;
+
+            if (selectedSet.has(card.image)) {
+              console.log(
+                `[loadUserCards] Graying out already selected: ${card.name}`
+              );
+              cardElement.style.filter = "grayscale(100%) brightness(60%)";
+              cardElement.style.opacity = "0.6";
+              cardElement.style.pointerEvents = "none";
+            } else {
+              cardElement.addEventListener("click", () => {
+                console.log(`[CardClick] Selected: ${card.name}`);
+                selectCard(card, selectedSlot);
+              });
+            }
+
+            cardListContainer.appendChild(cardElement);
+          });
+        } catch (error) {
+          console.error("[loadUserCards] Fetch error:", error);
+        }
+      }
+
+      function extractRarity(filename) {
+        const match = String(filename || "").match(/r([1-5])/i);
+        const rarity = match ? `r${match[1]}` : null;
+        console.log("[extractRarity] File:", filename, "Rarity:", rarity);
+        return rarity;
+      }
+
+      function rarityToClass(r) {
+        switch (r) {
+          case "r1":
+            return "common";
+          case "r2":
+            return "extra";
+          case "r3":
+            return "rare";
+          case "r4":
+            return "legendary";
+          case "r5":
+            return "untouched";
+          default:
+            return "";
+        }
+      }
+
+      function selectCard(card, selectedSlot) {
+        console.log(`[selectCard] Slot: ${selectedSlot}, Card: ${card.name}`);
+        try {
+          if (!selectedSlot) return;
+          const placeholders = document.querySelectorAll(".placeholder-card");
+          if (selectedSlot < 1 || selectedSlot > placeholders.length) return;
+
+          const selected = getSelectedCardImages();
+          if (selected.includes(card.image)) {
+            console.warn("[selectCard] Already selected, skipping");
+            return;
+          }
+
+          const placeholder = placeholders[selectedSlot - 1];
+          const prevSrc = placeholder.src;
+
+          const prevWasCard =
+            prevSrc && !prevSrc.includes("Menu/placeholder.png");
+          if (prevWasCard) {
+            console.log("[selectCard] Removing old card:", prevSrc);
+            const idx = selected.indexOf(prevSrc);
+            if (idx !== -1) selected.splice(idx, 1);
+          }
+
+          placeholder.src = card.image;
+          selected.push(card.image);
+          setSelectedCardImages(selected);
+
+          saveLoadout();
+          updateLetsGoState();
+
+          closeCardLibrary();
+
+          // ✅ Immediately refresh library internally to disable that card
+          console.log(
+            "[selectCard] Refreshing library to disable chosen card..."
+          );
+          setTimeout(() => {
+            if (currentEditingSlot) {
+              loadUserCards(currentEditingSlot);
+            }
+          }, 200);
+        } catch (err) {
+          console.error("[selectCard] Error:", err);
+        }
+      }
+
+      function saveLoadout() {
+        console.log("[saveLoadout] Saving loadout...");
+        try {
+          const placeholders = document.querySelectorAll(".placeholder-card");
+          const loadout = Array.from(placeholders).map((p) => p.src);
+
+          const loadoutData = { loadout, timestamp: Date.now() };
+          localStorage.setItem("cardLoadout", JSON.stringify(loadoutData));
+
+          const chosen = loadout.filter(
+            (src) => !src.includes("Menu/placeholder.png")
+          );
+          setSelectedCardImages(chosen);
+        } catch (err) {
+          console.error("[saveLoadout] Error:", err);
+        }
+      }
+
+      function loadSavedLoadout() {
+        console.log("[loadSavedLoadout] Loading saved loadout...");
+        try {
+          const loadoutData = JSON.parse(localStorage.getItem("cardLoadout"));
+          if (loadoutData) {
+            const currentTime = Date.now();
+            const timeElapsed = currentTime - loadoutData.timestamp;
+
+            if (timeElapsed < 24 * 60 * 60 * 1000) {
+              const savedLoadout = loadoutData.loadout;
+              const placeholders =
+                document.querySelectorAll(".placeholder-card");
+
+              savedLoadout.forEach((imageSrc, index) => {
+                if (imageSrc && index < placeholders.length) {
+                  placeholders[index].src = imageSrc;
+                }
+              });
+
+              updateLetsGoState();
+              const chosen = savedLoadout.filter(
+                (src) => !src.includes("Menu/placeholder.png")
+              );
+              setSelectedCardImages(chosen);
+            } else {
+              console.log("[loadSavedLoadout] Loadout expired, skipping");
+            }
+          }
+        } catch (err) {
+          console.error("[loadSavedLoadout] Error:", err);
+        }
+      }
+
+      function clearLoadout() {
+        console.log("[clearLoadout] Clearing loadout...");
+        try {
+          localStorage.removeItem("cardLoadout");
+          localStorage.removeItem("selectedCardImages");
+
+          const placeholders = document.querySelectorAll(".placeholder-card");
+          placeholders.forEach((p) => {
+            p.src = "Menu/placeholder.png";
+          });
+
+          const letsGoButton = document.querySelector(".lets-go");
+          letsGoButton.style.pointerEvents = "none";
+          letsGoButton.style.opacity = "0.5";
+
+          if (currentEditingSlot) {
+            console.log(
+              "[clearLoadout] Reloading library for slot",
+              currentEditingSlot
+            );
+            loadUserCards(currentEditingSlot);
+          }
+        } catch (err) {
+          console.error("[clearLoadout] Error:", err);
+        }
+      }
+
+      function updateLetsGoState() {
+        try {
+          const placeholders = document.querySelectorAll(".placeholder-card");
+          const letsGoButton = document.querySelector(".lets-go");
+          const selectedCards = Array.from(placeholders).filter(
+            (img) => !img.src.includes("Menu/placeholder.png")
+          ).length;
+          console.log("[updateLetsGoState] Selected cards:", selectedCards);
+
+          if (selectedCards > 0) {
+            letsGoButton.style.pointerEvents = "auto";
+            letsGoButton.style.opacity = "1";
+          } else {
+            letsGoButton.style.pointerEvents = "none";
+            letsGoButton.style.opacity = "0.5";
+          }
+        } catch (err) {
+          console.error("[updateLetsGoState] Error:", err);
+        }
+      }
+    </script>
+  </body>
 </html>

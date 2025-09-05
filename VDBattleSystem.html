@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Battle System</title>
+  <style>
+    body { font-family: sans-serif; background: #1a1a1a; color: #f0f0f0; padding: 1rem; }
+    #log { border: 1px solid #555; background: #111; padding: 1rem; height: 300px; overflow-y: auto; }
+    #input { width: 100%; padding: .5rem; margin-top: .5rem; background: #222; border: 1px solid #555; color: #f0f0f0; }
+    .stats { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .player { background: #222; padding: .5rem; border: 1px solid #555; flex: 1; }
+    .player h3 { margin: 0 0 .5rem; }
+    .highlight { color: #6f9; }
+  </style>
+</head>
+<body>
+  <h1>Card Battle System</h1>
+  <div class="stats">
+    <div class="player" id="player1-stats">
+      <h3>Player 1</h3>
+      <p>Health: <span id="p1-health"></span></p>
+      <p>Damage Limit: <span id="p1-damageLimit"></span></p>
+      <p>Shield: <span id="p1-shield"></span></p>
+      <p>Free Block: <span id="p1-block"></span></p>
+      <p>Wild Cards: <span id="p1-wild"></span></p>
+    </div>
+    <div class="player" id="player2-stats">
+      <h3>Player 2</h3>
+      <p>Health: <span id="p2-health"></span></p>
+      <p>Damage Limit: <span id="p2-damageLimit"></span></p>
+      <p>Shield: <span id="p2-shield"></span></p>
+      <p>Free Block: <span id="p2-block"></span></p>
+      <p>Wild Cards: <span id="p2-wild"></span></p>
+    </div>
+  </div>
+  <div id="log"></div>
+  <input type="text" id="input" placeholder="Enter command (e.g. P1 attack 10)">
+
+  <script>
+  // Game state
+  const players = {
+    P1: { health: 100, damageLimit: 100, shield: 50, block: 1, wild: { attack:1, defense:1, health:1 } },
+    P2: { health: 100, damageLimit: 100, shield: 50, block: 1, wild: { attack:1, defense:1, health:1 } }
+  };
+  let turn = 'P1';
+
+  // DOM refs
+  const logEl = document.getElementById('log');
+  const inputEl = document.getElementById('input');
+
+  function renderStats() {
+    [1,2].forEach(n => {
+      const p = players['P'+n];
+      document.getElementById(`p${n}-health`).innerText = p.health;
+      document.getElementById(`p${n}-damageLimit`).innerText = p.damageLimit;
+      document.getElementById(`p${n}-shield`).innerText = p.shield;
+      document.getElementById(`p${n}-block`).innerText = p.block;
+      document.getElementById(`p${n}-wild`).innerText = `A:${p.wild.attack}, D:${p.wild.defense}, H:${p.wild.health}`;
+    });
+  }
+
+  function log(msg, cls) {
+    const div = document.createElement('div');
+    div.innerHTML = msg;
+    if (cls) div.classList.add(cls);
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function switchTurn() {
+    turn = (turn === 'P1') ? 'P2' : 'P1';
+    log(`<span class="highlight">Turn:</span> ${turn}`);
+  }
+
+  function checkForDraw() {
+    if (players.P1.damageLimit <= 0 && players.P2.damageLimit <= 0) {
+      log(`<strong>It's a draw! Both players are out of damage limit.</strong>`);
+      inputEl.disabled = true;
+      return true;
+    }
+    return false;
+  }
+
+  function processCommand(cmd) {
+    const parts = cmd.trim().split(/\s+/);
+    const actor = parts[0];
+    if (actor !== turn) return log(`It's not ${actor}'s turn!`);
+
+    const action = parts[1];
+    const value = parseInt(parts[2],10);
+    const target = actor === 'P1' ? 'P2' : 'P1';
+    const me = players[actor];
+    const them = players[target];
+
+    switch(action) {
+      case 'attack':
+        if (isNaN(value)) return log('Invalid attack value');
+        if (me.damageLimit < value) return log('Not enough damage limit');
+        me.damageLimit -= value;
+        let dmg = value;
+        if (them.shield > 0) {
+          const absorb = Math.min(them.shield, dmg);
+          them.shield -= absorb;
+          dmg -= absorb;
+          log(`${actor} attacks for ${value}. ${target}'s shield absorbs ${absorb}.`);
+        }
+        if (dmg > 0) {
+          them.health = Math.max(0, them.health - dmg);
+          log(`${actor} deals ${dmg} to health!`);
+        }
+        break;
+      case 'block':
+        if (me.block <= 0) return log('No blocks left');
+        me.block--;
+        log(`${actor} uses block! Cancels next attack.`);
+        break;
+      case 'wild':
+        const type = parts[2];
+        if (!me.wild[type]) return log('Invalid wild type');
+        if (me.wild[type] <= 0) return log('No wild cards left');
+        me.wild[type]--;
+        switch(type) {
+          case 'attack': me.damageLimit += 10; break;
+          case 'defense': me.shield += 10; break;
+          case 'health': me.health += 10; break;
+        }
+        log(`${actor} uses wild ${type}!`);
+        break;
+      default:
+        log('Unknown action');
+    }
+
+    renderStats();
+    if (players[target].health <= 0) {
+      log(`<strong>${actor} wins!</strong>`);
+      inputEl.disabled = true;
+    } else if (!checkForDraw()) {
+      switchTurn();
+    }
+  }
+
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      processCommand(inputEl.value);
+      inputEl.value = '';
+    }
+  });
+
+  renderStats();
+  log(`<span class="highlight">Game start!</span> ${turn} goes first.`);
+  </script>
+</body>
+</html>
