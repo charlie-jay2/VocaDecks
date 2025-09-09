@@ -2,10 +2,10 @@
   <head>
     <link
       rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+    />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="./scripts/noticebox.js" defer></script>
     <style>
       @font-face {
         font-family: "Panton";
@@ -320,16 +320,14 @@
     </script>
 
     <div class="buttons">
-      <a href="./rarity.html">
-        <img src="./Menu/CLASSIC_BUTTON.png" class="cbtn" />
-      </a>
+      <img src="./Menu/CLASSIC_BUTTON.png" class="cbtn" />
       <img src="./Menu/GOLD_RUSH_BUTTON.png" class="grbtn" />
-      <a href="./settings.html">
-        <img src="./Menu/SETTINGS_BUTTON.png" class="settings" />
-      </a>
-      <a href="./profile.html">
-        <img src="./Menu/PROFILE_BUTTON.png" class="profile" />
-      </a>
+      <a href="./settings.html"
+        ><img src="./Menu/SETTINGS_BUTTON.png" class="settings"
+      /></a>
+      <a href="./profile.html"
+        ><img src="./Menu/PROFILE_BUTTON.png" class="profile"
+      /></a>
     </div>
 
     <div class="cards">
@@ -399,7 +397,7 @@
       }
 
       const buttons = [
-        document.querySelector(".cbtn").parentElement, // now <a href="./rarity.html">
+        document.querySelector(".cbtn"),
         document.querySelector(".settings").parentElement,
         document.querySelector(".profile").parentElement,
       ];
