@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VocaDecks Launcher | Home</title>
+    <style>
+      @font-face {
+        font-family: "Panton";
+        src: url("./Fonts/Panton.otf") format("opentype");
+        font-display: swap;
+      }
+
+      :root {
+        --color-bg: #000000;
+        --color-primary: #b78628;
+        --color-secondary: #fcc201;
+        --color-accent: #58abe2;
+        --color-text: #ffffff;
+        --color-muted: #4d4d4d;
+
+        --font-small: 0.875rem;
+        --font-base: 1rem;
+        --font-large: 1.25rem;
+        --font-title: 2rem;
+      }
+
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        overflow-y: hidden !important;
+        overflow-x: hidden !important;
+      }
+
+      * {
+        box-sizing: border-box;
+        max-width: 100vw;
+      }
+
+      #page-container {
+        background: linear-gradient(
+          to bottom,
+          rgba(122, 31, 61, 0.6),
+          rgba(0, 0, 0, 0.8)
+        );
+        background-attachment: fixed;
+        color: var(--color-text);
+        font-size: var(--font-base);
+        font-family: "Panton", Arial, sans-serif;
+        overflow-x: hidden;
+        overflow-y: hidden;
+      }
+
+      .logo {
+        position: fixed;
+        left: 10.5%;
+        top: 3%;
+        transform: translate(-50%, -50%);
+        width: 20%;
+        height: auto;
+        z-index: 9999;
+      }
+
+      .logoline {
+        position: fixed;
+        left: 6%;
+        top: 6%;
+        transform: translate(-50%, -50%);
+        width: 25%;
+        height: auto;
+        z-index: 9999;
+      }
+
+      .seriesone {
+        position: fixed;
+        left: 57%;
+        top: 11%;
+        transform: translate(-50%, -50%);
+        width: 29%;
+        height: auto;
+        z-index: 9999;
+      }
+
+      .seriesoneut {
+        position: fixed;
+        left: 56%;
+        top: 15%;
+        transform: translate(-50%, -50%);
+        color: var(--color-text);
+        font-family: "Panton", Arial, sans-serif;
+        font-size: var(--font-title);
+        font-weight: 400;
+        z-index: 9999;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: 10%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .play {
+        position: fixed;
+        left: 5%;
+        top: 33%;
+        transform: translate(-50%, -50%);
+        color: var(--color-text);
+        font-family: "Panton", Arial, sans-serif;
+        font-size: var(--font-title);
+        font-weight: 400;
+        transition: 0.3s ease-in-out;
+      }
+
+      .play:hover {
+        color: var(--color-secondary);
+        cursor: pointer;
+        text-shadow: 0 0 3px var(--color-secondary),
+          0 0 3px var(--color-secondary), 0 0 3px #fcc201;
+      }
+
+      .playline {
+        position: fixed;
+        left: 6%;
+        top: 37%;
+        transform: translate(-50%, -50%);
+        width: 25%;
+        height: auto;
+        z-index: 9999;
+      }
+
+      .store {
+        position: fixed;
+        left: 5.5%;
+        top: 41%;
+        transform: translate(-50%, -50%);
+        color: var(--color-text);
+        font-family: "Panton", Arial, sans-serif;
+        font-size: var(--font-title);
+        font-weight: 400;
+        transition: 0.3s ease-in-out;
+      }
+
+      .store:hover {
+        color: var(--color-secondary);
+        cursor: pointer;
+        text-shadow: 0 0 3px var(--color-secondary),
+          0 0 3px var(--color-secondary), 0 0 3px #fcc201;
+      }
+
+      .storeline {
+        position: fixed;
+        left: 6%;
+        top: 45%;
+        transform: translate(-50%, -50%);
+        width: 25%;
+        height: auto;
+        z-index: 9999;
+      }
+
+      .news {
+        position: fixed;
+        left: 5%;
+        top: 49%;
+        transform: translate(-50%, -50%);
+        color: var(--color-accent);
+        font-family: "Panton", Arial, sans-serif;
+        font-size: var(--font-title);
+        font-weight: 400;
+        text-shadow: 0 0 3px var(--color-accent), 0 0 3px var(--color-accent),
+          0 0 3px rgba(52, 152, 219, 0.6);
+        transition: 0.3s ease-in-out;
+        cursor: pointer;
+      }
+
+      .news:hover {
+        color: var(--color-secondary);
+        cursor: pointer;
+        text-shadow: 0 0 3px var(--color-secondary),
+          0 0 3px var(--color-secondary), 0 0 3px #fcc201;
+      }
+
+      .newsline {
+        position: fixed;
+        left: 6%;
+        top: 53%;
+        transform: translate(-50%, -50%);
+        width: 25%;
+        height: auto;
+        z-index: 9999;
+      }
+
+      .coral {
+        position: fixed;
+        left: 37%;
+        top: 60%;
+        transform: translate(-50%, -50%);
+        width: 35%;
+        height: auto;
+        z-index: 9999;
+      }
+
+      .playbtn {
+        position: fixed;
+        left: 88.5%;
+        top: 90%;
+        transform: translate(-50%, -50%);
+        width: 20%;
+        height: auto;
+        z-index: 9999;
+      }
+
+      .playbtn:hover {
+        cursor: pointer;
+      }
+
+      .bg {
+        position: relative;
+        left: 60%;
+        top: 50%;
+        width: 50%;
+        height: auto;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+      }
+
+      .snbg {
+        width: 20%;
+        height: auto;
+        position: fixed;
+        top: 47%;
+        left: 88%;
+        transform: translate(-50%, -50%);
+      }
+
+      .rnbg {
+        width: 50%;
+        height: auto;
+        left: 50%;
+        top: 73.3%;
+        transform: translate(-50%, -50%);
+        position: fixed;
+      }
+
+      .pnbg {
+        width: 50%;
+        height: auto;
+        left: 50%;
+        top: 25.2%;
+        transform: translate(-50%, -50%);
+        position: fixed;
+      }
+
+      .rnt {
+        color: var(--color-text);
+        font-size: var(--font-title);
+        position: fixed;
+        left: 32.3%;
+        top: 5%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+
+      .rnc {
+        color: var(--color-text);
+        font-size: var(--font-small);
+        position: fixed;
+        left: 31%;
+        top: 10%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+
+      .rni {
+        position: fixed;
+        left: 62.4%;
+        top: 30.6%;
+        width: 24%;
+        height: auto;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+
+      .pnt {
+        color: var(--color-text);
+        font-size: var(--font-title);
+        position: fixed;
+        left: 35%;
+        top: 58%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+
+      .pnc {
+        color: var(--color-text);
+        font-size: var(--font-small);
+        position: fixed;
+        left: 32%;
+        top: 63%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+
+      .pni {
+        position: fixed;
+        left: 62.4%;
+        top: 75%;
+        width: 24%;
+        height: auto;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+
+      .snt {
+        color: var(--color-text);
+        font-size: var(--font-base);
+        position: fixed;
+        left: 83%;
+        top: 6%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+
+      .snc {
+        color: var(--color-text);
+        font-size: var(--font-small);
+        position: fixed;
+        left: 84.6%;
+        top: 9%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+
+      .sni {
+        position: fixed;
+        left: 88%;
+        top: 22.5%;
+        width: 17%;
+        height: auto;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+
+      .admin {
+        color: var(--color-text);
+        font-size: var(--font-small);
+        position: fixed;
+        left: 3%;
+        top: 96%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <img src="./assets/logo.png" class="logo" />
+      <img src="./assets/Line_170.png" class="logoline" />
+    </div>
+    <img src="./assets/SIDE_BAR.png" class="sidebar" />
+    <div class="sidebartext">
+      <a href="./index.html"><p1 class="play">PLAY</p1></a>
+      <img src="./assets/Line_170.png" class="playline" />
+      <a href="./store.html"><p1 class="store">STORE</p1></a>
+      <img src="./assets/Line_170.png" class="storeline" />
+    </div>
+
+    <div class="recent-news">
+      <h1 class="rnt">NEWS TITLE</h1>
+      <h1 class="rnc">Content goes here</h1>
+      <img src="https://placehold.co/600x400/png" class="rni" />
+    </div>
+    <img src="./assets/NEWS_BG_2.png" class="rnbg" />
+
+    <div class="past-news">
+      <h1 class="pnt">PAST NEWS TITLE</h1>
+      <h1 class="pnc">PAST Content goes here</h1>
+      <img src="https://placehold.co/600x400/png" class="pni" />
+    </div>
+    <img src="./assets/NEWS_BG_1.png" class="pnbg" />
+    <div class="sub-news">
+      <h1 class="snt">SUB NEWS TITLE</h1>
+      <h1 class="snc">SUB Content goes here</h1>
+      <img src="https://placehold.co/600x400/png" class="sni" />
+    </div>
+    <img src="./assets/SUB_NEWS_BG.png" class="snbg" />
+  </body>
+  <script>
+    const { ipcRenderer } = require("electron");
+
+    const playBtn = document.querySelector(".playbtn");
+    if (playBtn) {
+      playBtn.addEventListener("click", () => {
+        ipcRenderer.send("launch-game");
+      });
+    }
+
+    const pageContainer = document.getElementById("page-container");
+    const playLink = document.querySelector(".play");
+    const storeLink = document.querySelector(".store");
+    const newsLink = document.querySelector(".news");
+
+    // preload sounds
+    const hoverSound = new Audio("assets/Hover.wav");
+    const clickSound = new Audio("assets/Back.wav");
+
+    function attachSoundEvents(element) {
+      if (!element) return;
+      element.addEventListener("mouseenter", () => {
+        hoverSound.currentTime = 0;
+        hoverSound.play();
+      });
+
+      element.addEventListener("click", () => {
+        clickSound.currentTime = 0;
+        clickSound.play();
+      });
+    }
+
+    [playLink, storeLink, newsLink].forEach((el) => attachSoundEvents(el));
+
+    async function loadPage(url) {
+      const res = await fetch(url);
+      const html = await res.text();
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+
+      const styles = doc.querySelectorAll("style");
+      pageContainer.innerHTML = "";
+
+      styles.forEach((style) => {
+        const newStyle = document.createElement("style");
+        newStyle.textContent = style.textContent;
+        pageContainer.appendChild(newStyle);
+      });
+
+      pageContainer.innerHTML += doc.body.innerHTML;
+
+      pageContainer.style.display = "block";
+
+      void pageContainer.offsetWidth;
+      pageContainer.classList.add("active");
+    }
+
+    if (playLink) {
+      playLink.addEventListener("click", () => {
+        pageContainer.classList.remove("active");
+
+        setTimeout(() => {
+          pageContainer.style.display = "none";
+          pageContainer.innerHTML = "";
+        }, 600);
+      });
+    }
+
+    if (storeLink) {
+      storeLink.addEventListener("click", () => {
+        loadPage("store.html");
+      });
+    }
+
+    if (newsLink) {
+      newsLink.addEventListener("click", () => {
+        loadPage("news.html");
+      });
+    }
+  </script>
+  <script>
+    const { createClient } = require("@supabase/supabase-js");
+    const { ipcRenderer } = require("electron"); // ✅ already used above
+
+    const SUPABASE_URL = "https://tksskoqrgezzvhwmtzeg.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrc3Nrb3FyZ2V6enZod210emVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzOTY0NjEsImV4cCI6MjA2OTk3MjQ2MX0.j9FQ-DdnDj4DFq6NEq4w0nalqFf8g0EKcVRZFLJ82yk";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function loadNews() {
+      const { data, error } = await supabase
+        .from("news")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching news:", error);
+        return;
+      }
+
+      // Clear old content
+      document.querySelector(".recent-news").innerHTML = "";
+      document.querySelector(".past-news").innerHTML = "";
+      document.querySelector(".sub-news").innerHTML = "";
+
+      data.forEach((news) => {
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = `
+        <h1>${news.title}</h1>
+        <p>${news.content}</p>
+        <img src="${news.image_url}" style="max-width:100%" />
+      `;
+
+        if (news.type === "recent") {
+          document.querySelector(".recent-news").appendChild(wrapper);
+        } else if (news.type === "past") {
+          document.querySelector(".past-news").appendChild(wrapper);
+        } else if (news.type === "sub") {
+          document.querySelector(".sub-news").appendChild(wrapper);
+        }
+      });
+    }
+
+    loadNews();
+
+    // ======================
+    // 🔑 Keyboard shortcut handler
+    // ======================
+    ipcRenderer.on("open-news-admin", () => {
+      window.location.href = "news-admin.html";
+    });
+  </script>
+</html>
