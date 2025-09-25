@@ -4,7 +4,6 @@
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
     <meta charset="utf-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       @font-face {
@@ -47,12 +46,12 @@
   </head>
   <body>
     <div class="centered-container">
-      <h1 class="t1">Finding <span id="rarity-text"></span> Servers...</h1>
+      <h1 class="t1">Searching for match...</h1>
       <h1 class="t2">CONNECTING STATUS</h1>
       <h1 class="t3">00:00</h1>
     </div>
+
     <script>
-      const rarityTextElem = document.getElementById("rarity-text");
       const t2 = document.querySelector(".t2");
       const t3 = document.querySelector(".t3");
 
@@ -79,21 +78,20 @@
         clearInterval(timerInterval);
       }
 
-      function connectWebSocket(rarity, token) {
+      function connectWebSocket(token) {
         if (!token) {
           alert("No Token found. Please login.");
           window.location.href = "index.html";
           return;
         }
 
-        token = localStorage.getItem("token");
         ws = new WebSocket(
           `wss://vdbe-0f2p.onrender.com/?token=${encodeURIComponent(token)}`
         );
 
         ws.onopen = () => {
           console.log("WebSocket connected");
-          ws.send(JSON.stringify({ type: "join", rarity }));
+          ws.send(JSON.stringify({ type: "join" })); // no rarity
           t2.textContent = "Finding match...";
           startTimer();
         };
@@ -108,24 +106,27 @@
           }
 
           if (msg.type === "welcome") {
-            console.log(msg.message); // 👋 Welcome user
+            console.log(msg.message);
           } else if (msg.type === "status") {
             t2.textContent = msg.message;
           } else if (msg.type === "match" || msg.type === "matched") {
+            // Prevent matching same user
+            const currentUser = localStorage.getItem("yourName") || "You";
+            if (msg.opponent === currentUser) {
+              t2.textContent = "Match found is same user. Searching again...";
+              console.log("Matched with self. Ignoring...");
+              return;
+            }
+
             stopTimer();
             t3.textContent = "Successfully found match";
             t2.textContent = `✅ Connected to ${
               msg.opponent || "Unknown Player"
             }`;
 
-            console.log(`✅ Connected to ${msg.opponent}`);
-            console.log(
-              `🧑‍💻 You are: ${msg.yourName || "You"} (${msg.role || "Player"})`
-            );
-
             // Save opponent and self info for battlep.html
             localStorage.setItem("matchedOpponent", msg.opponent || "Unknown");
-            localStorage.setItem("yourName", msg.yourName || "You");
+            localStorage.setItem("yourName", msg.yourName || currentUser);
             localStorage.setItem("yourRole", msg.role || "Player");
 
             // Update UI to show Player Two
@@ -162,11 +163,8 @@
       }
 
       window.addEventListener("DOMContentLoaded", () => {
-        const rarity = localStorage.getItem("selectedRarity") || "Unknown";
         const token = localStorage.getItem("token");
-
-        rarityTextElem.textContent = rarity;
-        connectWebSocket(rarity, token);
+        connectWebSocket(token);
       });
     </script>
   </body>
