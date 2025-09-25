@@ -2,8 +2,7 @@
   <head>
     <link
       rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-    />
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
@@ -320,14 +319,16 @@
     </script>
 
     <div class="buttons">
-      <img src="./Menu/CLASSIC_BUTTON.png" class="cbtn" />
+      <a href="./rarity.html">
+        <img src="./Menu/CLASSIC_BUTTON.png" class="cbtn" />
+      </a>
       <img src="./Menu/GOLD_RUSH_BUTTON.png" class="grbtn" />
-      <a href="./settings.html"
-        ><img src="./Menu/SETTINGS_BUTTON.png" class="settings"
-      /></a>
-      <a href="./profile.html"
-        ><img src="./Menu/PROFILE_BUTTON.png" class="profile"
-      /></a>
+      <a href="./settings.html">
+        <img src="./Menu/SETTINGS_BUTTON.png" class="settings" />
+      </a>
+      <a href="./profile.html">
+        <img src="./Menu/PROFILE_BUTTON.png" class="profile" />
+      </a>
     </div>
 
     <div class="cards">
@@ -339,6 +340,16 @@
       <img src="./Menu/INFORMATION.png" class="infocl" />
       <img src="./Menu/INFORMATION_GOLD_RUSH.png" class="infogr" />
     </div>
+    <script>
+      // Prevent default drag behavior for everything
+      document.addEventListener("dragstart", function (e) {
+        e.preventDefault();
+      });
+
+      // Optional: also prevent images from being dragged in older browsers
+      const imgs = document.querySelectorAll("img");
+      imgs.forEach((img) => img.setAttribute("draggable", "false"));
+    </script>
 
     <script>
       // --- Load SFX and Music Volumes from localStorage ---
@@ -397,7 +408,7 @@
       }
 
       const buttons = [
-        document.querySelector(".cbtn"),
+        document.querySelector(".cbtn").parentElement, // now <a href="./rarity.html">
         document.querySelector(".settings").parentElement,
         document.querySelector(".profile").parentElement,
       ];

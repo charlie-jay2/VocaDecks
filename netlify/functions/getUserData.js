@@ -98,8 +98,6 @@ exports.handler = async function (event, context) {
         trades: userDoc.trades ?? 0,
         battlesWon: userDoc.battleswon,
         battlesLost: userDoc.battleslost,
-        cards: userDoc.cards || [],
-        specialCards: userDoc.specialcards || [],
       }),
     };
   } catch (error) {

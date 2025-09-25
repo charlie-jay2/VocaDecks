@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-    />
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
     <style>
       @font-face {
         font-family: "Panton";
@@ -62,7 +61,7 @@
         opacity: 0.9;
         transition: opacity 0.2s;
         border-radius: 12px;
-        background: transparent; /* <- make sure this is transparent */
+        background: transparent;
       }
 
       .slider:hover {
@@ -115,8 +114,7 @@
           max="100"
           value="10"
           class="slider"
-          id="musicSlider"
-        />
+          id="musicSlider" />
       </div>
 
       <h2>SFX</h2>
@@ -127,13 +125,11 @@
           max="100"
           value="10"
           class="slider"
-          id="sfxSlider"
-        />
+          id="sfxSlider" />
       </div>
     </div>
 
     <script>
-      // --- Background music ---
       const bgMusic = new Audio("Menu/Challenger_Junction_VocaDecks_Theme.wav");
       bgMusic.loop = true;
       const savedTime = localStorage.getItem("bgMusicTime");
@@ -158,7 +154,6 @@
         });
       });
 
-      // --- SFX setup ---
       let sfxVolume = localStorage.getItem("sfxVolume");
       sfxVolume = sfxVolume !== null ? parseFloat(sfxVolume) : 0.1;
 
@@ -168,27 +163,26 @@
       const backSFX = new Audio("Menu/Back.wav");
       const okaySFX = new Audio("Menu/Okay.wav");
       const hoverSFX = new Audio("Menu/Hover.wav");
+      const letsgoSFX = new Audio("audio/PIKOTARO.mp3");
 
       function setSFXVolume(vol) {
         backSFX.volume = vol;
         okaySFX.volume = vol;
         hoverSFX.volume = vol;
+        letsgoSFX.volume = vol;
       }
 
       setSFXVolume(sfxVolume);
 
-      // --- Function to update slider gradient ---
       function updateSliderGradient(slider, color1, color2) {
         const val = slider.value;
         const percentage = val + "%";
         slider.style.background = `linear-gradient(to right, ${color1} 0%, ${color2} ${percentage}, rgba(255,255,255,0.1) ${percentage}, rgba(255,255,255,0.1) 100%)`;
       }
 
-      // --- Initialize gradients ---
       updateSliderGradient(musicSlider, "#55ddcd", "#fcee40");
       updateSliderGradient(sfxSlider, "#55ddcd", "#fcee40");
 
-      // --- Event listeners for sliders ---
       musicSlider.addEventListener("input", (e) => {
         let vol = parseFloat(e.target.value) / 100;
         bgMusic.volume = vol;
@@ -204,7 +198,6 @@
         updateSliderGradient(sfxSlider, "#55ddcd", "#fcee40");
       });
 
-      // --- Back button click with SFX ---
       const backBtn = document.querySelector(".back");
       if (backBtn) {
         backBtn.addEventListener("click", () => {
@@ -222,7 +215,6 @@
             });
         });
 
-        // Optional hover SFX for back button
         backBtn.addEventListener("mouseenter", () => {
           hoverSFX.currentTime = 0;
           hoverSFX.volume = sfxVolume;

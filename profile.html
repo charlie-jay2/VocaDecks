@@ -3,14 +3,12 @@
   <head>
     <link
       rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-    />
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
     <meta charset="utf-8" />
     <link rel="icon" type="image/x-icon" href="/Assets/favicon.ico" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
+      content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <style>
       @font-face {
         font-family: "Panton";
@@ -269,15 +267,21 @@
 
       .logout {
         position: absolute;
-        top: 7%;
-        left: 90%;
+        top: 5%;
+        left: 85%;
         font-size: 50px;
         width: auto;
         border-radius: 15px;
-        height: 6%;
+        height: 10%;
+        width: auto;
         color: black;
-        background-color: red;
         font-size: 27px;
+        transition: 0.3s ease-in-out;
+      }
+
+      .logout:hover {
+        scale: 1.2;
+        cursor: pointer;
       }
 
       .back {
@@ -299,33 +303,27 @@
         <img
           src="Menu/bg.png"
           class="t1 img-responsive"
-          onclick="setTheme('t1')"
-        />
+          onclick="setTheme('t1')" />
         <img
           src="Profile/MIDNIGHT_BLUE.png"
           class="t2 img-responsive"
-          onclick="setTheme('t2')"
-        />
+          onclick="setTheme('t2')" />
         <img
           src="Profile/TUNDRA_MANGO.png"
           class="t3 img-responsive"
-          onclick="setTheme('t3')"
-        />
+          onclick="setTheme('t3')" />
         <img
           src="Profile/RADIANT_ROCKET_LOLLY.png"
           class="t4 img-responsive"
-          onclick="setTheme('t4')"
-        />
+          onclick="setTheme('t4')" />
         <img
           src="Profile/CHERRIES__CREAM.png"
           class="t5 img-responsive"
-          onclick="setTheme('t5')"
-        />
+          onclick="setTheme('t5')" />
         <img
           src="Profile/SIREN_PURPLE.png"
           class="t6 img-responsive"
-          onclick="setTheme('t6')"
-        />
+          onclick="setTheme('t6')" />
 
         <h1 class="t1t">SUMMER CYAN (DEFAULT)</h1>
         <h1 class="t2t">MIDNIGHT BLUE</h1>
@@ -351,12 +349,11 @@
       <h1 class="battleln">00,000,000</h1>
     </div>
     <div>
-      <button class="logout">Logout</button>
+      <img src="./menu/LOGOUT.png" class="logout" />
       <img
         src="./Assets/ICONS/back.png"
         class="back"
-        onclick="window.location.href='menu.html'"
-      />
+        onclick="window.location.href='menu.html'" />
     </div>
     <script>
       // --- Load SFX and Music Volumes from localStorage ---

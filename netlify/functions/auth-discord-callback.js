@@ -1,3 +1,4 @@
+// netlify/functions/auth-discord-callback.js
 const jwt = require("jsonwebtoken");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
@@ -70,25 +71,50 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: "Failed to fetch Discord user" };
   }
 
-  // Upsert user in Supabase 'users' table
+  // Upsert user in Supabase 'users' table while preserving cards
   try {
-    const { error } = await supabase
+    // Check if user exists
+    const { data: existingUser, error: fetchError } = await supabase
       .from("users")
-      .upsert(
-        {
+      .select("*")
+      .eq("userid", userData.id)
+      .single();
+
+    if (fetchError && fetchError.code !== "PGRST116") {
+      console.error("Supabase fetch error:", fetchError);
+      return { statusCode: 500, body: "Error checking user" };
+    }
+
+    if (!existingUser) {
+      // New user → insert with default cards
+      const { error: insertError } = await supabase
+        .from("users")
+        .insert({
           userid: userData.id,
           username: userData.username,
           avatar: userData.avatar,
-          cards: [],
-        },
-        { onConflict: "userid" }
-      )
-      .select()
-      .single();
+          cards: [], // Only for new users
+        })
+        .single();
 
-    if (error) {
-      console.error("❌ Supabase upsert error:", error);
-      return { statusCode: 500, body: JSON.stringify(error) };
+      if (insertError) {
+        console.error("Supabase insert error:", insertError);
+        return { statusCode: 500, body: "Error creating user" };
+      }
+    } else {
+      // Existing user → update only username/avatar, leave cards untouched
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({
+          username: userData.username,
+          avatar: userData.avatar,
+        })
+        .eq("userid", userData.id);
+
+      if (updateError) {
+        console.error("Supabase update error:", updateError);
+        return { statusCode: 500, body: "Error updating user" };
+      }
     }
   } catch (err) {
     console.error("❌ Supabase exception:", err);
