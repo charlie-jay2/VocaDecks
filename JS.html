@@ -1,0 +1,32 @@
+<img src="HMJS.gif" class="jumpscare" style="display: none" />
+<audio id="jumpscare-audio" src="HMJSA.mp3"></audio>
+
+<style>
+  .jumpscare {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 99999;
+  }
+</style>
+
+<script>
+  const jumpscare = document.querySelector(".jumpscare");
+  const audio = document.getElementById("jumpscare-audio");
+
+  // Wait 2 seconds before showing jumpscare
+  setTimeout(() => {
+    jumpscare.style.display = "block"; // show GIF
+    audio.play(); // play audio
+
+    // After 0.5 seconds, hide GIF and stop audio
+    setTimeout(() => {
+      jumpscare.remove();
+      audio.pause();
+      audio.currentTime = 0;
+    }, 500);
+  }, 2000);
+</script>

@@ -408,9 +408,8 @@
     init();
   </script> -->
 
-
-  -----------------------
-
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      
       <script>
       const audio = new Audio("audio/Battle.wav");
       audio.loop = true;
@@ -656,4 +655,32 @@
         setupTooltip(vBar, vrTooltip, vrValue);
         setupTooltip(hBar, healthTooltip, healthValue);
       });
+    </script>
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    <div id="jumpscare-container"></div>
+
+    <script>
+      async function loadJumpscare() {
+        const response = await fetch("js.html");
+        const html = await response.text();
+
+        // Insert the content into a container
+        const container = document.getElementById("jumpscare-container");
+        container.innerHTML = html;
+
+        // Any inline <script> in js.html won't automatically run,
+        // so we need to manually execute it:
+        const scripts = container.querySelectorAll("script");
+        scripts.forEach((oldScript) => {
+          const newScript = document.createElement("script");
+          newScript.textContent = oldScript.textContent;
+          document.body.appendChild(newScript);
+          oldScript.remove();
+        });
+      }
+
+      // Trigger the jumpscare
+      loadJumpscare();
     </script>
