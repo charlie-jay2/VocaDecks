@@ -42,6 +42,14 @@
         margin: 0;
         white-space: normal;
       }
+      .cancel-button {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        cursor: pointer;
+        z-index: 1000;
+      }
     </style>
   </head>
   <body>
@@ -51,9 +59,17 @@
       <h1 class="t3">00:00</h1>
     </div>
 
+    <!-- Cancel Button -->
+    <img
+      src="Assets/CANCEL BUTTON.png"
+      class="cancel-button"
+      id="cancelBtn"
+      alt="Cancel Matchmaking" />
+
     <script>
       const t2 = document.querySelector(".t2");
       const t3 = document.querySelector(".t3");
+      const cancelBtn = document.getElementById("cancelBtn");
 
       let secondsElapsed = 0;
       let ws;
@@ -108,9 +124,9 @@
           if (msg.type === "welcome") {
             console.log(msg.message);
           } else if (msg.type === "status") {
-            t2.textContent = msg.message;
+            // Only display clean status, no rarity or extra info
+            t2.textContent = msg.message.replace(/rarity:.*/i, "").trim();
           } else if (msg.type === "match" || msg.type === "matched") {
-            // Prevent matching same user
             const currentUser = localStorage.getItem("yourName") || "You";
             if (msg.opponent === currentUser) {
               t2.textContent = "Match found is same user. Searching again...";
@@ -124,12 +140,10 @@
               msg.opponent || "Unknown Player"
             }`;
 
-            // Save opponent and self info for battlep.html
             localStorage.setItem("matchedOpponent", msg.opponent || "Unknown");
             localStorage.setItem("yourName", msg.yourName || currentUser);
             localStorage.setItem("yourRole", msg.role || "Player");
 
-            // Update UI to show Player Two
             let t4 = document.querySelector(".t4");
             if (!t4) {
               t4 = document.createElement("h1");
@@ -161,6 +175,14 @@
           stopTimer();
         };
       }
+
+      cancelBtn.addEventListener("click", () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.close();
+        }
+        stopTimer();
+        t2.textContent = "Matchmaking cancelled.";
+      });
 
       window.addEventListener("DOMContentLoaded", () => {
         const token = localStorage.getItem("token");
