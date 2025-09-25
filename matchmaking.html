@@ -182,6 +182,10 @@
         }
         stopTimer();
         t2.textContent = "Matchmaking cancelled.";
+
+        setTimeout(() => {
+          window.location.href = "menu.html";
+        }, 1000);
       });
 
       window.addEventListener("DOMContentLoaded", () => {
